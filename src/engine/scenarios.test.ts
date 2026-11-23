@@ -5,11 +5,13 @@ const summarize = (i: typeof baseInputs) => {
   const r = simulate(i);
   const end = r.rows[r.rows.length - 1];
   const round = (x: number) => Math.round(x);
+  const eq = equivalentRent(i);
   return {
     buyer: round(end.buyerNetWorth),
     renter: round(end.renterNetWorth),
     breakEvenMonth: r.breakEvenMonth,
-    equivalentRent: equivalentRent(i),
+    // Rounded so solver tolerance changes don't churn the snapshot.
+    equivalentRent: eq.kind === 'value' ? { ...eq, rent: Math.round(eq.rent * 100) / 100 } : eq,
   };
 };
 

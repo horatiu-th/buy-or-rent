@@ -6,7 +6,7 @@ exports[`2-room flat, existing build 1`] = `
   "buyer": 1580504,
   "equivalentRent": {
     "kind": "value",
-    "rent": 1561.771106145443,
+    "rent": 1561.77,
   },
   "renter": 500751,
 }
@@ -18,7 +18,7 @@ exports[`3-room flat, new build 1`] = `
   "buyer": 2370443,
   "equivalentRent": {
     "kind": "value",
-    "rent": 2590.679022753193,
+    "rent": 2590.68,
   },
   "renter": 1040446,
 }
@@ -30,7 +30,7 @@ exports[`cash purchase, short horizon 1`] = `
   "buyer": 711874,
   "equivalentRent": {
     "kind": "value",
-    "rent": 1805.9444890559462,
+    "rent": 1805.94,
   },
   "renter": 660136,
 }
