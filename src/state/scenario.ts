@@ -21,7 +21,7 @@ export const DEFAULT_SCENARIO: Scenario = {
   overrides: {},
 };
 
-const FIELD_UNITS = new Map(FIELDS.map((f) => [f.key, f.unit]));
+const FIELD_DEFS = new Map(FIELDS.map((f) => [f.key, f]));
 
 export function encodeScenario(s: Scenario): URLSearchParams {
   const p = new URLSearchParams();
@@ -37,22 +37,30 @@ export function encodeScenario(s: Scenario): URLSearchParams {
   return p;
 }
 
-export function decodeScenario(p: URLSearchParams): Scenario {
+/**
+ * Links are untrusted input: anything malformed falls back to the default, and numbers are
+ * clamped to the field limits so an absurd value (e.g. a 5000-year horizon) can't stall the page.
+ */
+export function decodeScenario(p: URLSearchParams, validCityIds?: readonly string[]): Scenario {
   const d = DEFAULT_SCENARIO;
   const sqm = Number(p.get('mp'));
   const overrides: Partial<Inputs> = {};
   for (const [k, raw] of p.entries()) {
-    const unit = FIELD_UNITS.get(k as keyof Inputs);
-    if (!unit) continue;
-    if (unit === 'bool') {
-      (overrides as Record<string, boolean>)[k] = raw === '1';
+    const def = FIELD_DEFS.get(k as keyof Inputs);
+    if (!def) continue;
+    if (def.unit === 'bool') {
+      if (raw === '0' || raw === '1') (overrides as Record<string, boolean>)[k] = raw === '1';
     } else {
-      const n = Number(raw);
-      if (raw !== '' && Number.isFinite(n)) (overrides as Record<string, number>)[k] = n;
+      let n = Number(raw);
+      if (raw === '' || !Number.isFinite(n)) continue;
+      if (def.min !== undefined) n = Math.max(def.min, n);
+      if (def.max !== undefined) n = Math.min(def.max, n);
+      (overrides as Record<string, number>)[k] = n;
     }
   }
+  const city = p.get('oras');
   return {
-    cityId: p.get('oras') ?? d.cityId,
+    cityId: city !== null && (!validCityIds || validCityIds.includes(city)) ? city : d.cityId,
     propertyType: p.get('tip') === 'new' ? 'new' : p.get('tip') === 'existing' ? 'existing' : d.propertyType,
     sqm: Number.isFinite(sqm) && sqm > 0 ? sqm : d.sqm,
     currency: p.get('moneda') === 'EUR' ? 'EUR' : d.currency,

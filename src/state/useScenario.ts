@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Inputs } from '../engine';
+import { loadDefaults } from '../data/defaults';
 import { decodeScenario, encodeScenario, DEFAULT_SCENARIO, type Scenario } from './scenario';
 
+const CITY_IDS = Object.keys(loadDefaults().cities);
+
 export function useScenario() {
-  const [scenario, setScenario] = useState<Scenario>(() => decodeScenario(new URLSearchParams(window.location.search)));
+  const [scenario, setScenario] = useState<Scenario>(() =>
+    decodeScenario(new URLSearchParams(window.location.search), CITY_IDS),
+  );
 
   useEffect(() => {
     const qs = encodeScenario(scenario).toString();
