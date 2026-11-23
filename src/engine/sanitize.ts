@@ -5,7 +5,7 @@ const MIN_RATE = -0.99;
 
 const NON_NEGATIVE = [
   'price', 'rent', 'notaryPct', 'registryPct', 'bankFees', 'propertyTaxPct', 'homeInsuranceAnnual',
-  'lifeInsurancePct', 'maintenancePct', 'renterInsuranceAnnual', 'depositMonths', 'investTaxRate',
+  'lifeInsurancePct', 'maintenancePct', 'renterInsuranceAnnual', 'depositMonths', 'investTaxRate', 'savingsTaxRate',
   'saleAgencyPct', 'saleTaxShortPct', 'saleTaxLongPct', 'saleTaxShortHoldYears',
 ] as const satisfies readonly (keyof Inputs)[];
 

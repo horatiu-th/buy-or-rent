@@ -75,7 +75,7 @@ export function simulate(raw: Inputs): Result {
     renterMonthlyCost: renterCost,
     buyerNetWorth: value - balance - saleCosts(value, month, i) + liquidate(buyerPf, i.investTaxRate).net,
     renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
-    renterCashNetWorth: liquidate(renterSavings, i.investTaxRate).net + deposit,
+    renterCashNetWorth: liquidate(renterSavings, i.savingsTaxRate).net + deposit,
     deflator: Math.pow(1 + gInf, month),
   });
 

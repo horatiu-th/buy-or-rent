@@ -23,6 +23,7 @@ export const baseInputs: Inputs = {
   investReturn: 0.06,
   investTaxRate: 0.1,
   savingsRate: 0.03,
+  savingsTaxRate: 0.1,
   includeSaleCosts: true,
   saleAgencyPct: 0.02,
   saleTaxShortPct: 0.03,

@@ -30,6 +30,7 @@ export interface Inputs {
   investReturn: number; // annual, gross
   investTaxRate: number; // on gains, applied at liquidation
   savingsRate: number; // annual bank deposit interest for the renter who doesn't invest
+  savingsTaxRate: number; // on deposit interest, which Romania taxes separately from investment gains
 
   // Sale at horizon
   includeSaleCosts: boolean;

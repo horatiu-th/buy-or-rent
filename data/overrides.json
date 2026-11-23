@@ -1,87 +1,88 @@
 {
   "values": {
-    "eurRon":               { "value": 5.1,    "unit": "lei/€", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "downPaymentPct":       { "value": 0.15,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "notaryPct":            { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "registryPct":          { "value": 0.0015, "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "bankFees":             { "value": 1500,   "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "loanTermYears":        { "value": 30,     "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "fixedRate":            { "value": 0.055,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "fixedYears":           { "value": 5,      "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "ircc":                 { "value": 0.055,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "variableMargin":       { "value": 0.025,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "propertyTaxPct":       { "value": 0.001,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "homeInsuranceAnnual":  { "value": 400,    "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "lifeInsurancePct":     { "value": 0.0025, "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "maintenancePct":       { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "propertyGrowth":       { "value": 0.03,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "rentGrowth":           { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "renterInsuranceAnnual":{ "value": 150,    "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "depositMonths":        { "value": 2,      "unit": "luni",  "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "investReturn":         { "value": 0.06,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "investTaxRate":        { "value": 0.1,    "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "savingsRate":          { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "saleAgencyPct":        { "value": 0.02,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "saleTaxShortPct":      { "value": 0.03,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "saleTaxLongPct":       { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "saleTaxShortHoldYears":{ "value": 3,      "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "horizonYears":         { "value": 30,     "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-    "inflation":            { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    "eurRon": {"value": 5.3485, "unit": "lei/€", "source": "BNR, curs de referință", "sourceUrl": "https://curs.bnr.ro/nbrfxrates.xml", "asOf": "2026-11-23", "status": "manual"},
+    "downPaymentPct": {"value": 0.15, "unit": "%", "source": "BNR, Regulamentul 17/2012 (LTV maxim 85% în lei)", "sourceUrl": "https://www.avocatnet.ro/articol_31655/Regulamentul-BNR-nr-17-2012-unele-conditii-de-creditare.html", "asOf": "2026-11-23", "status": "manual"},
+    "notaryPct": {"value": 0.012, "unit": "%", "source": "Onorarii minimale notariale, Ord. 177/C/2024, cu TVA", "sourceUrl": "https://notari.pro/calculator-taxe-notariale", "asOf": "2026-11-23", "status": "manual"},
+    "registryPct": {"value": 0.0015, "unit": "%", "source": "ANCPI, Ordinul 16/2019", "sourceUrl": "https://sj.ancpi.ro/tarife-servicii/", "asOf": "2026-11-23", "status": "manual"},
+    "bankFees": {"value": 2000, "unit": "lei", "source": "BCR Casa Mea (analiză și evaluare) plus înscrierea ipotecii", "sourceUrl": "https://www.bcr.ro/content/dam/ro/bcr/www_bcr_ro/Persoane-fizice/Credite/casa-mea/CASA-MEA-BCR-RON.pdf", "asOf": "2026-09-21", "status": "manual"},
+    "loanTermYears": {"value": 30, "unit": "ani", "source": "Durata maximă uzuală la băncile mari", "sourceUrl": "https://www.bcr.ro/content/dam/ro/bcr/www_bcr_ro/Persoane-fizice/Credite/casa-mea/CASA-MEA-BCR-RON.pdf", "asOf": "2026-09-21", "status": "manual"},
+    "fixedRate": {"value": 0.055, "unit": "%", "source": "BNR, dobânda medie la credite noi pentru locuințe (5,6%)", "sourceUrl": "https://financiarul.ro/finante-si-banci/costul-anual-mediu-al-creditelor-noi-pentru-locuinte-in-lei-a-scazut-la-6-35-de-la-7-60-acum-un-an/", "asOf": "2026-09-30", "status": "manual"},
+    "fixedYears": {"value": 5, "unit": "ani", "source": "Oferte uzuale cu dobândă fixă 3–5 ani", "sourceUrl": "https://www.cursbnr.ro/dobanda-medie-credite-ipotecare-lei", "asOf": "2026-11-23", "status": "manual"},
+    "ircc": {"value": 0.0557, "unit": "%", "source": "IRCC aplicabil oct.–dec. 2026", "sourceUrl": "https://www.cursbnr.ro/ircc", "asOf": "2026-10-01", "status": "manual"},
+    "variableMargin": {"value": 0.025, "unit": "%", "source": "Marje bancare peste IRCC (1,9–3,5%)", "sourceUrl": "https://www.cursbnr.ro/dobanda-medie-credite-ipotecare-lei", "asOf": "2026-08-31", "status": "manual"},
+    "propertyTaxPct": {"value": 0.0005, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "homeInsuranceAnnual": {"value": 400, "unit": "lei", "source": "PAD 130 lei/an plus poliță facultativă (estimare)", "sourceUrl": "https://blog.pago.ro/cat-costa-pad-in-2026-preturi-tipuri-de-locuinta-si-ce-platesti-de-fapt/", "asOf": "2026-11-23", "status": "manual"},
+    "lifeInsurancePct": {"value": 0.0031, "unit": "%", "source": "BCR Casa Mea, 0,026% pe lună din sold", "sourceUrl": "https://www.bcr.ro/content/dam/ro/bcr/www_bcr_ro/Persoane-fizice/Credite/casa-mea/CASA-MEA-BCR-RON.pdf", "asOf": "2026-09-21", "status": "manual"},
+    "maintenancePct": {"value": 0.01, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "propertyGrowth": {"value": 0.04, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "rentGrowth": {"value": 0.035, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "renterInsuranceAnnual": {"value": 150, "unit": "lei", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "depositMonths": {"value": 1, "unit": "luni", "source": "Practica pieței de închirieri", "sourceUrl": "https://spotmedia.ro/stiri/casa-si-gradina/cat-costa-de-fapt-sa-inchiriezi-un-apartament-in-2026-taxe-garantii-si-comisioane-ascunse", "asOf": "2026-02-21", "status": "manual"},
+    "investReturn": {"value": 0.06, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "investTaxRate": {"value": 0.1, "unit": "%", "source": "Între 3% (broker românesc, peste un an) și 16% (broker străin)", "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination", "asOf": "2026-11-23", "status": "manual"},
+    "savingsRate": {"value": 0.04, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "savingsTaxRate": {"value": 0.1, "unit": "%", "source": "Codul fiscal, impozit pe dobânzi", "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination", "asOf": "2026-11-23", "status": "manual"},
+    "saleAgencyPct": {"value": 0.02, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"},
+    "saleTaxShortPct": {"value": 0.03, "unit": "%", "source": "Codul fiscal art. 111, deținere până la 3 ani", "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination", "asOf": "2026-11-23", "status": "manual"},
+    "saleTaxLongPct": {"value": 0.01, "unit": "%", "source": "Codul fiscal art. 111, deținere peste 3 ani", "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination", "asOf": "2026-11-23", "status": "manual"},
+    "saleTaxShortHoldYears": {"value": 3, "unit": "ani", "source": "Codul fiscal art. 111", "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination", "asOf": "2026-11-23", "status": "manual"},
+    "horizonYears": {"value": 30, "unit": "ani", "source": "Alegere implicită", "asOf": "2026-11-23", "status": "manual"},
+    "inflation": {"value": 0.035, "unit": "%", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"}
   },
   "cities": {
     "bucuresti": {
       "name": "București",
-      "priceSqmEurNew":      { "value": 2200, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 2000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 13, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 1982, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2260, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 11.0, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "cluj": {
       "name": "Cluj-Napoca",
-      "priceSqmEurNew":      { "value": 3000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 2800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 15, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 3340, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 3286, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 10.3, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "timisoara": {
       "name": "Timișoara",
-      "priceSqmEurNew":      { "value": 1900, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 11, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2081, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2023, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 8.2, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "iasi": {
       "name": "Iași",
-      "priceSqmEurNew":      { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1600, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 1919, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2004, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 8.6, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "brasov": {
       "name": "Brașov",
-      "priceSqmEurNew":      { "value": 2300, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 2100, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 11, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2331, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2344, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 9.4, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "constanta": {
       "name": "Constanța",
-      "priceSqmEurNew":      { "value": 1900, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2257, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2106, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 9.3, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "oradea": {
       "name": "Oradea",
-      "priceSqmEurNew":      { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1500, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 9, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2027, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 1888, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 7.0, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "sibiu": {
       "name": "Sibiu",
-      "priceSqmEurNew":      { "value": 2000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2020, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2066, "unit": "€/m²", "source": "Storia, analiză iulie 2026", "sourceUrl": "https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie", "asOf": "2026-07-31", "status": "manual"},
+      "rentSqmEur": {"value": 7.7, "unit": "€/m²/lună", "source": "apartamente.org, indice noiembrie 2026", "sourceUrl": "https://apartamente.org/raport-piata", "asOf": "2026-11-23", "status": "manual"}
     },
     "ro": {
       "name": "Alt oraș (medie națională)",
-      "priceSqmEurNew":      { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "priceSqmEurExisting": { "value": 1500, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
-      "rentSqmEur":          { "value": 9, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+      "priceSqmEurNew": {"value": 2019, "unit": "€/m²", "source": "imobiliare.ro, medie națională septembrie 2026", "sourceUrl": "https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/", "asOf": "2026-09-30", "status": "manual"},
+      "priceSqmEurExisting": {"value": 2019, "unit": "€/m²", "source": "imobiliare.ro, medie națională septembrie 2026", "sourceUrl": "https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/", "asOf": "2026-09-30", "status": "manual"},
+      "rentSqmEur": {"value": 8.1, "unit": "€/m²/lună", "source": "Estimare", "asOf": "2026-11-23", "status": "manual"}
     }
   }
 }

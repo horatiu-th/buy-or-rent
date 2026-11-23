@@ -130,9 +130,10 @@ describe('renter who keeps savings in a bank deposit', () => {
     expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(upfront + saved, 4);
   });
 
-  it('taxes deposit interest like other investment gains', () => {
-    const untaxed = simulate({ ...baseInputs, savingsRate: 0.05, investTaxRate: 0 }).rows.at(-1)!;
-    const taxed = simulate({ ...baseInputs, savingsRate: 0.05, investTaxRate: 0.1 }).rows.at(-1)!;
-    expect(taxed.renterCashNetWorth).toBeLessThan(untaxed.renterCashNetWorth);
+  it('taxes deposit interest at its own rate, independent of the investment tax', () => {
+    const at = (savingsTaxRate: number, investTaxRate: number) =>
+      simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate, investTaxRate }).rows.at(-1)!.renterCashNetWorth;
+    expect(at(0.1, 0)).toBeLessThan(at(0, 0));
+    expect(at(0.1, 0)).toBeCloseTo(at(0.1, 0.5), 6);
   });
 });
