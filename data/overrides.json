@@ -1,0 +1,86 @@
+{
+  "values": {
+    "eurRon":               { "value": 5.1,    "unit": "lei/€", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "downPaymentPct":       { "value": 0.15,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "notaryPct":            { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "registryPct":          { "value": 0.0015, "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "bankFees":             { "value": 1500,   "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "loanTermYears":        { "value": 30,     "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "fixedRate":            { "value": 0.055,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "fixedYears":           { "value": 5,      "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "ircc":                 { "value": 0.055,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "variableMargin":       { "value": 0.025,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "propertyTaxPct":       { "value": 0.001,  "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "homeInsuranceAnnual":  { "value": 400,    "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "lifeInsurancePct":     { "value": 0.0025, "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "maintenancePct":       { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "propertyGrowth":       { "value": 0.03,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "rentGrowth":           { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "renterInsuranceAnnual":{ "value": 150,    "unit": "lei",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "depositMonths":        { "value": 2,      "unit": "luni",  "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "investReturn":         { "value": 0.06,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "investTaxRate":        { "value": 0.1,    "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "saleAgencyPct":        { "value": 0.02,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "saleTaxShortPct":      { "value": 0.03,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "saleTaxLongPct":       { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "saleTaxShortHoldYears":{ "value": 3,      "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "horizonYears":         { "value": 30,     "unit": "ani",   "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "inflation":            { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+  },
+  "cities": {
+    "bucuresti": {
+      "name": "București",
+      "priceSqmEurNew":      { "value": 2200, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 2000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 13, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "cluj": {
+      "name": "Cluj-Napoca",
+      "priceSqmEurNew":      { "value": 3000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 2800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 15, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "timisoara": {
+      "name": "Timișoara",
+      "priceSqmEurNew":      { "value": 1900, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 11, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "iasi": {
+      "name": "Iași",
+      "priceSqmEurNew":      { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1600, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "brasov": {
+      "name": "Brașov",
+      "priceSqmEurNew":      { "value": 2300, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 2100, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 11, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "constanta": {
+      "name": "Constanța",
+      "priceSqmEurNew":      { "value": 1900, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "oradea": {
+      "name": "Oradea",
+      "priceSqmEurNew":      { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1500, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 9, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "sibiu": {
+      "name": "Sibiu",
+      "priceSqmEurNew":      { "value": 2000, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1800, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 10, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    },
+    "ro": {
+      "name": "Alt oraș (medie națională)",
+      "priceSqmEurNew":      { "value": 1700, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "priceSqmEurExisting": { "value": 1500, "unit": "€/m²", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+      "rentSqmEur":          { "value": 9, "unit": "€/m²/lună", "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" }
+    }
+  }
+}
