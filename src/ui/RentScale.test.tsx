@@ -35,10 +35,19 @@ describe('RentScale', () => {
     expect(slider()).toHaveAttribute('max', '4000');
   });
 
+  it.each(['alwaysBuy', 'alwaysRent'] as const)('labels only the winning side for %s', (kind) => {
+    setup({ kind }, 2000);
+    const buying = screen.queryByText('Cumpărarea câștigă');
+    const renting = screen.queryByText('Închirierea câștigă');
+    expect(kind === 'alwaysBuy' ? buying : renting).toBeVisible();
+    expect(kind === 'alwaysBuy' ? renting : buying).toBeNull();
+  });
+
   it('shows no winner or threshold when the inputs cannot be computed', () => {
     const { container } = setup({ kind: 'invalid' }, 2000);
     expect(container.querySelector('.rent-scale')).not.toHaveClass('buyer-wins');
     expect(container.querySelector('.rent-scale')).not.toHaveClass('renter-wins');
+    expect(screen.queryByText(/câștigă/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Prag/)).not.toBeInTheDocument();
   });
 });

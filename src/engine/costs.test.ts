@@ -1,4 +1,4 @@
-import { acquisitionCosts, mortgageSetupCosts, saleCosts } from './costs';
+import { acquisitionCosts, mortgageSetupCosts, saleCostBreakdown, saleCosts } from './costs';
 import { baseInputs } from './fixtures';
 
 describe('acquisitionCosts', () => {
@@ -36,4 +36,12 @@ describe('saleCosts', () => {
   it('is zero when sale costs are excluded', () => {
     expect(saleCosts(600_000, 120, { ...baseInputs, includeSaleCosts: false })).toBe(0);
   });
+});
+
+it.each([
+  [36, true, 18_000, 12_000],
+  [37, true, 6_000, 12_000],
+  [37, false, 0, 0],
+] as const)('separates sale tax and commission at month %i with sale costs %s', (month, includeSaleCosts, tax, agencyFee) => {
+  expect(saleCostBreakdown(600_000, month, { ...baseInputs, includeSaleCosts })).toEqual({ tax, agencyFee });
 });

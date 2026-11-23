@@ -19,8 +19,13 @@ export function acquisitionCosts(i: Inputs): number {
   return i.price * (i.notaryPct + i.registryPct + i.buyerAgencyPct) + i.bankFees + mortgageSetupCosts(loan);
 }
 
-export function saleCosts(value: number, monthsHeld: number, i: Inputs): number {
-  if (!i.includeSaleCosts) return 0;
+export function saleCostBreakdown(value: number, monthsHeld: number, i: Inputs) {
+  if (!i.includeSaleCosts) return { agencyFee: 0, tax: 0 };
   const taxPct = monthsHeld <= i.saleTaxShortHoldYears * 12 ? i.saleTaxShortPct : i.saleTaxLongPct;
-  return value * (i.saleAgencyPct + taxPct);
+  return { agencyFee: value * i.saleAgencyPct, tax: value * taxPct };
+}
+
+export function saleCosts(value: number, monthsHeld: number, i: Inputs): number {
+  const { agencyFee, tax } = saleCostBreakdown(value, monthsHeld, i);
+  return agencyFee + tax;
 }

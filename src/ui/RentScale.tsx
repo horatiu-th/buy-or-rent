@@ -32,6 +32,7 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
   const baseMax = niceCeil(eq.kind === 'value' ? eq.rent * 2 : price * 0.01);
   const max = Math.max(heldMax ?? 0, rent > baseMax ? niceCeil(rent) : baseMax);
   const threshold = eq.kind === 'value' ? eq.rent / max : eq.kind === 'alwaysBuy' ? 0 : 1;
+  const split = eq.kind === 'value';
   const marker = Math.min(rent, max) / max;
   const fmt = (v: number) => formatMoney(v, currency, eurRon);
   const verdict =
@@ -49,7 +50,7 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
   } as CSSProperties;
 
   return (
-    <div className={`rent-scale ${verdict}`.trim()} style={style}>
+    <div className={`rent-scale ${verdict}`.trim()} data-outcome={eq.kind} style={style}>
       <div className="rent-scale-marks" aria-hidden="true">
         <span className="rent-scale-you">
           {ro.scale.yourRent}: {fmt(rent)}
@@ -72,13 +73,13 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
         />
       </div>
       <div className="rent-scale-legend" aria-hidden="true">
-        <span className="rent-scale-side rent-side">{ro.scale.rentWins}</span>
+        {(split || eq.kind === 'alwaysRent') && <span className="rent-scale-side rent-side">{ro.scale.rentWins}</span>}
         {eq.kind === 'value' && (
           <span className="rent-scale-threshold-label">
             {ro.scale.threshold} {fmt(eq.rent)}
           </span>
         )}
-        <span className="rent-scale-side buy-side">{ro.scale.buyWins}</span>
+        {(split || eq.kind === 'alwaysBuy') && <span className="rent-scale-side buy-side">{ro.scale.buyWins}</span>}
       </div>
     </div>
   );

@@ -90,7 +90,8 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     <button type="button" className="reset" onClick={onReset} title={ro.reset} aria-label={`${ro.reset}: ${text.label}`}>↺</button>
   );
 
-  const describedBy = [showHelp && helpId, sourceTag && sourceId].filter(Boolean).join(' ') || undefined;
+  const unitId = `${id}-unit`;
+  const describedBy = [def.unit !== 'bool' && unitId, showHelp && helpId, sourceTag && sourceId].filter(Boolean).join(' ') || undefined;
 
   const popoverId = `${id}-popover`;
   const helpToggle = (
@@ -162,7 +163,7 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
             onChange(normalizeField(def, v));
           }}
         />
-        <span className="suffix" aria-hidden="true">{suffix(def, currency, value as number)}</span>
+        <span id={unitId} className="suffix">{suffix(def, currency, value as number)}</span>
       </div>
     </div>
   );

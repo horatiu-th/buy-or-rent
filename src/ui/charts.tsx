@@ -1,6 +1,6 @@
 import { useSyncExternalStore, type ReactNode } from 'react';
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { Result } from '../engine';
@@ -103,6 +103,7 @@ function moneyAxis(values: number[], view: View) {
 }
 
 interface TipProps {
+  description?: string;
   active?: boolean;
   payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string; dataKey?: unknown; payload?: unknown }>;
   label?: unknown;
@@ -110,11 +111,12 @@ interface TipProps {
   title?: (label: unknown, point: unknown) => string;
 }
 
-function ChartTip({ active, payload, label, fmt, title }: TipProps) {
+function ChartTip({ active, payload, label, fmt, title, description }: TipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tip">
       {title && <p className="chart-tip-title">{title(label, payload[0].payload)}</p>}
+      {description && <p className="chart-tip-description">{description}</p>}
       {payload.map((p) => (
         <p key={String(p.name)} className="chart-tip-row">
           <span className={`swatch${p.dataKey === 'renterCash' ? ' dashed' : ''}`} style={{ color: p.color }} aria-hidden="true" />
@@ -212,13 +214,17 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
   // not smoothed curves that would invent a dip before the jump.
   return (
     <ChartFigure name={ro.charts.monthly} summary={summary}>
+      <figcaption className="monthly-legend">
+        <span><i className="swatch" style={{ color: BUYER }} aria-hidden="true" />{ro.buyer}</span>
+        <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{ro.renterBoth}</span>
+      </figcaption>
       <ResponsiveContainer width="100%" height={340}>
         <AreaChart data={data} title={ro.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
           <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={monthTitle} />} cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={ro.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={ro.renterBoth} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={ro.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
       </ResponsiveContainer>
@@ -234,14 +240,13 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
   const r = result.renter;
   const t = ro.breakdown;
   const data = [
-    { name: t.rent, buyer: 0, renter: conv(r.rent) },
-    { name: t.interest, buyer: conv(b.interest), renter: 0 },
-    { name: t.maintenance, buyer: conv(b.maintenance), renter: 0 },
-    { name: t.saleCosts, buyer: conv(b.saleCosts), renter: 0 },
-    { name: t.acquisitionCosts, buyer: conv(b.acquisitionCosts), renter: conv(r.agencyFee) },
-    { name: t.insurance, buyer: conv(b.insurance), renter: conv(r.insurance) },
-    { name: t.propertyTax, buyer: conv(b.propertyTax), renter: 0 },
-    { name: t.investmentTax, buyer: conv(b.investmentTax), renter: conv(r.investmentTax) },
+    { ...t.rent, buyer: 0, renter: conv(r.rent) },
+    { ...t.interest, buyer: conv(b.interest), renter: 0 },
+    { ...t.maintenance, buyer: conv(b.maintenance), renter: 0 },
+    { ...t.saleAgencyFee, buyer: conv(b.saleAgencyFee), renter: 0 },
+    { ...t.acquisitionCosts, buyer: conv(b.acquisitionCosts), renter: conv(r.agencyFee) },
+    { ...t.insurance, buyer: conv(b.insurance), renter: conv(r.insurance) },
+    { ...t.taxes, buyer: conv(b.propertyTax + b.investmentTax + b.saleTax), renter: conv(r.investmentTax) },
   ];
   const nominal = { ...view, real: false };
   const fmt = shownMoney(nominal);
@@ -250,7 +255,7 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
     data
       .map((d) => {
         const parts = [d.buyer > 0 && `${ro.buyer.toLowerCase()} ${fmt(d.buyer)}`, d.renter > 0 && `${ro.renter.toLowerCase()} ${fmt(d.renter)}`].filter(Boolean);
-        return parts.length ? `${d.name}: ${parts.join(', ')}` : '';
+        return parts.length ? `${d.label}: ${parts.join(', ')}. ${d.help}` : '';
       })
       .filter(Boolean)
       .join('; '),
@@ -261,13 +266,14 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
         <BarChart data={data} title={ro.charts.breakdown} layout="vertical" barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} horizontal={false} />
           <XAxis type="number" {...x} tick={TICK} {...AXIS} />
-          <YAxis type="category" dataKey="name" width={132} tick={TICK} axisLine={false} tickLine={false} />
-          <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={(l) => String(l)} />} cursor={{ fill: 'var(--field)' }} />
+          <YAxis type="category" dataKey="label" width={132} tick={TICK} axisLine={false} tickLine={false} />
+          <Tooltip
+            shared
+            content={(p) => <ChartTip {...p} fmt={fmt} title={String} description={data.find((row) => row.label === p.label)?.help} />}
+            cursor={{ fill: 'var(--field)' }}
+          />
           <Bar isAnimationActive={animate} dataKey="buyer" name={ro.buyer} fill={BUYER} radius={[0, 3, 3, 0]} />
-          <Bar isAnimationActive={animate} dataKey="renter" name={ro.renter} fill={RENTER} radius={[0, 3, 3, 0]}>
-            {/* Investment tax is paid only by the renter who invests, so it takes that renter's colour. */}
-            {data.map((d) => <Cell key={d.name} fill={d.name === t.investmentTax ? INVEST : RENTER} />)}
-          </Bar>
+          <Bar isAnimationActive={animate} dataKey="renter" name={ro.renterInvesting} fill={RENTER} radius={[0, 3, 3, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFigure>

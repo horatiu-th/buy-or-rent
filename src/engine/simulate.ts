@@ -1,5 +1,5 @@
 import { amortize } from './mortgage';
-import { acquisitionCosts, saleCosts } from './costs';
+import { acquisitionCosts, saleCostBreakdown, saleCosts } from './costs';
 import { sanitizeInputs } from './sanitize';
 import type { BuyerTotals, Inputs, MonthRow, RenterTotals, Result } from './types';
 
@@ -74,7 +74,7 @@ export function simulate(raw: Inputs): Result {
 
   const buyer: BuyerTotals = {
     downPayment, acquisitionCosts: acq, interest: 0, principal: 0, propertyTax: 0,
-    insurance: 0, maintenance: 0, saleCosts: 0, investmentTax: 0, cashOut: upfront + buyerPf.basis,
+    insurance: 0, maintenance: 0, saleCosts: 0, saleAgencyFee: 0, saleTax: 0, investmentTax: 0, cashOut: upfront + buyerPf.basis,
   };
   const renter: RenterTotals = {
     agencyFee: rentAgencyFee, rent: 0, insurance: 0, investmentTax: 0,
@@ -142,7 +142,10 @@ export function simulate(raw: Inputs): Result {
     rows.push(snapshot(m, buyerCost, renterCost));
   }
 
-  buyer.saleCosts = saleCosts(value, months, i);
+  const sale = saleCostBreakdown(value, months, i);
+  buyer.saleAgencyFee = sale.agencyFee;
+  buyer.saleTax = sale.tax;
+  buyer.saleCosts = sale.agencyFee + sale.tax;
   buyer.investmentTax = liquidate(buyerPf, i.investTaxRate).tax;
   renter.investmentTax = liquidate(renterPf, i.investTaxRate).tax;
 

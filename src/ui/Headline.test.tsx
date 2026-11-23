@@ -7,6 +7,7 @@ function renderHeadline(props: Partial<Parameters<typeof Headline>[0]> = {}) {
   render(
     <Headline
       eq={{ kind: 'value', rent: 2500 }}
+      horizonMonths={240}
       breakEvenMonth={27}
       buyerEverAhead
       sale={sale}
@@ -20,6 +21,13 @@ function renderHeadline(props: Partial<Parameters<typeof Headline>[0]> = {}) {
 const NOTE = /presupune vânzarea/;
 
 describe('Headline', () => {
+  it.each([{ kind: 'value', rent: 2500 }, { kind: 'alwaysBuy' }, { kind: 'alwaysRent' }] as const)(
+    'names the horizon and investing renter for $kind', (eq) => {
+      renderHeadline({ eq });
+      expect(screen.getByTestId('headline')).toHaveTextContent(/După 20 de ani.*chiriașul care investește/);
+    },
+  );
+
   it('says the buyer moves ahead and stays ahead', () => {
     renderHeadline();
     expect(

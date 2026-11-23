@@ -23,7 +23,10 @@ export const ro = {
     yourRent: 'Chiria ta',
     threshold: 'Prag',
   },
-  atHorizon: (after: string) => `Avere netă după ${after}`,
+  atHorizon: (after: string, real: boolean, currency: Currency) => {
+    const basis = currency === 'EUR' ? 'lei de azi, convertiți în €' : 'lei de azi';
+    return `Avere netă după ${after} (${real ? basis : 'valori nominale'})`;
+  },
   tabsLabel: 'Grafice',
   footer: {
     rate: (rate: string, date: string) => `Curs BNR: ${rate} lei/€, din ${date.split('-').reverse().join('.')}.`,
@@ -45,6 +48,7 @@ export const ro = {
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
   renterInvesting: 'Chiriaș care investește',
+  renterBoth: 'Chiriaș (ambele variante)',
   renterCash: 'Chiriaș cu economii la depozit',
   chartStart: 'La început',
   afterTime: (d: string) => `După ${d}`,
@@ -60,9 +64,12 @@ export const ro = {
       `Costul lunar în prima lună: cumpărător ${firstBuyer}, chiriaș ${firstRenter}. În ultima lună: cumpărător ${lastBuyer}, chiriaș ${lastRenter}.`,
     breakdownSummary: (items: string) => `Totaluri pe tot orizontul, în valori nominale. ${items}.`,
   },
-  headlineValue: (rent: string) => `Cumpărarea merită dacă o chirie similară e peste ${rent}/lună.`,
-  headlineAlwaysBuy: 'Cu aceste ipoteze, cumpărarea câștigă chiar și la chirie zero.',
-  headlineAlwaysRent: 'Cu aceste ipoteze, închirierea câștigă la orice chirie realistă.',
+  headlineValue: (after: string, rent: string) =>
+    `După ${after}, cumpărătorul are o avere netă mai mare decât chiriașul care investește dacă chiria lunară depășește ${rent}.`,
+  headlineAlwaysBuy: (after: string) =>
+    `După ${after}, cumpărătorul are cel puțin aceeași avere netă ca chiriașul care investește, chiar și la chirie zero.`,
+  headlineAlwaysRent: (after: string) =>
+    `După ${after}, chiriașul care investește are cel puțin aceeași avere netă ca proprietarul la orice chirie analizată.`,
   verdictBuy: (after: string) =>
     `Pentru cifrele tale, cumpărarea trece în față după ${after} și rămâne în față până la final.`,
   verdictBuyFromStart: 'Pentru cifrele tale, cumpărarea e în față de la început și rămâne în față până la final.',
@@ -78,9 +85,34 @@ export const ro = {
     sensitivity: 'Sensibilitate',
   },
   breakdown: {
-    acquisitionCosts: 'Costuri inițiale', interest: 'Dobândă',
-    propertyTax: 'Impozit', insurance: 'Asigurări', maintenance: 'Întreținere',
-    saleCosts: 'Costuri vânzare', investmentTax: 'Impozit investiții', rent: 'Chirie',
+    rent: {
+      label: 'Chirie',
+      help: 'Suma chiriilor lunare pe perioada aleasă. La fiecare an nou de simulare, chiria se modifică în funcție de rata de creștere introdusă.',
+    },
+    interest: {
+      label: 'Dobândă',
+      help: 'Partea din fiecare rată care acoperă dobânda la soldul creditului. Totalul adună dobânda plătită în perioada analizată.',
+    },
+    maintenance: {
+      label: 'Întreținere',
+      help: 'Bugetul pentru întreținere și reparații. Se calculează lunar, aplicând o doisprezecime din procentul anual la valoarea estimată a locuinței în luna respectivă.',
+    },
+    saleAgencyFee: {
+      label: 'Comision la vânzare',
+      help: 'Comisionul agenției se calculează ca procent din valoarea estimată a locuinței la final. Se aplică doar dacă incluzi costurile de vânzare.',
+    },
+    acquisitionCosts: {
+      label: 'Costuri inițiale',
+      help: 'Cumpărătorul plătește notarul, intabularea și comisioanele bancare și de agenție. Dacă ia credit, se adaugă costurile ipotecii. Pentru chiriaș se include comisionul agenției la închiriere.',
+    },
+    insurance: {
+      label: 'Asigurări',
+      help: 'Pentru cumpărător se adună primele pentru PAD, asigurarea facultativă a locuinței și asigurarea de viață. Pentru chiriaș se adună primele pentru asigurarea de chiriaș.',
+    },
+    taxes: {
+      label: 'Impozite',
+      help: 'Cumpărătorul plătește impozitul anual pe clădire, indexat cu inflația. Pentru ambele variante se adaugă impozitul pe câștigul din investiții la final. Dacă incluzi costurile de vânzare, cumpărătorul plătește și impozitul la vânzarea locuinței. Cota depinde de durata deținerii.',
+    },
   },
   sensitivityHelp:
     'Diferența de avere netă la final (cumpărător − chiriașul care investește) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale. Un plus înseamnă că cumpărarea câștigă, un minus că închirierea câștigă; în centru sunt valorile tale.',

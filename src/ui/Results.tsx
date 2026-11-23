@@ -29,7 +29,7 @@ function EndSummary({ result, view }: { result: Result; view: View }) {
   ];
   return (
     <div className="end-summary">
-      <p className="end-summary-title">{ro.atHorizon(formatDuration(last.month))}</p>
+      <p className="end-summary-title">{ro.atHorizon(formatDuration(last.month), view.real, view.currency)}</p>
       <dl>
         {items.map((it) => (
           <div key={it.cls} className={`end-item ${it.cls}`}>
@@ -53,7 +53,6 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
   const eq = useMemo(() => equivalentRent(inputs), [rentFreeKey]);
   const grid = useMemo(() => (tab === 'sensitivity' ? sensitivity(inputs) : null), [inputs, tab]);
   const tabs = Object.keys(ro.tabs) as Tab[];
-  const noteId = useId();
   // These views add up or compare nominal sums, so the inflation switch has nothing to adjust there.
   const nominalOnly = tab === 'breakdown' || tab === 'sensitivity';
 
@@ -61,6 +60,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
     <div className="results">
       <Headline
         eq={eq}
+        horizonMonths={result.rows[result.rows.length - 1].month}
         breakEvenMonth={result.breakEvenMonth}
         buyerEverAhead={result.buyerEverAhead}
         sale={inputs}
@@ -75,7 +75,13 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
         eurRon={view.eurRon}
         onRentChange={onRentChange}
       />
-      <EndSummary result={result} view={view} />
+      <div>
+        <label className="switch summary-switch">
+          <input type="checkbox" role="switch" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} />
+          <span>{ro.realValues(view.currency)}</span>
+        </label>
+        <EndSummary result={result} view={view} />
+      </div>
 
       <div className="chart-block">
         <div className="chart-toolbar">
@@ -108,17 +114,6 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
               </button>
             ))}
           </div>
-          <label className="switch">
-            <input
-              type="checkbox"
-              role="switch"
-              checked={view.real && !nominalOnly}
-              disabled={nominalOnly}
-              aria-describedby={nominalOnly ? noteId : undefined}
-              onChange={(e) => onToggleReal(e.target.checked)}
-            />
-            <span>{ro.realValues(view.currency)}</span>
-          </label>
         </div>
         <div role="tabpanel" id={panelId} aria-labelledby={`${panelId}-${tab}`} className="chart-panel">
           {tab === 'netWorth' && <NetWorthChart result={result} view={view} />}
@@ -127,7 +122,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
           {tab === 'sensitivity' && grid && (
             <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} currency={view.currency} eurRon={view.eurRon} />
           )}
-          {nominalOnly && <p id={noteId} className="note">{ro.nominalNote}</p>}
+          {nominalOnly && <p className="note">{ro.nominalNote}</p>}
         </div>
       </div>
       <p className="note">{ro.assumptions}</p>

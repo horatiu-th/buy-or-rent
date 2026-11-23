@@ -6,6 +6,7 @@ type SaleInputs = Pick<Inputs, 'includeSaleCosts' | 'saleTaxShortPct' | 'saleTax
 
 interface Props {
   eq: EquivalentRent;
+  horizonMonths: number;
   breakEvenMonth: number | null;
   /** Whether the buyer is level or ahead in any month, which tells a lost lead apart from never leading. */
   buyerEverAhead: boolean;
@@ -14,7 +15,7 @@ interface Props {
   eurRon: number;
 }
 
-export function Headline({ eq, breakEvenMonth, buyerEverAhead, sale, currency, eurRon }: Props) {
+export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sale, currency, eurRon }: Props) {
   if (eq.kind === 'invalid') {
     return (
       <header className="headline">
@@ -22,10 +23,11 @@ export function Headline({ eq, breakEvenMonth, buyerEverAhead, sale, currency, e
       </header>
     );
   }
+  const after = formatDuration(horizonMonths);
   const main =
-    eq.kind === 'value' ? ro.headlineValue(formatMoney(eq.rent, currency, eurRon))
-    : eq.kind === 'alwaysBuy' ? ro.headlineAlwaysBuy
-    : ro.headlineAlwaysRent;
+    eq.kind === 'value' ? ro.headlineValue(after, formatMoney(eq.rent, currency, eurRon))
+    : eq.kind === 'alwaysBuy' ? ro.headlineAlwaysBuy(after)
+    : ro.headlineAlwaysRent(after);
   const verdict =
     breakEvenMonth === 0 ? ro.verdictBuyFromStart
     : breakEvenMonth !== null ? ro.verdictBuy(formatDuration(breakEvenMonth))

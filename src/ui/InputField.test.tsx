@@ -29,6 +29,14 @@ function renderField(props: Partial<Parameters<typeof InputField>[0]> = {}) {
 }
 
 describe('InputField', () => {
+  it.each([
+    ['downPaymentPct', 'RON', '%'], ['rent', 'EUR', '€'], ['rent', 'RON', 'lei'],
+    ['fixedYears', 'RON', 'ani'], ['depositMonths', 'RON', 'luni'],
+  ] as const)('exposes the unit for %s in %s', (key, currency, unit) => {
+    renderField({ def: def(key), value: 2, currency });
+    expect(screen.getByRole('textbox')).toHaveAccessibleDescription(unit);
+  });
+
   it('converts percentages without float noise', async () => {
     const onChange = renderField({ def: def('downPaymentPct'), value: 0.15 });
     const input = screen.getByLabelText('Avans');

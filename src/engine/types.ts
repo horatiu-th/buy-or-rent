@@ -71,6 +71,8 @@ export interface BuyerTotals {
   insurance: number;
   maintenance: number;
   saleCosts: number;
+  saleAgencyFee: number;
+  saleTax: number;
   investmentTax: number;
   cashOut: number;
 }

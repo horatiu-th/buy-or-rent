@@ -50,7 +50,7 @@ it('stores euro edits as whole lei in the URL', async () => {
   expect(new URLSearchParams(window.location.search).get('price')).toBe(String(Math.round(1234 * eurRon)));
 });
 
-it('switches off the inflation adjustment where a view only has nominal values', async () => {
+it('keeps the summary adjustment independent of the nominal sensitivity table', async () => {
   window.history.replaceState(null, '', '/?moneda=EUR&real=1');
   render(<App />);
   const toggle = screen.getByRole('switch', { name: /Ajustat cu inflația/ });
@@ -58,12 +58,14 @@ it('switches off the inflation adjustment where a view only has nominal values',
   expect(toggle).toBeEnabled();
   expect(screen.queryByText(/Valori nominale/)).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
-  expect(toggle).toBeDisabled();
-  expect(toggle).not.toBeChecked();
-  expect(toggle).toHaveAccessibleDescription(/Valori nominale/);
+  expect(toggle).toBeChecked();
+  expect(screen.getByText(/Avere netă după.*lei de azi, convertiți în €/)).toBeVisible();
+  expect(within(screen.getByRole('tabpanel')).getByText(/Valori nominale/)).toBeVisible();
+  await userEvent.click(toggle);
+  expect(screen.getByText(/Avere netă după.*valori nominale/)).toBeVisible();
   await userEvent.click(screen.getByRole('tab', { name: 'Avere netă' }));
   expect(toggle).toBeEnabled();
-  expect(toggle).toBeChecked();
+  expect(toggle).not.toBeChecked();
 });
 
 it('says what today\'s money means in euro', () => {
