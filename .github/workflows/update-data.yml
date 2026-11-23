@@ -1,0 +1,34 @@
+name: Update data
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run data:fetch
+      - run: npm run data:merge
+      - run: npm test
+      # A PR rather than a direct push, so a broken source can't silently change live numbers.
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/auto-update
+          title: 'chore: Updated data'
+          commit-message: 'chore: Updated data'
+          body-path: pipeline-summary.md
+          add-paths: |
+            data/auto.json
+            src/data/defaults.json
