@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { SourcedValue } from '../data/schema';
 import { ro } from '../i18n/ro';
 import type { FieldDef } from './fields';
@@ -40,6 +40,27 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
   const [draft, setDraft] = useState('');
   const [focused, setFocused] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  // A popover should get out of the way the moment attention moves elsewhere.
+  useEffect(() => {
+    if (!showHelp) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!anchorRef.current?.contains(e.target as Node)) setShowHelp(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setShowHelp(false);
+      toggleRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [showHelp]);
 
   // Keep the draft as a string while typing so "0." or "" aren't clobbered mid-edit.
   useEffect(() => {
@@ -59,17 +80,25 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
 
   const describedBy = [showHelp && helpId, sourceTag && sourceId].filter(Boolean).join(' ') || undefined;
 
+  const popoverId = `${id}-popover`;
   const helpToggle = (
-    <button
-      type="button"
-      className="help"
-      aria-expanded={showHelp}
-      aria-controls={helpId}
-      aria-label={`${ro.help}: ${text.label}`}
-      onClick={() => setShowHelp((v) => !v)}
-    >i</button>
+    <span className="help-anchor" ref={anchorRef}>
+      <button
+        ref={toggleRef}
+        type="button"
+        className="help"
+        aria-expanded={showHelp}
+        aria-controls={popoverId}
+        aria-label={`${ro.help}: ${text.label}`}
+        onClick={() => setShowHelp((v) => !v)}
+      >i</button>
+      {/* Kept in the DOM while closed so the input's description can still point at the source. */}
+      <span id={popoverId} role="note" className="help-popover" hidden={!showHelp}>
+        <span id={helpId} className="help-text">{text.help}</span>
+        {sourceTag}
+      </span>
+    </span>
   );
-  const helpText = <p id={helpId} className="help-text" hidden={!showHelp}>{text.help}</p>;
 
   const head = (label: ReactNode) => (
     <div className="field-head">
@@ -88,8 +117,6 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
             <span>{text.label}</span>
           </label>,
         )}
-        {helpText}
-        {sourceTag}
       </div>
     );
   }
@@ -124,8 +151,6 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
         />
         <span className="suffix" aria-hidden="true">{suffix(def, currency)}</span>
       </div>
-      {helpText}
-      {sourceTag}
     </div>
   );
 }

@@ -145,7 +145,7 @@ button { cursor: pointer; }
    Each is a block with a filled header that folds the group away. */
 .input-group {
   --tint: var(--field); --accent: var(--muted);
-  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
 }
 .input-group + .input-group { margin-top: 0.75rem; }
 /* The same colours as the chart lines tie each group to its side of the comparison. */
@@ -155,7 +155,7 @@ button { cursor: pointer; }
 .group-head { margin: 0; }
 .group-head button {
   display: flex; align-items: center; gap: 0.6rem; width: 100%; padding: 0.8rem 1rem;
-  border: none; background: var(--tint); text-align: left;
+  border: none; border-radius: 11px; background: var(--tint); text-align: left;
   font-size: var(--step-1); font-weight: 700; letter-spacing: -0.01em;
 }
 .group-head button::before { content: ''; flex: none; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--accent); }
@@ -167,6 +167,7 @@ button { cursor: pointer; }
   transform: rotate(-45deg); transition: transform 150ms;
 }
 .input-group.is-open > .group-head .chevron { transform: rotate(45deg) translate(-2px, -2px); }
+.input-group.is-open > .group-head button { border-radius: 11px 11px 0 0; }
 .group-body { padding: 0.75rem 1rem 1rem; }
 .group-body[hidden] { display: none; }
 .topic + .topic { margin-top: 1rem; }
@@ -195,12 +196,27 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .field-head > label { color: var(--ink); }
 .field.is-disabled .field-head > label { color: var(--muted); }
 .field.is-disabled .number-box { opacity: 0.5; }
-.help-text, .source { grid-column: 1 / -1; }
-.help-text { margin-top: 0.4rem; font-size: var(--step--1); color: var(--muted); max-width: 34rem; }
-/* Sources stay out of the way until a field is in use, then explain where its default came from. */
-.source { display: none; margin-top: 0.3rem; font-size: var(--step--1); color: var(--muted); }
-.field:focus-within .source { display: block; }
+.help-anchor { position: relative; display: inline-flex; }
+/* Opens above and to the right of the icon, so it never covers the input it explains. */
+.help-popover {
+  position: absolute; left: calc(100% + 0.4rem); bottom: calc(100% + 0.4rem); z-index: 20;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  width: max-content; max-width: min(19rem, calc(100vw - 2rem));
+  padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--ink); box-shadow: 0 8px 24px rgb(23 32 43 / 0.14);
+  font-size: var(--step--1); font-weight: 400; font-style: normal; line-height: 1.45; text-align: left;
+  animation: popover-in 120ms ease-out;
+}
+.help-popover[hidden] { display: none; }
+.help-popover .source { display: block; color: var(--muted); }
 .source-stale { color: var(--renter); }
+@keyframes popover-in { from { opacity: 0; transform: translateY(4px); } }
+/* On phones there's no room to the right of the icon, so the popover starts at the label instead. */
+@media (max-width: 560px) {
+  .field-head { position: relative; }
+  .help-anchor { position: static; }
+  .help-popover { left: 0; max-width: calc(100vw - 4rem); }
+}
 
 .help {
   flex: none; display: inline-grid; place-items: center; width: 1.15rem; height: 1.15rem; padding: 0;

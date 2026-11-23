@@ -65,4 +65,32 @@ describe('InputField', () => {
     expect(screen.getByText('Chiria pentru o locuință comparabilă.')).toBeVisible();
     expect(input).toHaveAccessibleDescription(/Chiria pentru o locuință comparabilă\..*Sursa X/);
   });
+
+  it('shows help and source together in a popover next to the info button', async () => {
+    renderField({ source: source({}) });
+    const toggle = screen.getByRole('button', { name: /Ajutor/ });
+    await userEvent.click(toggle);
+    const popover = screen.getByRole('note');
+    expect(popover).toBeVisible();
+    expect(popover).toHaveTextContent('Chiria pentru o locuință comparabilă.');
+    expect(popover).toHaveTextContent('Sursa X');
+    expect(toggle.parentElement).toContainElement(popover);
+  });
+
+  it('closes the popover with Escape and returns focus to the button', async () => {
+    renderField({ source: source({}) });
+    const toggle = screen.getByRole('button', { name: /Ajutor/ });
+    await userEvent.click(toggle);
+    await userEvent.keyboard('{Escape}');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveFocus();
+  });
+
+  it('closes the popover when clicking elsewhere', async () => {
+    renderField({ source: source({}) });
+    const toggle = screen.getByRole('button', { name: /Ajutor/ });
+    await userEvent.click(toggle);
+    await userEvent.click(document.body);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
 });
