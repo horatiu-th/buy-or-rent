@@ -20,6 +20,7 @@
     "depositMonths":        { "value": 2,      "unit": "luni",  "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
     "investReturn":         { "value": 0.06,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
     "investTaxRate":        { "value": 0.1,    "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
+    "savingsRate":          { "value": 0.04,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
     "saleAgencyPct":        { "value": 0.02,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
     "saleTaxShortPct":      { "value": 0.03,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },
     "saleTaxLongPct":       { "value": 0.01,   "unit": "%",     "source": "Placeholder – de verificat", "asOf": "2026-11-23", "status": "manual" },

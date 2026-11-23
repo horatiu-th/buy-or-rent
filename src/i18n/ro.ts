@@ -38,7 +38,7 @@ export const ro = {
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
   renterInvesting: 'Chiriaș care investește',
-  renterCash: 'Chiriaș care nu investește',
+  renterCash: 'Chiriaș cu economii la depozit',
   year: 'An',
   headlineValue: (rent: string) => `Cumpărarea merită dacă o chirie similară e peste ${rent}/lună.`,
   headlineAlwaysBuy: 'Cu aceste ipoteze, cumpărarea câștigă chiar și la chirie zero.',
@@ -60,7 +60,7 @@ export const ro = {
     saleCosts: 'Costuri vânzare', investmentTax: 'Impozit investiții', rent: 'Chirie',
   },
   sensitivityHelp:
-    'Diferența de avere netă la final (cumpărător − chiriaș) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale.',
+    'Diferența de avere netă la final (cumpărător − chiriașul care investește) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale.',
   sensitivityRows: 'Creștere preț locuință',
   sensitivityCols: 'Randament investiții',
   groups: {
@@ -100,6 +100,7 @@ export const ro = {
     inflation: { label: 'Inflație', help: 'Folosită doar pentru afișarea în lei de azi.' },
     investReturn: { label: 'Randament investiții', help: 'Randament anual brut al banilor neinvestiți în locuință.' },
     investTaxRate: { label: 'Impozit pe câștig', help: 'Aplicat câștigului la final.' },
+    savingsRate: { label: 'Dobândă depozit', help: 'Dobânda anuală a chiriașului care își ține economiile într-un depozit bancar în loc să investească. Câștigul e impozitat la fel ca investițiile.' },
     renterInsuranceAnnual: { label: 'Asigurare chiriaș', help: 'Pe an.' },
     depositMonths: { label: 'Garanție chirie', help: 'Număr de chirii lunare date ca garanție, returnată la final.' },
     includeSaleCosts: { label: 'Include costurile de vânzare', help: 'Compară averea lichidă, ca și cum ai vinde la final.' },

@@ -1,5 +1,5 @@
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart,
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { Result } from '../engine';
@@ -139,7 +139,10 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
         <YAxis type="category" dataKey="name" width={132} tick={TICK} axisLine={false} tickLine={false} />
         <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={(l) => String(l)} />} cursor={{ fill: 'var(--field)' }} />
         <Bar dataKey="buyer" name={ro.buyer} fill={BUYER} radius={[0, 3, 3, 0]} />
-        <Bar dataKey="renter" name={ro.renter} fill={RENTER} radius={[0, 3, 3, 0]} />
+        <Bar dataKey="renter" name={ro.renter} fill={RENTER} radius={[0, 3, 3, 0]}>
+          {/* Investment tax is paid only by the renter who invests, so it takes that renter's colour. */}
+          {data.map((d) => <Cell key={d.name} fill={d.name === t.investmentTax ? INVEST : RENTER} />)}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

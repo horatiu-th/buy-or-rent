@@ -140,6 +140,13 @@
       "asOf": "2026-11-23",
       "status": "manual"
     },
+    "savingsRate": {
+      "value": 0.04,
+      "unit": "%",
+      "source": "Placeholder – de verificat",
+      "asOf": "2026-11-23",
+      "status": "manual"
+    },
     "saleAgencyPct": {
       "value": 0.02,
       "unit": "%",

@@ -126,10 +126,10 @@ it('counts edits hidden inside the folded buying costs', () => {
   expect(screen.getByText('2 valori modificate')).toBeInTheDocument();
 });
 
-it('shows the renter who keeps savings in cash next to the investing renter', () => {
+it('shows the renter who keeps savings in a deposit next to the investing renter', () => {
   render(<App />);
   expect(screen.getByText('Chiriaș care investește')).toBeInTheDocument();
-  expect(screen.getByText('Chiriaș care nu investește')).toBeInTheDocument();
+  expect(screen.getByText('Chiriaș cu economii la depozit')).toBeInTheDocument();
 });
 
 it('collapses a group and counts the edits inside it', async () => {

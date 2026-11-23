@@ -4,7 +4,7 @@ import { formatMoney, type Currency } from './format';
 
 interface Props { grid: number[][]; baseGrowth: number; baseReturn: number; currency: Currency; eurRon: number }
 
-const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
+const pct = (x: number) => `${(x * 100).toLocaleString('ro-RO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 export function SensitivityTable({ grid, baseGrowth, baseReturn, currency, eurRon }: Props) {
   return (

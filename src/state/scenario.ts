@@ -17,7 +17,8 @@ export const DEFAULT_SCENARIO: Scenario = {
   propertyType: 'existing',
   sqm: 55,
   currency: 'RON',
-  real: false,
+  // Today's money by default: nominal sums decades out look large and hide inflation's effect on cash.
+  real: true,
   overrides: {},
 };
 
@@ -33,7 +34,7 @@ export function encodeScenario(s: Scenario): URLSearchParams {
   if (s.propertyType !== d.propertyType) p.set('tip', s.propertyType);
   if (s.sqm !== d.sqm) p.set('mp', String(s.sqm));
   if (s.currency !== d.currency) p.set('moneda', s.currency);
-  if (s.real !== d.real) p.set('real', '1');
+  if (s.real !== d.real) p.set('real', s.real ? '1' : '0');
   for (const [k, v] of Object.entries(s.overrides)) {
     p.set(k, typeof v === 'boolean' ? (v ? '1' : '0') : String(v));
   }
@@ -71,7 +72,7 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
     propertyType: p.get('tip') === 'new' ? 'new' : p.get('tip') === 'existing' ? 'existing' : d.propertyType,
     sqm,
     currency: p.get('moneda') === 'EUR' ? 'EUR' : d.currency,
-    real: p.get('real') === '1',
+    real: p.get('real') === '1' ? true : p.get('real') === '0' ? false : d.real,
     overrides,
   };
 }

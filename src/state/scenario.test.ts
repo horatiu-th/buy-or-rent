@@ -44,3 +44,20 @@ describe('area from the URL', () => {
     expect(decodeScenario(new URLSearchParams('mp=')).sqm).toBe(DEFAULT_SCENARIO.sqm);
   });
 });
+
+describe('inflation-adjusted view', () => {
+  it('is on by default and stays out of the URL', () => {
+    expect(DEFAULT_SCENARIO.real).toBe(true);
+    expect(encodeScenario(DEFAULT_SCENARIO).has('real')).toBe(false);
+  });
+
+  it('round-trips the nominal view through real=0', () => {
+    const s = { ...DEFAULT_SCENARIO, real: false };
+    expect(encodeScenario(s).get('real')).toBe('0');
+    expect(decodeScenario(encodeScenario(s)).real).toBe(false);
+  });
+
+  it('ignores malformed values', () => {
+    expect(decodeScenario(new URLSearchParams('real=yes')).real).toBe(true);
+  });
+});

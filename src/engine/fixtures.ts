@@ -22,6 +22,7 @@ export const baseInputs: Inputs = {
   depositMonths: 2,
   investReturn: 0.06,
   investTaxRate: 0.1,
+  savingsRate: 0.03,
   includeSaleCosts: true,
   saleAgencyPct: 0.02,
   saleTaxShortPct: 0.03,
@@ -46,6 +47,7 @@ export const flatWorld: Inputs = {
   renterInsuranceAnnual: 0,
   depositMonths: 0,
   investReturn: 0,
+  savingsRate: 0,
   includeSaleCosts: false,
   inflation: 0,
 };

@@ -49,6 +49,7 @@ export const FIELDS: FieldDef[] = [
 
   { key: 'investReturn', unit: 'pct', topic: 'investing', min: -0.2, max: 0.3, step: 0.005 },
   { key: 'investTaxRate', unit: 'pct', topic: 'investing', min: 0, max: 0.5, step: 0.01 },
+  { key: 'savingsRate', unit: 'pct', topic: 'investing', min: 0, max: 0.2, step: 0.0025 },
 
   { key: 'horizonYears', unit: 'years', topic: 'general', min: 1, max: 50, step: 1 },
   { key: 'inflation', unit: 'pct', topic: 'general', min: -0.1, max: 0.5, step: 0.005 },

@@ -9,7 +9,7 @@ const NON_NEGATIVE = [
   'saleAgencyPct', 'saleTaxShortPct', 'saleTaxLongPct', 'saleTaxShortHoldYears',
 ] as const satisfies readonly (keyof Inputs)[];
 
-const GROWTH_RATES = ['propertyGrowth', 'rentGrowth', 'investReturn', 'inflation'] as const satisfies readonly (keyof Inputs)[];
+const GROWTH_RATES = ['propertyGrowth', 'rentGrowth', 'investReturn', 'savingsRate', 'inflation'] as const satisfies readonly (keyof Inputs)[];
 
 /** Clamps inputs into the range the simulation is defined for, so UI edge cases can't produce NaN or a free loan. */
 export function sanitizeInputs(i: Inputs): Inputs {

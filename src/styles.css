@@ -262,11 +262,11 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   transition: left 180ms ease-out;
 }
 .rent-scale.buyer-wins .rent-scale-you { color: var(--buyer); }
-.rent-scale.renter-wins .rent-scale-you { color: var(--renter); }
+.rent-scale.renter-wins .rent-scale-you { color: var(--invest); }
 .rent-scale-track { position: relative; height: 1.5rem; display: flex; align-items: center; }
 .rent-scale-track input[type='range'] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 0.6rem; margin: 0; border-radius: 999px;
-  background: linear-gradient(to right, var(--renter-soft) 0 var(--t), var(--buyer-soft) var(--t) 100%);
+  background: linear-gradient(to right, var(--invest-soft) 0 var(--t), var(--buyer-soft) var(--t) 100%);
   cursor: pointer;
 }
 .rent-scale-track input[type='range']::-webkit-slider-thumb {
@@ -277,9 +277,9 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   width: 1rem; height: 1rem; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink);
 }
 .rent-scale.buyer-wins input[type='range']::-webkit-slider-thumb { border-color: var(--buyer); }
-.rent-scale.renter-wins input[type='range']::-webkit-slider-thumb { border-color: var(--renter); }
+.rent-scale.renter-wins input[type='range']::-webkit-slider-thumb { border-color: var(--invest); }
 .rent-scale.buyer-wins input[type='range']::-moz-range-thumb { border-color: var(--buyer); }
-.rent-scale.renter-wins input[type='range']::-moz-range-thumb { border-color: var(--renter); }
+.rent-scale.renter-wins input[type='range']::-moz-range-thumb { border-color: var(--invest); }
 .rent-scale-threshold {
   position: absolute; left: var(--t); top: 0; bottom: 0; width: 2px; transform: translateX(-1px);
   background: var(--ink); border-radius: 1px; pointer-events: none;
@@ -288,7 +288,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   position: relative; display: flex; justify-content: space-between; margin-top: 0.5rem;
   font-size: var(--step--1); color: var(--muted);
 }
-.rent-scale-side.rent-side { color: var(--renter); }
+.rent-scale-side.rent-side { color: var(--invest); }
 .rent-scale-side.buy-side { color: var(--buyer); }
 .rent-scale-threshold-label {
   position: absolute; left: var(--t); transform: translateX(var(--t-shift, -50%)); white-space: nowrap;
@@ -337,14 +337,14 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .swatch.dashed { background: repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 7px); }
 
 .sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; }
-.sensitivity { border-collapse: collapse; width: 100%; font-size: var(--step-0); font-variant-numeric: tabular-nums; }
+.sensitivity { border-collapse: collapse; width: 100%; font-size: var(--step-0); }
 .sensitivity th, .sensitivity td { padding: 0.65rem 0.75rem; text-align: right; border-bottom: 1px solid var(--line); }
 .sensitivity thead th { font-size: var(--step--1); font-weight: 500; color: var(--muted); }
 .sensitivity thead th:first-child { text-align: left; }
 .sensitivity tbody th { text-align: left; font-weight: 500; color: var(--muted); }
-/* Amounts stay in ink; a side bar in the series colour marks which option wins. */
+/* Amounts stay in ink; a side bar marks the winner. The comparison is against the investing renter, hence green. */
 .sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
-.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--renter); }
+.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--invest); }
 .sensitivity tbody tr:nth-child(2) td:nth-of-type(2) { font-weight: 650; }
 
 .note { color: var(--muted); font-size: var(--step--1); max-width: 40rem; }
