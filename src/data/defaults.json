@@ -6,7 +6,7 @@
       "source": "BNR, curs de referință",
       "sourceUrl": "https://curs.bnr.ro/nbrfxrates.xml",
       "asOf": "2026-11-23",
-      "status": "manual"
+      "status": "ok"
     },
     "downPaymentPct": {
       "value": 0.15,

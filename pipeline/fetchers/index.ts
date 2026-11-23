@@ -1,2 +1,4 @@
 import type { Fetcher } from '../types';
-export const FETCHERS: Fetcher[] = [];
+import { bnrFx } from './bnrFx';
+
+export const FETCHERS: Fetcher[] = [bnrFx];

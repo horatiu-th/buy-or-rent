@@ -1,1 +1,12 @@
-{}
+{
+  "values": {
+    "eurRon": {
+      "value": 5.3485,
+      "unit": "lei/€",
+      "source": "BNR, curs de referință",
+      "sourceUrl": "https://curs.bnr.ro/nbrfxrates.xml",
+      "asOf": "2026-11-23",
+      "status": "ok"
+    }
+  }
+}

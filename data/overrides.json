@@ -1,6 +1,5 @@
 {
   "values": {
-    "eurRon": {"value": 5.3485, "unit": "lei/€", "source": "BNR, curs de referință", "sourceUrl": "https://curs.bnr.ro/nbrfxrates.xml", "asOf": "2026-11-23", "status": "manual"},
     "downPaymentPct": {"value": 0.15, "unit": "%", "source": "BNR, Regulamentul 17/2012 (LTV maxim 85% în lei)", "sourceUrl": "https://www.avocatnet.ro/articol_31655/Regulamentul-BNR-nr-17-2012-unele-conditii-de-creditare.html", "asOf": "2026-11-23", "status": "manual"},
     "notaryPct": {"value": 0.012, "unit": "%", "source": "Onorarii minimale notariale, Ord. 177/C/2024, cu TVA", "sourceUrl": "https://notari.pro/calculator-taxe-notariale", "asOf": "2026-11-23", "status": "manual"},
     "registryPct": {"value": 0.0015, "unit": "%", "source": "ANCPI, Ordinul 16/2019", "sourceUrl": "https://sj.ancpi.ro/tarife-servicii/", "asOf": "2026-11-23", "status": "manual"},
