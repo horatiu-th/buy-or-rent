@@ -15,6 +15,7 @@ export const ro = {
   resetAll: 'Resetează tot',
   reset: 'Revino la valoarea implicită',
   help: 'Ajutor',
+  presets: { label: 'Tip dobândă', fixed5: 'Fix 5 ani', variable: 'Variabilă' },
   currency: 'Monedă',
   realValues: (currency: Currency) => `Ajustat cu inflația (${currency === 'EUR' ? '€' : 'lei'} de azi)`,
   nominalNote: 'Valori nominale',

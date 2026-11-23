@@ -19,10 +19,27 @@ interface Props {
 
 const ADVANCED_GROUPS: Group[] = ['acquisition', 'ownership', 'growth', 'investing', 'sale'];
 
+const PRESETS = [
+  { years: 5, label: ro.presets.fixed5 },
+  { years: 0, label: ro.presets.variable },
+] as const;
+
 export function InputsPanel({ data, cityId, propertyType, inputs, overrides, currency, setField, resetField }: Props) {
   const eurRon = data.values.eurRon.value;
+  // Presets only change the fixed period; the rate itself stays whatever the user or the defaults say.
+  const presets = (
+    <div key="presets" className="presets" role="group" aria-label={ro.presets.label}>
+      {PRESETS.map((p) => (
+        <button key={p.years} type="button" aria-pressed={inputs.fixedYears === p.years} onClick={() => setField('fixedYears', p.years)}>
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+
   const render = (group: Group) =>
-    FIELDS.filter((f) => f.group === group).map((def) => (
+    FIELDS.filter((f) => f.group === group).flatMap((def) => [
+      ...(def.key === 'fixedRate' ? [presets] : []),
       <InputField
         key={def.key}
         def={def}
@@ -33,8 +50,10 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
         eurRon={eurRon}
         onChange={(v) => setField(def.key, v as never)}
         onReset={() => resetField(def.key)}
-      />
-    ));
+        // With no fixed period the fixed rate never applies; disabled rather than hidden to avoid layout jumps.
+        disabled={def.key === 'fixedRate' && inputs.fixedYears === 0}
+      />,
+    ]);
 
   return (
     <div className="inputs">

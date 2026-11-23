@@ -75,3 +75,30 @@ it('groups the property type radios', () => {
   expect(a.getAttribute('name')).toBeTruthy();
   expect(a.getAttribute('name')).toBe(b.getAttribute('name'));
 });
+
+describe('interest presets', () => {
+  it('switches between fixed and variable and shows the active one', async () => {
+    render(<App />);
+    const fixed = screen.getByRole('button', { name: 'Fix 5 ani' });
+    const variable = screen.getByRole('button', { name: 'Variabilă' });
+
+    await userEvent.click(variable);
+    expect(window.location.search).toContain('fixedYears=0');
+    expect(variable).toHaveAttribute('aria-pressed', 'true');
+    expect(fixed).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByLabelText('Dobândă fixă')).toBeDisabled();
+
+    await userEvent.click(fixed);
+    expect(window.location.search).toContain('fixedYears=5');
+    expect(fixed).toHaveAttribute('aria-pressed', 'true');
+    expect(variable).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByLabelText('Dobândă fixă')).toBeEnabled();
+  });
+
+  it('presses neither preset for another fixed period', () => {
+    window.history.replaceState(null, '', '/?fixedYears=3');
+    render(<App />);
+    expect(screen.getByRole('button', { name: 'Fix 5 ani' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Variabilă' })).toHaveAttribute('aria-pressed', 'false');
+  });
+});

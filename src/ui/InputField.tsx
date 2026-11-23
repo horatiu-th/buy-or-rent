@@ -13,6 +13,7 @@ interface Props {
   eurRon: number;
   onChange: (v: number | boolean) => void;
   onReset: () => void;
+  disabled?: boolean;
 }
 
 function toDisplay(def: FieldDef, v: number, currency: Currency, eurRon: number) {
@@ -31,7 +32,7 @@ function fromDisplay(def: FieldDef, v: number, currency: Currency, eurRon: numbe
 const suffix = (def: FieldDef, currency: Currency) =>
   ({ pct: '%', money: currency === 'EUR' ? '€' : 'lei', years: 'ani', months: 'luni', bool: '' })[def.unit];
 
-export function InputField({ def, value, isOverridden, source, currency, eurRon, onChange, onReset }: Props) {
+export function InputField({ def, value, isOverridden, source, currency, eurRon, onChange, onReset, disabled }: Props) {
   const id = useId();
   const helpId = `${id}-help`;
   const sourceId = `${id}-source`;
@@ -101,6 +102,7 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
         <input
           id={id}
           aria-describedby={describedBy}
+          disabled={disabled}
           type="number"
           inputMode="decimal"
           value={draft}
