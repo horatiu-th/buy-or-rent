@@ -21,11 +21,11 @@ interface Props {
 /** End-of-horizon figures; the swatches double as the legend for the charts below. */
 function EndSummary({ result, view }: { result: Result; view: View }) {
   const last = result.rows[result.rows.length - 1];
-  const fmt = (v: number) => formatMoney(view.real ? v / last.deflator : v, view.currency, view.eurRon);
+  const fmt = (nominal: number) =>
+    formatMoney(view.real ? nominal / last.deflator : nominal, view.currency, view.eurRon);
   const items = [
-    { cls: 'buyer', label: ro.buyer, value: last.buyerNetWorth },
-    { cls: 'renter', label: ro.renterInvesting, value: last.renterNetWorth },
-    { cls: 'renter-cash', label: ro.renterCash, value: last.renterCashNetWorth },
+    { cls: 'buyer', label: ro.buyer, value: fmt(last.buyerNetWorth) },
+    { cls: 'renter', label: ro.renterInvesting, value: fmt(last.renterNetWorth) },
   ];
   return (
     <div className="end-summary">
@@ -34,7 +34,7 @@ function EndSummary({ result, view }: { result: Result; view: View }) {
         {items.map((it) => (
           <div key={it.cls} className={`end-item ${it.cls}`}>
             <dt>{it.label}</dt>
-            <dd>{fmt(it.value)}</dd>
+            <dd>{it.value}</dd>
           </div>
         ))}
       </dl>

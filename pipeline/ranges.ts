@@ -24,8 +24,6 @@ export const VALUE_RANGES: Record<ValueKey, Range> = {
   depositMonths: { min: 0, max: 6 },
   investReturn: { min: -0.05, max: 0.2 },
   investTaxRate: { min: 0, max: 0.5 },
-  savingsRate: { min: 0, max: 0.2 },
-  savingsTaxRate: { min: 0, max: 0.5 },
   saleAgencyPct: { min: 0, max: 0.1 },
   saleTaxShortPct: { min: 0, max: 0.2 },
   saleTaxLongPct: { min: 0, max: 0.2 },

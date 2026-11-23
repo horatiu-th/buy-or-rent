@@ -6,17 +6,18 @@ A buy-vs-rent calculator for Romania. It answers one question: **at what rent do
 
 ## What it does
 
-You pick a city, a property type and a size. The calculator fills in typical prices, rents, loan rates, fees and taxes from public sources, and then simulates, month by month, three households that start with the same cash:
+You pick a city, a property type and a size. The calculator fills in typical prices, rents, loan rates, fees and taxes from public sources, and then simulates, month by month, two households:
 
 - **Cumpărător** (buyer): pays the down payment and fees, takes a mortgage, owns the home.
 - **Chiriaș care investește** (renter who invests): rents a similar home and invests every leu the buyer spent and they didn't.
-- **Chiriaș cu economii la depozit** (renter who saves): same as the renter who invests, but keeps the money in a bank deposit.
 
 It shows:
 
 - **The verdict:** the rent above which buying wins, and when the buyer pulls ahead for good.
 - **A rent scale:** where your rent sits against that threshold. Drag it to try other rents.
 - **Charts:** net worth over time, monthly costs, where the money goes, and how sensitive the result is to price growth and investment returns.
+
+Across the charts, blue represents the buyer and teal represents the renter. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
 
 Every input can be changed, values are shown in today's money by default, and any scenario can be shared as a link.
 

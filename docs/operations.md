@@ -67,8 +67,8 @@ Most defaults are maintained by hand. Follow [Updating values by hand](data.md#u
 | At the start of each quarter | **IRCC.** The value for quarter T applies from the start of quarter T+2. Update `validUntil` to the last day of the quarter it applies to; `data:merge` warns once that date has passed. | [BNR IRCC page](https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor) |
 | Every 3 months | Mortgage rates and bank margins | BNR new-loan interest statistics; major banks' product sheets |
 | Every 3–6 months | City prices (€/m², new and existing) and rents | Storia, imobiliare.ro and apartamente.org monthly reports |
-| Every January | Taxes: property tax, sale tax, investment and deposit-interest tax; notary and land-registry fees | Codul fiscal, ANAF, PwC Tax Summaries for Romania |
-| Once a year | Long-run assumptions: inflation, property and rent growth, returns, deposit rates | BNR inflation report, Eurostat house price index |
+| Every January | Taxes: property tax, sale tax and investment tax; notary and land-registry fees | Codul fiscal, ANAF, PwC Tax Summaries for Romania |
+| Once a year | Long-run assumptions: inflation, property and rent growth, investment returns | BNR inflation report, Eurostat house price index |
 | Once a year | Insurance costs, typical rental deposit | PAD tariffs, insurers, press |
 | When announced | Noua Casă terms (a preset was postponed until the 2027 terms are known) | FNGCIMM, Ministry of Finance |
 

@@ -67,10 +67,7 @@ export function simulate(raw: Inputs): Result {
   const startGap = upfront - deposit - rentAgencyFee;
   const buyerPf: Portfolio = { value: 0, basis: 0 };
   const renterPf: Portfolio = { value: 0, basis: 0 };
-  // The same renter's savings held in a bank deposit instead: identical contributions, deposit interest.
-  const renterSavings: Portfolio = { value: 0, basis: 0 };
   contribute(startGap > 0 ? renterPf : buyerPf, Math.abs(startGap));
-  if (startGap > 0) contribute(renterSavings, startGap);
 
   const buyer: BuyerTotals = {
     downPayment, acquisitionCosts: acq, interest: 0, principal: 0, propertyTax: 0,
@@ -83,8 +80,6 @@ export function simulate(raw: Inputs): Result {
 
   const gProp = monthlyRate(i.propertyGrowth);
   const gInv = monthlyRate(i.investReturn);
-  // Banks withhold deposit tax when interest is paid, so savings compound at the after-tax rate.
-  const gSav = monthlyRate(i.savingsRate * (1 - i.savingsTaxRate));
   const gInf = monthlyRate(i.inflation);
   let value = i.price;
   let balance = loanAmount;
@@ -97,7 +92,6 @@ export function simulate(raw: Inputs): Result {
     renterMonthlyCost: renterCost,
     buyerNetWorth: value - balance - saleCosts(value, month, i) + liquidate(buyerPf, i.investTaxRate).net,
     renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
-    renterCashNetWorth: renterSavings.value + deposit,
     deflator: Math.pow(1 + gInf, month),
   });
 
@@ -132,10 +126,8 @@ export function simulate(raw: Inputs): Result {
 
     buyerPf.value *= 1 + gInv;
     renterPf.value *= 1 + gInv;
-    renterSavings.value *= 1 + gSav;
     const diff = buyerCost - renterCost;
     contribute(diff > 0 ? renterPf : buyerPf, Math.abs(diff));
-    if (diff > 0) contribute(renterSavings, diff);
     buyer.cashOut += buyerCost + Math.max(0, -diff);
     renter.cashOut += renterCost + Math.max(0, diff);
 

@@ -7,7 +7,7 @@ export type Unit = 'money' | 'pct' | 'years' | 'months' | 'bool';
 /** Where a field sits in the panel. Buying has enough fields that it splits into smaller topics. */
 export type Topic =
   | 'home' | 'loan' | 'purchaseCosts' | 'ownershipCosts' | 'sale'
-  | 'renting' | 'investing' | 'general';
+  | 'renting' | 'general';
 
 export interface FieldDef {
   key: keyof Inputs;
@@ -55,10 +55,8 @@ export const FIELDS: FieldDef[] = [
   { key: 'rentAgencyPct', unit: 'pct', topic: 'renting', min: 0, max: 3, step: 0.05 },
   { key: 'renterInsuranceAnnual', unit: 'money', topic: 'renting', min: 0, max: 100_000, step: 50 },
 
-  { key: 'investReturn', unit: 'pct', topic: 'investing', min: -0.2, max: 0.3, step: 0.005 },
-  { key: 'investTaxRate', unit: 'pct', topic: 'investing', min: 0, max: 0.5, step: 0.01 },
-  { key: 'savingsRate', unit: 'pct', topic: 'investing', min: 0, max: 0.2, step: 0.0025 },
-  { key: 'savingsTaxRate', unit: 'pct', topic: 'investing', min: 0, max: 0.5, step: 0.01 },
+  { key: 'investReturn', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },
+  { key: 'investTaxRate', unit: 'pct', topic: 'renting', min: 0, max: 0.5, step: 0.01 },
 
   { key: 'horizonYears', unit: 'years', topic: 'general', min: MIN_HORIZON_YEARS, max: MAX_HORIZON_YEARS, step: 1 },
   { key: 'inflation', unit: 'pct', topic: 'general', min: -0.1, max: 0.5, step: 0.005 },

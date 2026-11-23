@@ -1,4 +1,4 @@
-/* Palette: cool paper and slate ink, blueprint blue for buying, façade ochre for renting.
+/* Palette: cool paper and slate ink, blueprint blue for buying, teal for renting.
    Series colours keep >= 3:1 contrast on their surfaces and stay distinct for colour-blind readers. */
 :root {
   --paper: #f5f7f9;
@@ -9,14 +9,12 @@
   --field: #edf0f4;
   --buyer: #2457c5;
   --buyer-soft: #dce6f8;
-  --renter: #b57a00;
-  --renter-soft: #f6e9cc;
-  /* The series ochre is only 3.65:1 on white, too faint for small text, so text uses a darker shade. */
-  --renter-text: #8f6000;
+  --renter: #187967;
+  --renter-soft: #deeee9;
+  --renter-text: #156452;
+  --stale-text: #8f6000;
   /* Borders that identify a control need 3:1 against the surface; --line is decoration only. */
   --control-line: #7d8794;
-  --invest: #1d7f66;
-  --invest-soft: #d6eee6;
   --focus: #2457c5;
 
   --font: 'Schibsted Grotesk Variable', system-ui, sans-serif;
@@ -45,12 +43,11 @@
     --field: #222b35;
     --buyer: #6e9bf0;
     --buyer-soft: #1e2f4d;
-    --renter: #e0a63a;
-    --renter-soft: #3a2e14;
-    --renter-text: #e0a63a;
+    --renter: #63cbb3;
+    --renter-soft: #19372f;
+    --renter-text: #81d7bf;
+    --stale-text: #e0a63a;
     --control-line: #68737f;
-    --invest: #4cc3a0;
-    --invest-soft: #153a30;
     --focus: #6e9bf0;
     color-scheme: dark;
   }
@@ -149,7 +146,7 @@ button { cursor: pointer; }
   .results-column { order: -1; }
 }
 
-/* Input groups: one per side of the decision, plus investing and general settings.
+/* Input groups: one per side of the decision, plus general settings.
    Each is a block with a filled header that folds the group away. */
 .input-group {
   --tint: var(--field); --accent: var(--muted);
@@ -159,7 +156,6 @@ button { cursor: pointer; }
 /* The same colours as the chart lines tie each group to its side of the comparison. */
 .group-buying { --tint: var(--buyer-soft); --accent: var(--buyer); }
 .group-renting { --tint: var(--renter-soft); --accent: var(--renter); }
-.group-investing { --tint: var(--invest-soft); --accent: var(--invest); }
 .group-head { margin: 0; }
 .group-head button {
   display: flex; align-items: center; gap: 0.6rem; width: 100%; padding: 0.8rem 1rem;
@@ -217,7 +213,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 }
 .help-popover[hidden] { display: none; }
 .help-popover .source { display: block; color: var(--muted); }
-.source-stale { color: var(--renter-text); }
+.source-stale { color: var(--stale-text); }
 @keyframes popover-in { from { opacity: 0; transform: translateY(4px); } }
 /* On phones there's no room to the right of the icon, so the popover starts at the label instead. */
 @media (max-width: 560px) {
@@ -284,7 +280,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   transition: left 180ms ease-out;
 }
 .rent-scale.buyer-wins .rent-scale-you { color: var(--buyer); }
-.rent-scale.renter-wins .rent-scale-you { color: var(--invest); }
+.rent-scale.renter-wins .rent-scale-you { color: var(--renter-text); }
 .rent-scale-track { position: relative; height: 1.5rem; display: flex; align-items: center; }
 .rent-scale-track input[type='range'] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 0.6rem; margin: 0; border-radius: 999px;
@@ -292,7 +288,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
      without relying on hue, and both halves keep 3:1 against the page. */
   background:
     linear-gradient(to right, transparent 0 var(--t), var(--buyer) var(--t) 100%),
-    repeating-linear-gradient(135deg, var(--invest) 0 3px, var(--invest-soft) 3px 6px);
+    repeating-linear-gradient(135deg, var(--renter) 0 3px, var(--renter-soft) 3px 6px);
   cursor: pointer;
 }
 .rent-scale[data-outcome='invalid'] input[type='range'] { background: var(--control-line); }
@@ -305,9 +301,9 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   width: 1rem; height: 1rem; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink);
 }
 .rent-scale.buyer-wins input[type='range']::-webkit-slider-thumb { border-color: var(--buyer); }
-.rent-scale.renter-wins input[type='range']::-webkit-slider-thumb { border-color: var(--invest); }
+.rent-scale.renter-wins input[type='range']::-webkit-slider-thumb { border-color: var(--renter-text); }
 .rent-scale.buyer-wins input[type='range']::-moz-range-thumb { border-color: var(--buyer); }
-.rent-scale.renter-wins input[type='range']::-moz-range-thumb { border-color: var(--invest); }
+.rent-scale.renter-wins input[type='range']::-moz-range-thumb { border-color: var(--renter-text); }
 .rent-scale-threshold {
   position: absolute; left: var(--t); top: 0; bottom: 0; width: 2px; transform: translateX(-1px);
   background: var(--ink); border-radius: 1px; pointer-events: none;
@@ -317,7 +313,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   position: relative; display: flex; justify-content: space-between; margin-top: 0.5rem;
   font-size: var(--step--1); color: var(--muted);
 }
-.rent-scale-side.rent-side { color: var(--invest); }
+.rent-scale-side.rent-side { color: var(--renter-text); }
 .rent-scale-side.buy-side { color: var(--buyer); }
 .rent-scale-threshold-label {
   position: absolute; left: var(--t); transform: translateX(var(--t-shift, -50%)); white-space: nowrap;
@@ -335,9 +331,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .end-item dd { margin: 0.15rem 0 0; font-size: var(--step-2); font-weight: 650; letter-spacing: -0.01em; }
 .end-item dt::before { content: ''; flex: none; width: 0.9rem; height: 3px; border-radius: 2px; }
 .end-item.buyer dt::before { background: var(--buyer); }
-.end-item.renter dt::before { background: var(--invest); }
-.end-item.renter-cash dt::before { background: repeating-linear-gradient(to right, var(--renter) 0 4px, transparent 4px 7px); }
-.end-item.renter-cash dd { color: var(--muted); font-weight: 500; }
+.end-item.renter dt::before { background: var(--renter); }
 
 /* Chart area */
 .chart-toolbar {
@@ -368,7 +362,6 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .chart-tip-row { display: flex; align-items: center; gap: 0.45rem; }
 .chart-tip-row strong { margin-left: auto; padding-left: 1rem; font-weight: 600; }
 .swatch { flex: none; width: 0.9rem; height: 3px; border-radius: 2px; background: currentColor; }
-.swatch.dashed { background: repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 7px); }
 
 .table-scroll { overflow-x: auto; }
 .sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; caption-side: top; text-align: left; }
@@ -377,9 +370,9 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .sensitivity thead th { font-size: var(--step--1); font-weight: 500; color: var(--muted); }
 .sensitivity thead th:first-child { text-align: left; }
 .sensitivity tbody th { text-align: left; font-weight: 500; color: var(--muted); }
-/* Amounts stay in ink; a side bar marks the winner. The comparison is against the investing renter, hence green. */
+/* Amounts stay in ink; a side bar marks the winner. */
 .sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
-.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--invest); }
+.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--renter); }
 .sensitivity td.is-base { font-weight: 650; }
 
 .site-footer {

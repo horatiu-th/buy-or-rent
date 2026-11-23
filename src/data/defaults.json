@@ -149,21 +149,6 @@
       "asOf": "2026-11-23",
       "status": "manual"
     },
-    "savingsRate": {
-      "value": 0.04,
-      "unit": "%",
-      "source": "Estimare",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
-    "savingsTaxRate": {
-      "value": 0.1,
-      "unit": "%",
-      "source": "Codul fiscal, impozit pe dobânzi",
-      "sourceUrl": "https://taxsummaries.pwc.com/romania/individual/income-determination",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
     "saleAgencyPct": {
       "value": 0.02,
       "unit": "%",

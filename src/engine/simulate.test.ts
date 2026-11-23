@@ -161,7 +161,7 @@ describe('breakEven', () => {
   const rows = (pairs: [number, number][]): MonthRow[] =>
     pairs.map(([buyerNetWorth, renterNetWorth], month) => ({
       month, buyerNetWorth, renterNetWorth, propertyValue: 0, loanBalance: 0, buyerMonthlyCost: 0,
-      renterMonthlyCost: 0, renterCashNetWorth: 0, deflator: 1,
+      renterMonthlyCost: 0, deflator: 1,
     }));
 
   it('is 0 when the buyer is ahead from month 0 onward', () => {
@@ -179,42 +179,6 @@ describe('breakEven', () => {
 
   it('is null when the buyer is behind at the horizon', () => {
     expect(breakEven(rows([[6, 5], [6, 5], [4, 5]]))).toBeNull();
-  });
-});
-
-describe('renter who keeps savings in a bank deposit', () => {
-  // Without tax the two renters differ only in return; with tax they also differ in when it is paid.
-  it('matches the investing renter when the deposit pays the same and nothing is taxed', () => {
-    const { rows } = simulate({ ...baseInputs, investReturn: 0.04, savingsRate: 0.04, investTaxRate: 0, savingsTaxRate: 0 });
-    for (const r of rows) expect(r.renterCashNetWorth).toBeCloseTo(r.renterNetWorth, 4);
-  });
-
-  it('falls behind the investing renter when investing pays more', () => {
-    const end = simulate({ ...baseInputs, investReturn: 0.06, savingsRate: 0.02 }).rows.at(-1)!;
-    expect(end.renterCashNetWorth).toBeLessThan(end.renterNetWorth);
-  });
-
-  it('holds exactly the deposit plus every lei not spent at a zero deposit rate', () => {
-    const i = { ...baseInputs, investReturn: 0.08, savingsRate: 0 };
-    const { rows } = simulate(i);
-    const upfront = i.price * i.downPaymentPct + acquisitionCosts(i) - i.rent * i.rentAgencyPct;
-    const saved = rows.slice(1).reduce((s, r) => s + Math.max(0, r.buyerMonthlyCost - r.renterMonthlyCost), 0);
-    expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(upfront + saved, 4);
-  });
-
-  it('withholds deposit tax as interest is paid, so savings compound at the after-tax rate', () => {
-    // A rent far above the cost of owning means the renter never adds savings after day one.
-    const i = { ...baseInputs, rent: 20_000, depositMonths: 0, savingsRate: 0.04, savingsTaxRate: 0.1, horizonYears: 30 };
-    const { rows } = simulate(i);
-    const start = rows[0].renterCashNetWorth;
-    expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(start * Math.pow(1 + 0.04 * 0.9, 30), 2);
-  });
-
-  it('taxes deposit interest independently of the investment tax', () => {
-    const at = (savingsTaxRate: number, investTaxRate: number) =>
-      simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate, investTaxRate }).rows.at(-1)!.renterCashNetWorth;
-    expect(at(0.1, 0)).toBeLessThan(at(0, 0));
-    expect(at(0.1, 0)).toBeCloseTo(at(0.1, 0.5), 6);
   });
 });
 

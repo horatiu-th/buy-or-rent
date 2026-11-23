@@ -6,7 +6,7 @@ The engine lives in `src/engine/`. It is plain TypeScript: it takes an `Inputs` 
 
 Comparing a mortgage payment with a rent is misleading: the buyer builds equity, pays one-off fees and owns an asset that changes in value, while the renter keeps cash that can earn a return. So instead of comparing monthly costs, the calculator compares **net worth**.
 
-Three households start with **the same amount of cash** and spend **the same amount every month**. Whatever one of them doesn't spend on housing, they keep: the buyer and the investing renter invest it, the saving renter puts it in a deposit. At any month, the household with the higher net worth is the one whose choice was better so far.
+The buyer and the investing renter start with the same cash and invest any difference in housing costs.
 
 ## The timeline
 
@@ -14,10 +14,10 @@ Three households start with **the same amount of cash** and spend **the same amo
 
 ### Month 0
 
-| | Buyer | Renter |
+| | Buyer | Investing renter |
 |---|---|---|
 | Pays | Down payment + acquisition costs (notary, land registry, buyer agency fee, bank fees, and the loan-based mortgage fees from `mortgageSetupCosts()`: 0.1% of the loan plus the notary's fee for the mortgage contract) | Rental deposit + rental agency fee |
-| Keeps | Nothing, if their upfront costs are higher | The difference, invested or saved |
+| Keeps | Nothing, if their upfront costs are higher | The difference, invested |
 
 If the renter's upfront costs are larger than the buyer's (rare), the buyer keeps and invests the difference instead. The deposit comes back at the end; the agency fee doesn't.
 
@@ -34,17 +34,16 @@ If the renter's upfront costs are larger than the buyer's (rare), the buyer keep
 - Renter's insurance per year / 12.
 
 **Who invests the difference**
-- If the buyer's cost is higher, the renter invests (or saves) the difference.
+- If the buyer's cost is higher, the investing renter invests the difference.
 - If the rent is higher, the buyer invests the difference.
 
 **Growth**
 - The property grows by `propertyGrowth` (converted to a monthly rate).
 - Investments grow by `investReturn`.
-- Deposits grow by `savingsRate × (1 − savingsTaxRate)`, because banks withhold the interest tax as interest is paid.
 
 **Rate conventions**
 - Loan rates are **nominal**: the monthly rate is `annual / 12`, which is how Romanian banks quote mortgage rates.
-- Property growth, investment return, deposit interest and inflation are **effective** annual rates: the monthly rate is `(1 + annual)^(1/12) − 1`, so twelve months compound to exactly the annual figure.
+- Property growth, investment return and inflation are **effective** annual rates: the monthly rate is `(1 + annual)^(1/12) − 1`, so twelve months compound to exactly the annual figure.
 - Rent is the exception: it stays flat for a year, then rises by the full `rentGrowth`.
 
 ### The loan
@@ -66,7 +65,7 @@ Net worth is what each household would have **if it liquidated everything that m
 |---|---|
 | Buyer | property value − loan balance − sale costs + investments after tax on gains |
 | Renter who invests | investments after tax on gains + rental deposit |
-| Renter who saves | deposit balance (already after tax) + rental deposit |
+
 
 **Sale costs** are the agency fee plus the property transfer tax, both as a share of the sale value. The tax rate is higher if the home has been owned for up to `saleTaxShortHoldYears` inclusive (3% up to and including 3 years, 1% after, under current Romanian rules), so month 36 still uses the higher rate and month 37 the lower one. Because net worth assumes a sale each month, the buyer's line jumps up when the lower rate kicks in. The interface explains this when it affects the result.
 
@@ -76,7 +75,7 @@ Net worth is what each household would have **if it liquidated everything that m
 
 | Output | Meaning | Where |
 |---|---|---|
-| `rows` | One row per month: property value, loan balance, monthly costs, the three net worths, and a deflator | `simulate()` |
+| `rows` | One row per month: property value, loan balance, monthly costs, both net worths, and a deflator | `simulate()` |
 | `breakEvenMonth` | The first month from which the buyer **stays ahead** of the investing renter until the horizon. `0` if the buyer is ahead from month 0 onward; `null` if the buyer is behind at the horizon. A temporary early lead doesn't count. A tie counts as ahead. | `simulate()` |
 | `buyerEverAhead` | Whether the buyer is ahead (or level) in any month, month 0 included, even if the lead is later lost. Lets the interface tell "never ahead" apart from "ahead for a while" when `breakEvenMonth` is `null`. | `simulate()` |
 | Equivalent rent | The starting rent at which the buyer and the investing renter end the horizon level. Found by bisection. The search starts with an upper bound of 2% of the price per month (at least 1,000 lei) and doubles it, up to 10 times, until the buyer comes out ahead. | `equivalentRent()` in `solve.ts` |
@@ -105,7 +104,7 @@ Euro amounts are lei converted at **today's** BNR rate. In the nominal view this
 
 - `NaN` and infinite numbers are replaced first: by the minimum for the horizon and the loan term, by 0 for everything else.
 - Prices, rents, fees, insurance, the fixed period and loan rates (fixed rate, IRCC, margin) are clamped to zero or more, so the bank never pays the borrower.
-- Tax rates (investment, deposit and both sale taxes) are clamped to 0–100%.
+- Tax rates (investment and both sale taxes) are clamped to 0–100%.
 - Growth rates, returns and inflation can't go to −100% or below.
 - The down payment is clamped to 0–100%.
 - The horizon is 1–50 years and the loan term at most 35 (`MIN_`/`MAX_HORIZON_YEARS`, `MIN_`/`MAX_LOAN_TERM_YEARS`, matching the interface). With a loan, the term is at least one year, so a loan can't go unpaid.
@@ -125,7 +124,7 @@ These are deliberate simplifications:
 - **The rent deposit isn't topped up** as rent rises; it stays at `depositMonths` × the starting rent.
 - **Property tax uses one zone per city.** The real bill depends on the zone within the city (about ±6% around the default) and on the local rate.
 - **No CASS** (health contribution) on investment income above the thresholds.
-- **The buyer always invests** any monthly surplus at the investment return, even when compared with the saving renter.
+- **The buyer always invests** any monthly surplus at the investment return.
 - **One rental agency fee only.** The renter pays it once at the start; renters who move pay it again, which isn't modelled. No moving, furnishing or renovation costs either.
 - **No Noua Casă preset.** The programme's 2027 terms weren't known when the defaults were set; users can enter a 5% down payment and IRCC + 2% themselves.
 
@@ -137,6 +136,5 @@ The engine has its own tests next to each module (`*.test.ts`). The most importa
 - With no growth, returns or fees, the gap is exactly the acquisition costs.
 - The loan schedule repays exactly the principal, and recalculates correctly after the fixed period.
 - At the equivalent rent, the final gap is within 1 leu of zero, and the gap never falls as rent rises.
-- The saving renter compounds at exactly the after-tax deposit rate.
 
 `scenarios.test.ts` holds snapshots of a few reference scenarios, so any change in results shows up in review.

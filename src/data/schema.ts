@@ -35,7 +35,7 @@ export const REQUIRED_VALUE_KEYS = [
   'eurRon', 'downPaymentPct', 'notaryPct', 'registryPct', 'bankFees', 'loanTermYears',
   'fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'propertyTaxSqm', 'homeInsuranceAnnual',
   'lifeInsurancePct', 'maintenancePct', 'propertyGrowth', 'rentGrowth', 'renterInsuranceAnnual',
-  'depositMonths', 'investReturn', 'investTaxRate', 'savingsRate', 'savingsTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
+  'depositMonths', 'investReturn', 'investTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
   'buyerAgencyPct', 'buyerAgencyPctNew', 'irccLongRun', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
 ] as const;

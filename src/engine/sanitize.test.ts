@@ -36,13 +36,13 @@ describe('sanitizeInputs', () => {
     const s = sanitizeInputs({
       ...baseInputs, price: -1, rent: -1, notaryPct: -1, registryPct: -1, bankFees: -1, propertyTaxAnnual: -1,
       homeInsuranceAnnual: -1, lifeInsurancePct: -1, maintenancePct: -1, renterInsuranceAnnual: -1,
-      depositMonths: -1, investTaxRate: -1, savingsTaxRate: -1, saleAgencyPct: -1, saleTaxShortPct: -1,
+      depositMonths: -1, investTaxRate: -1, saleAgencyPct: -1, saleTaxShortPct: -1,
       saleTaxLongPct: -1, saleTaxShortHoldYears: -1,
     });
     expect(s).toMatchObject({
       price: 0, rent: 0, notaryPct: 0, registryPct: 0, bankFees: 0, propertyTaxAnnual: 0, homeInsuranceAnnual: 0,
       lifeInsurancePct: 0, maintenancePct: 0, renterInsuranceAnnual: 0, depositMonths: 0, investTaxRate: 0,
-      savingsTaxRate: 0, saleAgencyPct: 0, saleTaxShortPct: 0, saleTaxShortHoldYears: 0, saleTaxLongPct: 0,
+      saleAgencyPct: 0, saleTaxShortPct: 0, saleTaxShortHoldYears: 0, saleTaxLongPct: 0,
     });
   });
 
@@ -53,9 +53,9 @@ describe('sanitizeInputs', () => {
 
   it('caps tax rates at 100%', () => {
     const s = sanitizeInputs({
-      ...baseInputs, investTaxRate: 1.5, savingsTaxRate: 2, saleTaxShortPct: 1.1, saleTaxLongPct: 3,
+      ...baseInputs, investTaxRate: 1.5, saleTaxShortPct: 1.1, saleTaxLongPct: 3,
     });
-    expect(s).toMatchObject({ investTaxRate: 1, savingsTaxRate: 1, saleTaxShortPct: 1, saleTaxLongPct: 1 });
+    expect(s).toMatchObject({ investTaxRate: 1, saleTaxShortPct: 1, saleTaxLongPct: 1 });
   });
 
   it('caps the horizon and the loan term at the longest periods the interface offers', () => {

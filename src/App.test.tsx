@@ -142,13 +142,15 @@ it('moves the rent with the rent scale slider', () => {
   expect(screen.getByLabelText('Chirie lunară')).toHaveValue('1.500');
 });
 
-it('groups inputs by buying, renting, investing and general', () => {
+it('groups rent and investment settings under renting', () => {
   render(<App />);
-  for (const name of ['Cumpărare', 'Închiriere', 'Investiții', 'General']) {
+  for (const name of ['Cumpărare', 'Închiriere', 'General']) {
     expect(screen.getByRole('region', { name })).toBeInTheDocument();
   }
   expect(within(screen.getByRole('region', { name: 'Închiriere' })).getByLabelText('Chirie lunară')).toBeInTheDocument();
-  expect(within(screen.getByRole('region', { name: 'Investiții' })).getByLabelText('Randament investiții')).toBeInTheDocument();
+  const renting = within(screen.getByRole('region', { name: 'Închiriere' }));
+  expect(renting.queryAllByRole('heading', { level: 4 })).toHaveLength(0);
+  expect(renting.getByLabelText('Randament investiții')).toBeVisible();
 });
 
 it('counts edits hidden inside the folded buying costs', () => {
@@ -157,10 +159,10 @@ it('counts edits hidden inside the folded buying costs', () => {
   expect(screen.getByText('2 valori modificate')).toBeInTheDocument();
 });
 
-it('shows the renter who keeps savings in a deposit next to the investing renter', () => {
+it('shows only the buyer and investing renter in the end summary', () => {
   render(<App />);
   expect(screen.getByText('Chiriaș care investește')).toBeInTheDocument();
-  expect(screen.getByText('Chiriaș cu economii la depozit')).toBeInTheDocument();
+  expect(screen.getAllByRole('definition')).toHaveLength(2);
 });
 
 it('collapses a group and counts the edits inside it', async () => {

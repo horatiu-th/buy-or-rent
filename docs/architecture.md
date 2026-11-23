@@ -78,7 +78,7 @@ Changing city keeps edited values such as price and rent; "Resetează tot" (rese
 | File | Purpose |
 |---|---|
 | `fields.ts` | One definition per input: unit (`money`, `pct`, `years`, `months`, `bool`), topic, and min/max/step |
-| `InputsPanel.tsx` | Arranges fields into collapsible groups: General, Cumpărare, Închiriere, Investiții. Buying costs and sale settings fold under a further toggle. Collapsed groups count the edits inside them. |
+| `InputsPanel.tsx` | Arranges fields into collapsible groups: General, Cumpărare and Închiriere. Închiriere lists rent and investment fields together under a single heading. Buying costs and sale settings fold under a further toggle. Collapsed groups count the edits inside them. |
 | `InputField.tsx` | One input: a text draft while typing, conversion for % and €, a ↺ reset when edited, and an info popover with the explanation and the source |
 | `CityPicker.tsx` | The city, property type and size row |
 | `Segmented.tsx` | Radio group drawn as a segmented control |
@@ -100,8 +100,7 @@ One stylesheet with design tokens at the top, in light and dark variants:
 | Token | Use |
 |---|---|
 | `--buyer` | Blue: the buyer, and the Cumpărare group |
-| `--invest` | Green: the renter who invests, and the Investiții group |
-| `--renter` | Ochre: renting costs, the saving renter, and the Închiriere group |
+| `--renter` | Teal: the renter across all charts and the Închiriere group |
 | `--paper`, `--surface`, `--ink`, `--muted`, `--line`, `--field` | Background, text and line colours |
 
 The typeface is Schibsted Grotesk, bundled with the app (no external font requests). On desktop the results column stays in view while the inputs scroll; on narrow screens results come first.
@@ -162,7 +161,7 @@ If Vitest reports a module it can't find right after you create it, clear its ca
 
 ## Conventions
 
-- Branch names: `<type>/<short-kebab-description>`, e.g. `feat/help-popovers`.
-- Commit messages: one line, `<type>: <what changed>`, e.g. `feat: Added deposit interest for the saving renter`.
+- For ticket work, name branches `<type>/<ticket>-<short-kebab-description>`.
+- For ticket work, use a single-line commit message in the form `<type> #<ticket>: <what changed>`.
 - Comments explain non-obvious reasons, not what the code does, and never mention ticket numbers.
 - Interface text is Romanian; code, comments and documentation are English.

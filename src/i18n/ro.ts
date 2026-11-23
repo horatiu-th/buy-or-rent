@@ -48,8 +48,6 @@ export const ro = {
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
   renterInvesting: 'Chiriaș care investește',
-  renterBoth: 'Chiriaș (ambele variante)',
-  renterCash: 'Chiriaș cu economii la depozit',
   chartStart: 'La început',
   afterTime: (d: string) => `După ${d}`,
   monthN: (n: number) => `Luna ${n}`,
@@ -57,8 +55,8 @@ export const ro = {
     netWorth: 'Grafic: averea netă în timp',
     monthly: 'Grafic: costurile lunare în timp',
     breakdown: 'Grafic: unde se duc banii',
-    netWorthSummary: (span: string, buyer: string, renter: string, cash: string) =>
-      `Averea netă lună de lună, pe ${span}. La final: cumpărător ${buyer}, chiriaș care investește ${renter}, chiriaș cu economii la depozit ${cash}.`,
+    netWorthSummary: (span: string, buyer: string, renter: string) =>
+      `Averea netă lună de lună, pe ${span}. La final: cumpărător ${buyer}, chiriaș care investește ${renter}.`,
     breakEvenSummary: (after: string) => `Cumpărarea trece definitiv în față după ${after}.`,
     monthlySummary: (firstBuyer: string, firstRenter: string, lastBuyer: string, lastRenter: string) =>
       `Costul lunar în prima lună: cumpărător ${firstBuyer}, chiriaș ${firstRenter}. În ultima lună: cumpărător ${lastBuyer}, chiriaș ${lastRenter}.`,
@@ -124,7 +122,6 @@ export const ro = {
   groups: {
     buying: 'Cumpărare',
     renting: 'Închiriere',
-    investing: 'Investiții',
     general: 'General',
   },
   topics: {
@@ -161,8 +158,6 @@ export const ro = {
     inflation: { label: 'Inflație', help: 'Inflația anuală din România. Indexează impozitul pe clădire și e folosită pentru afișarea în lei de azi: sumele viitoare sunt readuse la puterea de cumpărare de azi, iar în € sunt apoi convertite la cursul de azi.' },
     investReturn: { label: 'Randament investiții', help: 'Randament anual brut, în lei, al banilor neinvestiți în locuință. Implicit: un ETF global de acțiuni. Pentru un portofoliu mai prudent, folosește o valoare mai mică.' },
     investTaxRate: { label: 'Impozit pe câștig', help: 'Aplicat câștigului din investiții la final. În 2026: 3% prin broker românesc pentru dețineri de peste un an, 16% prin broker străin. CASS, datorat peste anumite praguri de venit, nu e inclus.' },
-    savingsRate: { label: 'Dobândă depozit', help: 'Dobânda anuală a chiriașului care își ține economiile într-un depozit bancar în loc să investească.' },
-    savingsTaxRate: { label: 'Impozit pe dobândă', help: 'Impozitul pe dobânda din depozite, reținut de bancă.' },
     renterInsuranceAnnual: { label: 'Asigurare chiriaș', help: 'Pe an.' },
     depositMonths: { label: 'Garanție chirie', help: 'Număr de chirii lunare date ca garanție, returnată la final.' },
     rentAgencyPct: { label: 'Comision agenție la închiriere', help: 'Procent dintr-o chirie lunară, plătit o dată, la început. Adesea 50%; 0 dacă închiriezi direct de la proprietar.' },

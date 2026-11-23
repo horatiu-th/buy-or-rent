@@ -49,8 +49,6 @@ Every default is a starting point for the user, not a forecast. Values marked **
 |---|---|---|---|
 | `investReturn` | 7% | **Estimate.** Global equity ETF, nominal, in lei | JPM 2027 LTCMA: global equity 7.5%/yr in USD over 10–15 years ([JPM](https://am.jpmorgan.com/us/en/asset-management/institutional/about-us/media/press-releases/jp-morgan-releases-2027-long-term-capital-market-assumptions/)); Vanguard (2026-09-30, USD): developed ex-US 5.3–7.3%, US 4.8–6.8%; Amundi (Apr 2026): dynamic portfolio 6.4–6.9% for EUR investors. EUR/RON rose 1.7%/yr 2005–2025 (Eurostat). MSCI ACWI in EUR returned 12.2%/yr over 10 years and 6.6%/yr since Dec 2000 (factsheet, 2026-10-30); the recent decade rode rising valuations (P/E 20.8). Less ~0.15–0.2% fund costs. A balanced or cautious portfolio would be 5–6%. |
 | `investTaxRate` | 3% | [Law 239/2025](https://static.anaf.ro/static/10/Anaf/legislatie/L_239_2025.pdf), art. 97(8¹): gains via a Romanian broker on holdings over 365 days, withheld at source, final | 6% for holdings under a year; 16% of the net annual gain via a foreign broker (art. 123(1²)); 16% on dividends from 2026 (Law 141/2025). CASS (a stepped amount capped at 9,720 lei/yr above 6 minimum wages of investment income) is not modelled. |
-| `savingsRate` | 4% | **Estimate.** | 12-month RON deposits pay ~5.0–5.5% at large banks today (BNR average 5.07%, Sep 2026). Expected to fall as inflation falls; 4% is a long-run figure. |
-| `savingsTaxRate` | 10% | Codul fiscal, tax on interest ([PwC](https://taxsummaries.pwc.com/romania/individual/income-determination)) | Withheld by the bank. Neither Law 141/2025 nor Law 239/2025 changed it. |
 
 ## Long-run assumptions
 

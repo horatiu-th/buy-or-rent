@@ -11,7 +11,6 @@ export interface View { currency: Currency; eurRon: number; real: boolean }
 
 const BUYER = 'var(--buyer)';
 const RENTER = 'var(--renter)';
-const INVEST = 'var(--invest)';
 const GRID = 'var(--line)';
 const TICK = { fill: 'var(--muted)', fontSize: 12 };
 const AXIS = { stroke: 'var(--line)', tickLine: false } as const;
@@ -48,7 +47,6 @@ export function chartRows(result: Result, view: View) {
     year: r.month / 12,
     buyer: conv(r.buyerNetWorth, r.deflator),
     renter: conv(r.renterNetWorth, r.deflator),
-    renterCash: conv(r.renterCashNetWorth, r.deflator),
     buyerCost: conv(r.buyerMonthlyCost, r.deflator),
     renterCost: conv(r.renterMonthlyCost, r.deflator),
   }));
@@ -119,7 +117,7 @@ function ChartTip({ active, payload, label, fmt, title, description }: TipProps)
       {description && <p className="chart-tip-description">{description}</p>}
       {payload.map((p) => (
         <p key={String(p.name)} className="chart-tip-row">
-          <span className={`swatch${p.dataKey === 'renterCash' ? ' dashed' : ''}`} style={{ color: p.color }} aria-hidden="true" />
+          <span className="swatch" style={{ color: p.color }} aria-hidden="true" />
           <span>{p.name}</span>
           <strong>{typeof p.value === 'number' ? fmt(p.value) : String(p.value)}</strong>
         </p>
@@ -167,11 +165,11 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
   const animate = useAnimate();
   const data = chartRows(result, view);
   const fmt = shownMoney(view);
-  const y = moneyAxis(data.flatMap((d) => [d.buyer, d.renter, d.renterCash]), view);
+  const y = moneyAxis(data.flatMap((d) => [d.buyer, d.renter]), view);
   const marker = breakEvenX(result);
   const last = data[data.length - 1];
   const summary = [
-    ro.charts.netWorthSummary(formatDuration(last.month), fmt(last.buyer), fmt(last.renter), fmt(last.renterCash)),
+    ro.charts.netWorthSummary(formatDuration(last.month), fmt(last.buyer), fmt(last.renter)),
     marker !== null && result.breakEvenMonth !== null ? ro.charts.breakEvenSummary(formatDuration(result.breakEvenMonth)) : '',
   ].filter(Boolean).join(' ');
   return (
@@ -190,8 +188,7 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
               label={{ value: ro.breakEvenMark, position: 'top', offset: 14, fill: 'var(--muted)', fontSize: 12 }}
             />
           )}
-          <Line isAnimationActive={animate} type="linear" dataKey="renterCash" name={ro.renterCash} stroke={RENTER} dot={false} strokeWidth={2} strokeDasharray="5 4" activeDot={{ r: 3 }} />
-          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={ro.renterInvesting} stroke={INVEST} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={ro.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
           <Line isAnimationActive={animate} type="linear" dataKey="buyer" name={ro.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
         </LineChart>
       </ResponsiveContainer>
@@ -216,7 +213,7 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
     <ChartFigure name={ro.charts.monthly} summary={summary}>
       <figcaption className="monthly-legend">
         <span><i className="swatch" style={{ color: BUYER }} aria-hidden="true" />{ro.buyer}</span>
-        <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{ro.renterBoth}</span>
+        <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{ro.renter}</span>
       </figcaption>
       <ResponsiveContainer width="100%" height={340}>
         <AreaChart data={data} title={ro.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
@@ -224,7 +221,7 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
           {yearAxis(data)}
           <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
           <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={monthTitle} />} cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={ro.renterBoth} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={ro.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={ro.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
       </ResponsiveContainer>

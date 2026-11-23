@@ -33,8 +33,6 @@ export interface Inputs {
   // Investing
   investReturn: number; // annual, gross
   investTaxRate: number; // on gains, applied at liquidation
-  savingsRate: number; // annual bank deposit interest for the renter who doesn't invest
-  savingsTaxRate: number; // on deposit interest, which Romania taxes separately from investment gains
 
   // Sale at horizon
   includeSaleCosts: boolean;
@@ -56,8 +54,6 @@ export interface MonthRow {
   renterMonthlyCost: number;
   buyerNetWorth: number;
   renterNetWorth: number;
-  /** The same renter if every lei saved sat in a bank deposit instead of being invested. */
-  renterCashNetWorth: number;
   /** Divide a nominal value by this to get today's lei. */
   deflator: number;
 }
