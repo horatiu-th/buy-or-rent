@@ -67,8 +67,8 @@
     "ircc": {
       "value": 0.0557,
       "unit": "%",
-      "source": "IRCC aplicabil oct.–dec. 2026",
-      "sourceUrl": "https://www.cursbnr.ro/ircc",
+      "source": "BNR, IRCC 2026T2, aplicabil oct.–dec. 2026",
+      "sourceUrl": "https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor",
       "asOf": "2026-10-01",
       "status": "manual"
     },

@@ -9,7 +9,7 @@ Every default is a starting point for the user, not a forecast. Values marked **
 | Key | Value | Source | Notes |
 |---|---|---|---|
 | `eurRon` | 5.3485 | [BNR reference rate](https://curs.bnr.ro/nbrfxrates.xml), 2026-11-23 | Refreshed automatically once the pipeline runs. |
-| `ircc` | 5.57% | [cursbnr.ro/ircc](https://www.cursbnr.ro/ircc); BCR Casa Mea product sheet | Applies 2026-10-01 to 2026-12-31. **5.61% applies from 2027-01-01**: update on or after that date. BNR's own IRCC page could not be read automatically. |
+| `ircc` | 5.57% | [BNR, IRCC page](https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor): quarterly index 2026T2 | The index computed for a quarter applies two quarters later, so 2026T2 applies 2026-10-01 to 2026-12-31. **5.61% applies from 2027-01-01** (reported by [cursbnr.ro](https://www.cursbnr.ro/ircc); not yet on BNR's page on 2026-11-23): update on or after that date. |
 | `fixedRate` | 5.5% | BNR average rate on new RON housing loans: 5.6% (Sep 2026), via [Financiarul](https://financiarul.ro/finante-si-banci/costul-anual-mediu-al-creditelor-noi-pentru-locuinte-in-lei-a-scazut-la-6-35-de-la-7-60-acum-un-an/) | Bank offers range 4.65–6.4%; the lowest require salary transfer and other conditions. |
 | `fixedYears` | 5 | Common 3–5 year fixed offers ([ipotecare.ro via cursbnr](https://www.cursbnr.ro/dobanda-medie-credite-ipotecare-lei)) | |
 | `variableMargin` | 2.5% | Bank margins 1.9–3.5% over IRCC; ipotecare.ro average variable rate (8.05% vs IRCC 5.56%, Aug 2026) implies ~2.5% | |
@@ -81,7 +81,9 @@ Known oddities, kept as published:
 
 ## Automated collection
 
-- **BNR** (exchange rate, IRCC) and **INS** (inflation): suitable for the scheduled pipeline.
+- **BNR exchange rate** (`eurRon`): fetched by the scheduled pipeline from the official XML feed (`curs.bnr.ro/nbrfxrates.xml`).
+- **IRCC** (`ircc`): **kept manual.** BNR publishes it only on an HTML page whose tables are loaded by the site's internal CMS endpoint (an undocumented POST with page-specific block ids), with no XML, CSV or other machine-readable file. That endpoint can change whenever the page is edited, so it isn't a stable source to automate. Third-party copies (cursbnr.ro etc.) are not scraped. Update it by hand each quarter: the value for quarter T applies from the start of quarter T+2.
+- **Inflation** (`inflation`): **kept manual on purpose.** It is a long-run assumption, not the current CPI, so auto-filling it from INS would be wrong.
 - **imobiliare.ro**: robots.txt blocks search pages and most filter parameters; third parties report anti-bot protection. Terms of use could not be read. **Not scraped.**
 - **storia.ro**: robots.txt allows most paths (`Content-Signal: ai-train=no`). Terms of use could not be read. **Not scraped.**
 - City prices and rents are therefore updated by hand from the published reports above, with attribution.
