@@ -57,3 +57,21 @@ it('flags nominal views when showing today\'s money', async () => {
   await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
   expect(screen.getByText('Valori nominale')).toBeInTheDocument();
 });
+
+it('lets the area be cleared and retyped', async () => {
+  render(<App />);
+  const sqm = screen.getByLabelText('Suprafață (m²)');
+  await userEvent.clear(sqm);
+  expect(sqm).toHaveValue(null);
+  await userEvent.type(sqm, '7');
+  expect(window.location.search).not.toContain('mp=');
+  await userEvent.type(sqm, '0');
+  expect(window.location.search).toContain('mp=70');
+});
+
+it('groups the property type radios', () => {
+  render(<App />);
+  const [a, b] = screen.getAllByRole('radio');
+  expect(a.getAttribute('name')).toBeTruthy();
+  expect(a.getAttribute('name')).toBe(b.getAttribute('name'));
+});

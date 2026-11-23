@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo } from 'react';
+import { useCallback, useDeferredValue, useMemo } from 'react';
 import { buildInputs, loadDefaults } from './data/defaults';
 import type { Inputs } from './engine';
 import { ro } from './i18n/ro';
@@ -11,13 +11,17 @@ const data = loadDefaults();
 
 export default function App() {
   const { scenario, update, setField, resetField, resetAll } = useScenario();
+  const { cityId, propertyType, sqm, overrides, currency, real } = scenario;
+  // Narrow deps so toggling currency or real values doesn't rebuild inputs and rerun the simulation.
   const inputs: Inputs = useMemo(
-    () => ({ ...buildInputs(data, scenario.cityId, scenario.propertyType, scenario.sqm), ...scenario.overrides }),
-    [scenario],
+    () => ({ ...buildInputs(data, cityId, propertyType, sqm), ...overrides }),
+    [cityId, propertyType, sqm, overrides],
   );
   // Keeps typing responsive: results re-render at lower priority than the input that changed.
   const deferredInputs = useDeferredValue(inputs);
   const eurRon = data.values.eurRon.value;
+  const view = useMemo(() => ({ currency, eurRon, real }), [currency, eurRon, real]);
+  const onToggleReal = useCallback((r: boolean) => update({ real: r }), [update]);
 
   return (
     <main className="app">
@@ -49,8 +53,8 @@ export default function App() {
         />
         <Results
           inputs={deferredInputs}
-          view={{ currency: scenario.currency, eurRon, real: scenario.real }}
-          onToggleReal={(real) => update({ real })}
+          view={view}
+          onToggleReal={onToggleReal}
         />
       </div>
     </main>

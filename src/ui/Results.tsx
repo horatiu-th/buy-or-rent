@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { equivalentRent, sensitivity, simulate, type Inputs } from '../engine';
 import { ro } from '../i18n/ro';
 import { BreakdownChart, MonthlyCostsChart, NetWorthChart, type View } from './charts';
@@ -7,7 +7,10 @@ import { SensitivityTable } from './SensitivityTable';
 
 type Tab = keyof typeof ro.tabs;
 
-export function Results({ inputs, view, onToggleReal }: { inputs: Inputs; view: View; onToggleReal: (v: boolean) => void }) {
+interface Props { inputs: Inputs; view: View; onToggleReal: (v: boolean) => void }
+
+// Memoized so keystrokes in the inputs panel don't re-render charts until the deferred inputs catch up.
+export const Results = memo(function Results({ inputs, view, onToggleReal }: Props) {
   const [tab, setTab] = useState<Tab>('netWorth');
   const result = useMemo(() => simulate(inputs), [inputs]);
   const eq = useMemo(() => equivalentRent(inputs), [inputs]);
@@ -41,4 +44,4 @@ export function Results({ inputs, view, onToggleReal }: { inputs: Inputs; view: 
       <p className="note">{ro.assumptions}</p>
     </div>
   );
-}
+});
