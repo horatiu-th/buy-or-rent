@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 import type { SourcedValue } from '../data/schema';
 import { ro } from '../i18n/ro';
 import type { FieldDef } from './fields';
@@ -69,18 +69,27 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
       aria-controls={helpId}
       aria-label={`${ro.help}: ${text.label}`}
       onClick={() => setShowHelp((v) => !v)}
-    >ⓘ</button>
+    >i</button>
   );
   const helpText = <p id={helpId} className="help-text" hidden={!showHelp}>{text.help}</p>;
 
+  const head = (label: ReactNode) => (
+    <div className="field-head">
+      {label}
+      {helpToggle}
+      {resetButton}
+    </div>
+  );
+
   if (def.unit === 'bool') {
     return (
-      <div className="field">
-        <label htmlFor={id}>
-          <input id={id} type="checkbox" aria-describedby={describedBy} checked={value as boolean} onChange={(e) => onChange(e.target.checked)} /> {text.label}
-        </label>
-        {helpToggle}
-        {resetButton}
+      <div className={`field field-bool${isOverridden ? ' is-edited' : ''}`}>
+        {head(
+          <label htmlFor={id} className="switch">
+            <input id={id} type="checkbox" role="switch" aria-describedby={describedBy} checked={value as boolean} onChange={(e) => onChange(e.target.checked)} />
+            <span>{text.label}</span>
+          </label>,
+        )}
         {helpText}
         {sourceTag}
       </div>
@@ -94,11 +103,9 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     : def.step !== undefined ? toDisplay(def, def.step, currency, eurRon) : undefined;
 
   return (
-    <div className="field">
-      <label htmlFor={id}>{text.label}</label>
-      {helpToggle}
-      {helpText}
-      <div className="input-row">
+    <div className={`field${isOverridden ? ' is-edited' : ''}${disabled ? ' is-disabled' : ''}`}>
+      {head(<label htmlFor={id}>{text.label}</label>)}
+      <div className="number-box">
         <input
           id={id}
           aria-describedby={describedBy}
@@ -117,9 +124,9 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
             if (e.target.value !== '' && Number.isFinite(n)) onChange(fromDisplay(def, n, currency, eurRon));
           }}
         />
-        <span className="suffix">{suffix(def, currency)}</span>
-        {resetButton}
+        <span className="suffix" aria-hidden="true">{suffix(def, currency)}</span>
       </div>
+      {helpText}
       {sourceTag}
     </div>
   );

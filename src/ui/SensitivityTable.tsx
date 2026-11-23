@@ -9,7 +9,7 @@ const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 export function SensitivityTable({ grid, baseGrowth, baseReturn, currency, eurRon }: Props) {
   return (
     <div>
-      <p>{ro.sensitivityHelp}</p>
+      <p className="sensitivity-intro">{ro.sensitivityHelp}</p>
       <table className="sensitivity">
         <thead>
           <tr>

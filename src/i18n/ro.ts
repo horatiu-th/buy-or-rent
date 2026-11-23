@@ -5,7 +5,7 @@ type FieldText = { label: string; help: string };
 
 export const ro = {
   title: 'Cumpăr sau închiriez?',
-  subtitle: 'Calculator pentru România',
+  subtitle: 'Cât valorează, peste ani, o locuință cumpărată față de una închiriată în România.',
   city: 'Oraș',
   propertyType: 'Tip locuință',
   newBuild: 'Construcție nouă',
@@ -17,6 +17,21 @@ export const ro = {
   help: 'Ajutor',
   presets: { label: 'Tip dobândă', fixed5: 'Fix 5 ani', variable: 'Variabilă' },
   currency: 'Monedă',
+  sections: { home: 'Locuința', rent: 'Chiria', loan: 'Creditul', horizon: 'Orizontul' },
+  provisional:
+    'Valorile implicite sunt provizorii până la verificarea din surse oficiale. Poți modifica orice cifră; sursa apare când selectezi un câmp.',
+  scale: {
+    label: 'Ajustează chiria',
+    rentWins: 'Închirierea câștigă',
+    buyWins: 'Cumpărarea câștigă',
+    yourRent: 'Chiria ta',
+    threshold: 'Prag',
+  },
+  atHorizon: (after: string) => `Avere netă după ${after}`,
+  difference: 'Diferență',
+  tabsLabel: 'Grafice',
+  resultsLabel: 'Rezultate',
+  breakEvenMark: 'Cumpărarea trece în față',
   realValues: (currency: Currency) => `Ajustat cu inflația (${currency === 'EUR' ? '€' : 'lei'} de azi)`,
   nominalNote: 'Valori nominale',
   source: 'sursa',

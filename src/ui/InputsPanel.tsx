@@ -2,7 +2,7 @@ import type { Inputs } from '../engine';
 import type { DataFile } from '../data/schema';
 import { sourceFor, type PropertyType } from '../data/defaults';
 import { ro } from '../i18n/ro';
-import { FIELDS, type Group } from './fields';
+import { FIELDS, type FieldDef, type Group } from './fields';
 import { InputField } from './InputField';
 import type { Currency } from './format';
 
@@ -18,6 +18,14 @@ interface Props {
 }
 
 const ADVANCED_GROUPS: Group[] = ['acquisition', 'ownership', 'growth', 'investing', 'sale'];
+
+// The key inputs read better as a few short sections than as one long list.
+const KEY_SECTIONS: { title: string; keys: (keyof Inputs)[] }[] = [
+  { title: ro.sections.home, keys: ['price', 'downPaymentPct'] },
+  { title: ro.sections.rent, keys: ['rent'] },
+  { title: ro.sections.loan, keys: ['fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'loanTermYears'] },
+  { title: ro.sections.horizon, keys: ['horizonYears'] },
+];
 
 const PRESETS = [
   { years: 5, label: ro.presets.fixed5 },
@@ -37,8 +45,8 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
     </div>
   );
 
-  const render = (group: Group) =>
-    FIELDS.filter((f) => f.group === group).flatMap((def) => [
+  const renderDefs = (defs: FieldDef[]) =>
+    defs.flatMap((def) => [
       ...(def.key === 'fixedRate' ? [presets] : []),
       <InputField
         key={def.key}
@@ -55,16 +63,23 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
       />,
     ]);
 
+  const byKey = new Map(FIELDS.map((f) => [f.key, f]));
+
   return (
     <div className="inputs">
-      <section>{render('key')}</section>
-      <details>
+      {KEY_SECTIONS.map((section) => (
+        <section key={section.title} className="input-section">
+          <h3>{section.title}</h3>
+          {renderDefs(section.keys.map((k) => byKey.get(k)!))}
+        </section>
+      ))}
+      <details className="advanced">
         <summary>{ro.advanced}</summary>
         {ADVANCED_GROUPS.map((g) => (
-          <fieldset key={g}>
-            <legend>{ro.groups[g]}</legend>
-            {render(g)}
-          </fieldset>
+          <section key={g} className="input-section">
+            <h3>{ro.groups[g]}</h3>
+            {renderDefs(FIELDS.filter((f) => f.group === g))}
+          </section>
         ))}
       </details>
     </div>

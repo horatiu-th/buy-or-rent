@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { loadDefaults } from './data/defaults';
@@ -101,4 +101,12 @@ describe('interest presets', () => {
     expect(screen.getByRole('button', { name: 'Fix 5 ani' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Variabilă' })).toHaveAttribute('aria-pressed', 'false');
   });
+});
+
+it('moves the rent with the rent scale slider', () => {
+  render(<App />);
+  const slider = screen.getByRole('slider', { name: 'Ajustează chiria' });
+  fireEvent.change(slider, { target: { value: '1500' } });
+  expect(new URLSearchParams(window.location.search).get('rent')).toBe('1500');
+  expect(screen.getByLabelText('Chirie lunară')).toHaveValue(1500);
 });

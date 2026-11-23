@@ -3,6 +3,7 @@ import type { DataFile } from '../data/schema';
 import type { PropertyType } from '../data/defaults';
 import { ro } from '../i18n/ro';
 import { SQM_MAX, SQM_MIN } from '../state/scenario';
+import { Segmented } from './Segmented';
 
 interface Props {
   data: DataFile;
@@ -12,8 +13,14 @@ interface Props {
   onChange: (patch: { cityId?: string; propertyType?: PropertyType; sqm?: number }) => void;
 }
 
+const TYPES = [
+  { value: 'new', label: ro.newBuild },
+  { value: 'existing', label: ro.existing },
+] as const;
+
 export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props) {
-  const radioName = useId();
+  const cityId_ = useId();
+  const sqmId = useId();
   const [draft, setDraft] = useState(String(sqm));
   const [focused, setFocused] = useState(false);
 
@@ -24,37 +31,44 @@ export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props)
   }, [sqm, focused]);
 
   return (
-    <div className="city-picker">
-      <label>
-        {ro.city}
-        <select value={cityId} onChange={(e) => onChange({ cityId: e.target.value })}>
+    <div className="scenario">
+      <div className="scenario-item scenario-city">
+        <label htmlFor={cityId_}>{ro.city}</label>
+        <select id={cityId_} value={cityId} onChange={(e) => onChange({ cityId: e.target.value })}>
           {Object.entries(data.cities).map(([id, c]) => (
             <option key={id} value={id}>{c.name}</option>
           ))}
         </select>
-      </label>
-      <fieldset>
-        <legend>{ro.propertyType}</legend>
-        <label><input type="radio" name={radioName} checked={propertyType === 'new'} onChange={() => onChange({ propertyType: 'new' })} /> {ro.newBuild}</label>
-        <label><input type="radio" name={radioName} checked={propertyType === 'existing'} onChange={() => onChange({ propertyType: 'existing' })} /> {ro.existing}</label>
-      </fieldset>
-      <label>
-        {ro.sqm}
-        <input
-          type="number"
-          inputMode="decimal"
-          min={SQM_MIN}
-          max={SQM_MAX}
-          value={draft}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            const n = Number(e.target.value);
-            if (e.target.value !== '' && Number.isFinite(n) && n >= SQM_MIN) onChange({ sqm: n });
-          }}
+      </div>
+      <div className="scenario-item">
+        <Segmented
+          legend={ro.propertyType}
+          value={propertyType}
+          options={TYPES}
+          onChange={(v) => onChange({ propertyType: v })}
         />
-      </label>
+      </div>
+      <div className="scenario-item scenario-sqm">
+        <label htmlFor={sqmId}>{ro.sqm}</label>
+        <div className="number-box">
+          <input
+            id={sqmId}
+            type="number"
+            inputMode="decimal"
+            min={SQM_MIN}
+            max={SQM_MAX}
+            value={draft}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              const n = Number(e.target.value);
+              if (e.target.value !== '' && Number.isFinite(n) && n >= SQM_MIN) onChange({ sqm: n });
+            }}
+          />
+          <span className="suffix" aria-hidden="true">m²</span>
+        </div>
+      </div>
     </div>
   );
 }
