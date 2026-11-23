@@ -13,6 +13,7 @@ export const ro = {
   advanced: 'Setări avansate',
   resetAll: 'Resetează tot',
   reset: 'Revino la valoarea implicită',
+  help: 'Ajutor',
   currency: 'Monedă',
   realValues: 'Ajustat cu inflația (lei de azi)',
   source: 'sursa',

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
+import { loadDefaults } from './data/defaults';
 
 // Recharts' ResponsiveContainer needs ResizeObserver, which jsdom lacks.
 beforeAll(() => {
@@ -29,4 +30,21 @@ it('restores a scenario from the URL', () => {
   render(<App />);
   expect(screen.getByLabelText('Oraș')).toHaveValue('iasi');
   expect(screen.getByLabelText('Chirie lunară')).toHaveValue(1999);
+});
+
+it('removes a field from the URL when it is reset', async () => {
+  window.history.replaceState(null, '', '/?rent=1999');
+  render(<App />);
+  await userEvent.click(screen.getByRole('button', { name: 'Revino la valoarea implicită: Chirie lunară' }));
+  expect(window.location.search).not.toContain('rent=');
+});
+
+it('stores euro edits as whole lei in the URL', async () => {
+  window.history.replaceState(null, '', '/?moneda=EUR');
+  render(<App />);
+  const price = screen.getByLabelText('Preț locuință');
+  await userEvent.clear(price);
+  await userEvent.type(price, '1234');
+  const eurRon = loadDefaults().values.eurRon.value;
+  expect(new URLSearchParams(window.location.search).get('price')).toBe(String(Math.round(1234 * eurRon)));
 });

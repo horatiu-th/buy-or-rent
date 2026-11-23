@@ -21,9 +21,10 @@ function toDisplay(def: FieldDef, v: number, currency: Currency, eurRon: number)
   return v;
 }
 
+// Rounding keeps binary float noise (1.1 / 100 = 0.011000000000000001) out of the state and the URL.
 function fromDisplay(def: FieldDef, v: number, currency: Currency, eurRon: number) {
-  if (def.unit === 'pct') return v / 100;
-  if (def.unit === 'money' && currency === 'EUR') return v * eurRon;
+  if (def.unit === 'pct') return +(v / 100).toFixed(6);
+  if (def.unit === 'money' && currency === 'EUR') return Math.round(v * eurRon);
   return v;
 }
 
@@ -32,9 +33,12 @@ const suffix = (def: FieldDef, currency: Currency) =>
 
 export function InputField({ def, value, isOverridden, source, currency, eurRon, onChange, onReset }: Props) {
   const id = useId();
+  const helpId = `${id}-help`;
+  const sourceId = `${id}-source`;
   const text = ro.fields[def.key];
   const [draft, setDraft] = useState('');
   const [focused, setFocused] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Keep the draft as a string while typing so "0." or "" aren't clobbered mid-edit.
   useEffect(() => {
@@ -43,7 +47,7 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
 
   const isPlaceholder = source?.status === 'manual' && source.source.startsWith('Placeholder');
   const sourceTag = source && !isOverridden && (
-    <small className={`source source-${source.status}`}>
+    <small id={sourceId} className={`source source-${source.status}`}>
       {ro.source}: {source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.source}</a> : source.source}, {source.asOf}
       {source.status === 'stale' && ` · ${ro.stale}`}
       {isPlaceholder && ` · ${ro.placeholder}`}
@@ -54,29 +58,49 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     <button type="button" className="reset" onClick={onReset} title={ro.reset} aria-label={`${ro.reset}: ${text.label}`}>↺</button>
   );
 
+  const describedBy = [showHelp && helpId, sourceTag && sourceId].filter(Boolean).join(' ') || undefined;
+
+  const helpToggle = (
+    <button
+      type="button"
+      className="help"
+      aria-expanded={showHelp}
+      aria-controls={helpId}
+      aria-label={`${ro.help}: ${text.label}`}
+      onClick={() => setShowHelp((v) => !v)}
+    >ⓘ</button>
+  );
+  const helpText = <p id={helpId} className="help-text" hidden={!showHelp}>{text.help}</p>;
+
   if (def.unit === 'bool') {
     return (
       <div className="field">
         <label htmlFor={id}>
-          <input id={id} type="checkbox" checked={value as boolean} onChange={(e) => onChange(e.target.checked)} /> {text.label}
+          <input id={id} type="checkbox" aria-describedby={describedBy} checked={value as boolean} onChange={(e) => onChange(e.target.checked)} /> {text.label}
         </label>
-        <span className="help" title={text.help}>ⓘ</span>
+        {helpToggle}
         {resetButton}
+        {helpText}
+        {sourceTag}
       </div>
     );
   }
 
   const min = def.min !== undefined ? toDisplay(def, def.min, currency, eurRon) : undefined;
   const max = def.max !== undefined ? toDisplay(def, def.max, currency, eurRon) : undefined;
-  const step = def.step !== undefined ? toDisplay(def, def.step, currency, eurRon) : undefined;
+  // A lei step converted to euro gives odd increments (e.g. 196 €), so euro money inputs step freely.
+  const step = def.unit === 'money' && currency === 'EUR' ? 'any'
+    : def.step !== undefined ? toDisplay(def, def.step, currency, eurRon) : undefined;
 
   return (
     <div className="field">
       <label htmlFor={id}>{text.label}</label>
-      <span className="help" title={text.help}>ⓘ</span>
+      {helpToggle}
+      {helpText}
       <div className="input-row">
         <input
           id={id}
+          aria-describedby={describedBy}
           type="number"
           inputMode="decimal"
           value={draft}

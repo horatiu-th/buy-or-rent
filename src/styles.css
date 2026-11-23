@@ -57,7 +57,9 @@ details > summary { cursor: pointer; margin: 0.5rem 0 1rem; font-weight: 600; }
 .input-row input { width: 100%; }
 .suffix { color: var(--text-secondary); min-width: 2rem; }
 .reset { padding: 0.1rem 0.45rem; }
-.help { cursor: help; margin-left: 0.25rem; color: var(--text-secondary); }
+.help { margin-left: 0.25rem; padding: 0 0.3rem; border: none; background: none; color: var(--text-secondary); cursor: pointer; }
+.help[aria-expanded='true'] { color: var(--text); }
+.help-text { margin: 0.15rem 0 0.35rem; font-size: 0.8rem; color: var(--text-secondary); }
 .source { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.15rem; }
 .source-stale, .source-manual { font-style: italic; }
 
