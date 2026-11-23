@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Inputs } from '../engine';
 import type { DataFile } from '../data/schema';
 import { sourceFor, type PropertyType } from '../data/defaults';
@@ -83,25 +84,46 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
     );
   };
 
+  const [collapsed, setCollapsed] = useState<Partial<Record<GroupId, boolean>>>({});
+  const toggle = (id: GroupId) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+  const editsIn = (topics: Topic[]) => topics.flatMap(fieldsOf).filter((f) => f.key in overrides).length;
+
   return (
     <div className="inputs">
       {LAYOUT.map((group) => {
         const named = group.topics.length > 1 || Boolean(group.more);
-        // Edits inside the folded part would otherwise be invisible, so the summary counts them.
-        const hiddenEdits = (group.more ?? []).flatMap(fieldsOf).filter((f) => f.key in overrides).length;
+        const isOpen = !collapsed[group.id];
+        const bodyId = `group-${group.id}-body`;
+        // Edits inside folded parts would otherwise be invisible, so the folded headers count them.
+        const groupEdits = editsIn([...group.topics, ...(group.more ?? [])]);
+        const hiddenEdits = editsIn(group.more ?? []);
         return (
-          <section key={group.id} className={`input-group group-${group.id}`} aria-labelledby={`group-${group.id}`}>
-            <h3 id={`group-${group.id}`}>{ro.groups[group.id]}</h3>
-            {group.topics.map((t) => renderTopic(t, named))}
-            {group.more && (
-              <details className="more">
-                <summary>
-                  <span>{ro.buyingMore}</span>
-                  {hiddenEdits > 0 && <span className="edit-count">{ro.editedCount(hiddenEdits)}</span>}
-                </summary>
-                {group.more.map((t) => renderTopic(t, true))}
-              </details>
-            )}
+          <section key={group.id} className={`input-group group-${group.id}${isOpen ? ' is-open' : ''}`} aria-labelledby={`group-${group.id}-title`}>
+            <h3 className="group-head">
+              <button
+                type="button"
+                id={`group-${group.id}`}
+                aria-expanded={isOpen}
+                aria-controls={bodyId}
+                onClick={() => toggle(group.id)}
+              >
+                <span id={`group-${group.id}-title`} className="group-title">{ro.groups[group.id]}</span>
+                {!isOpen && groupEdits > 0 && <span className="edit-count">{ro.editedCount(groupEdits)}</span>}
+                <span className="chevron" aria-hidden="true" />
+              </button>
+            </h3>
+            <div id={bodyId} className="group-body" hidden={!isOpen}>
+              {group.topics.map((t) => renderTopic(t, named))}
+              {group.more && (
+                <details className="more">
+                  <summary>
+                    <span>{ro.buyingMore}</span>
+                    {hiddenEdits > 0 && <span className="edit-count">{ro.editedCount(hiddenEdits)}</span>}
+                  </summary>
+                  {group.more.map((t) => renderTopic(t, true))}
+                </details>
+              )}
+            </div>
           </section>
         );
       })}

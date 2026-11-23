@@ -142,19 +142,33 @@ button { cursor: pointer; }
   border-left: 2px solid var(--renter); margin-bottom: 1.5rem;
 }
 
-/* Input groups: one per side of the decision, plus investing and general settings */
-.input-group { padding: 1.5rem 0; border-top: 1px solid var(--line); }
-.input-group:first-of-type { border-top: none; padding-top: 0; }
-.input-group > h3 {
-  display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.75rem;
+/* Input groups: one per side of the decision, plus investing and general settings.
+   Each is a block with a filled header that folds the group away. */
+.input-group {
+  --tint: var(--field); --accent: var(--muted);
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden;
+}
+.input-group + .input-group { margin-top: 0.75rem; }
+/* The same colours as the chart lines tie each group to its side of the comparison. */
+.group-buying { --tint: var(--buyer-soft); --accent: var(--buyer); }
+.group-renting { --tint: var(--renter-soft); --accent: var(--renter); }
+.group-head { margin: 0; }
+.group-head button {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%; padding: 0.8rem 1rem;
+  border: none; background: var(--tint); text-align: left;
   font-size: var(--step-1); font-weight: 700; letter-spacing: -0.01em;
 }
-/* The same colours as the chart lines tie each group to its side of the comparison. */
-.input-group > h3::before {
-  content: ''; width: 0.25rem; height: 1.1rem; border-radius: 2px; background: var(--line);
+.group-head button::before { content: ''; flex: none; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--accent); }
+.group-head button:focus-visible { outline-offset: -2px; border-radius: 12px 12px 0 0; }
+.group-title { flex: 1; }
+.chevron {
+  flex: none; width: 0.5rem; height: 0.5rem; margin-right: 0.15rem;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg); transition: transform 150ms;
 }
-.group-buying > h3::before { background: var(--buyer); }
-.group-renting > h3::before { background: var(--renter); }
+.input-group.is-open .chevron { transform: rotate(45deg) translate(-2px, -2px); }
+.group-body { padding: 0.75rem 1rem 1rem; }
+.group-body[hidden] { display: none; }
 .topic + .topic { margin-top: 1rem; }
 .topic h4 { font-size: var(--step--1); font-weight: 600; color: var(--muted); margin: 0 0 0.25rem; }
 
@@ -169,10 +183,11 @@ details.more > summary::-webkit-details-marker { display: none; }
 details.more > summary::before { content: '+'; font-size: var(--step-1); line-height: 1; width: 0.75rem; }
 details.more[open] > summary::before { content: '−'; }
 details.more[open] > summary { margin-bottom: 0.75rem; }
-.edit-count { margin-left: auto; color: var(--buyer); font-weight: 600; }
+.edit-count { margin-left: auto; color: var(--buyer); font-size: var(--step--1); font-weight: 600; letter-spacing: 0; }
+.group-head .edit-count { margin-left: 0; color: var(--ink); font-weight: 500; }
 
 .field {
-  display: grid; grid-template-columns: minmax(0, 1fr) 9rem; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1fr) 7.75rem; align-items: center;
   column-gap: 0.75rem; padding: 0.3rem 0;
 }
 .field-head { display: flex; align-items: center; gap: 0.3rem; min-width: 0; }

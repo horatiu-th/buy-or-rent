@@ -131,3 +131,15 @@ it('shows the renter who keeps savings in cash next to the investing renter', ()
   expect(screen.getByText('Chiriaș care investește')).toBeInTheDocument();
   expect(screen.getByText('Chiriaș care nu investește')).toBeInTheDocument();
 });
+
+it('collapses a group and counts the edits inside it', async () => {
+  window.history.replaceState(null, '', '/?rent=2000&rentGrowth=0.05');
+  render(<App />);
+  const toggle = screen.getByRole('button', { name: /^Închiriere/ });
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByLabelText('Chirie lunară')).toBeVisible();
+  await userEvent.click(toggle);
+  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.getByLabelText('Chirie lunară')).not.toBeVisible();
+  expect(within(toggle).getByText('2 valori modificate')).toBeInTheDocument();
+});
