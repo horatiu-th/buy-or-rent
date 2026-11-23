@@ -34,3 +34,13 @@ describe('scenario URL hardening', () => {
     expect(s.overrides).toEqual({ horizonYears: 50, downPaymentPct: 0, price: 999999999 });
   });
 });
+
+describe('area from the URL', () => {
+  it('clamps out-of-range values and ignores invalid ones', () => {
+    expect(decodeScenario(new URLSearchParams('mp=5000')).sqm).toBe(500);
+    expect(decodeScenario(new URLSearchParams('mp=3')).sqm).toBe(10);
+    expect(decodeScenario(new URLSearchParams('mp=72')).sqm).toBe(72);
+    expect(decodeScenario(new URLSearchParams('mp=abc')).sqm).toBe(DEFAULT_SCENARIO.sqm);
+    expect(decodeScenario(new URLSearchParams('mp=')).sqm).toBe(DEFAULT_SCENARIO.sqm);
+  });
+});

@@ -21,6 +21,9 @@ export const DEFAULT_SCENARIO: Scenario = {
   overrides: {},
 };
 
+export const SQM_MIN = 10;
+export const SQM_MAX = 500;
+
 const FIELD_DEFS = new Map(FIELDS.map((f) => [f.key, f]));
 
 export function encodeScenario(s: Scenario): URLSearchParams {
@@ -43,7 +46,11 @@ export function encodeScenario(s: Scenario): URLSearchParams {
  */
 export function decodeScenario(p: URLSearchParams, validCityIds?: readonly string[]): Scenario {
   const d = DEFAULT_SCENARIO;
-  const sqm = Number(p.get('mp'));
+  const rawSqm = p.get('mp');
+  const sqmNum = Number(rawSqm);
+  const sqm = rawSqm === null || rawSqm === '' || !Number.isFinite(sqmNum)
+    ? d.sqm
+    : Math.min(SQM_MAX, Math.max(SQM_MIN, sqmNum));
   const overrides: Partial<Inputs> = {};
   for (const [k, raw] of p.entries()) {
     const def = FIELD_DEFS.get(k as keyof Inputs);
@@ -62,7 +69,7 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
   return {
     cityId: city !== null && (!validCityIds || validCityIds.includes(city)) ? city : d.cityId,
     propertyType: p.get('tip') === 'new' ? 'new' : p.get('tip') === 'existing' ? 'existing' : d.propertyType,
-    sqm: Number.isFinite(sqm) && sqm > 0 ? sqm : d.sqm,
+    sqm,
     currency: p.get('moneda') === 'EUR' ? 'EUR' : d.currency,
     real: p.get('real') === '1',
     overrides,

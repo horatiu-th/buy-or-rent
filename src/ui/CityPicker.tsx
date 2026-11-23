@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react';
 import type { DataFile } from '../data/schema';
 import type { PropertyType } from '../data/defaults';
 import { ro } from '../i18n/ro';
+import { SQM_MAX, SQM_MIN } from '../state/scenario';
 
 interface Props {
   data: DataFile;
@@ -10,8 +11,6 @@ interface Props {
   sqm: number;
   onChange: (patch: { cityId?: string; propertyType?: PropertyType; sqm?: number }) => void;
 }
-
-const MIN_SQM = 10;
 
 export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props) {
   const radioName = useId();
@@ -44,15 +43,15 @@ export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props)
         <input
           type="number"
           inputMode="decimal"
-          min={MIN_SQM}
-          max={500}
+          min={SQM_MIN}
+          max={SQM_MAX}
           value={draft}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onChange={(e) => {
             setDraft(e.target.value);
             const n = Number(e.target.value);
-            if (e.target.value !== '' && Number.isFinite(n) && n >= MIN_SQM) onChange({ sqm: n });
+            if (e.target.value !== '' && Number.isFinite(n) && n >= SQM_MIN) onChange({ sqm: n });
           }}
         />
       </label>
