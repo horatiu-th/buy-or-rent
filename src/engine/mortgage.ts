@@ -4,3 +4,38 @@ export function annuityPayment(principal: number, annualRate: number, months: nu
   if (r === 0) return principal / months;
   return (principal * r) / (1 - Math.pow(1 + r, -months));
 }
+
+export interface LoanParams {
+  principal: number;
+  termMonths: number;
+  fixedRate: number;
+  fixedMonths: number;
+  variableRate: number;
+}
+
+export interface LoanMonth {
+  payment: number;
+  interest: number;
+  principal: number;
+  balance: number; // after this month's payment
+}
+
+export function amortize(p: LoanParams): LoanMonth[] {
+  const schedule: LoanMonth[] = [];
+  let balance = p.principal;
+  let rate = p.fixedMonths > 0 ? p.fixedRate : p.variableRate;
+  let payment = annuityPayment(balance, rate, p.termMonths);
+
+  for (let m = 1; m <= p.termMonths; m++) {
+    if (p.fixedMonths > 0 && m === p.fixedMonths + 1) {
+      rate = p.variableRate;
+      payment = annuityPayment(balance, rate, p.termMonths - p.fixedMonths);
+    }
+    const interest = (balance * rate) / 12;
+    // The last payment absorbs floating-point drift so the loan closes at exactly zero.
+    const principal = m === p.termMonths ? balance : payment - interest;
+    balance = m === p.termMonths ? 0 : balance - principal;
+    schedule.push({ payment: interest + principal, interest, principal, balance });
+  }
+  return schedule;
+}
