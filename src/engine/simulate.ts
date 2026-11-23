@@ -115,7 +115,8 @@ export function simulate(raw: Inputs): Result {
       buyer.principal += loanMonth.principal;
       balance = loanMonth.balance;
     }
-    const propertyTax = (value * i.propertyTaxPct) / 12;
+    // Local taxes are set per m² and indexed yearly with inflation, so they don't follow the market value.
+    const propertyTax = (i.propertyTaxAnnual * Math.pow(1 + i.inflation, Math.floor((m - 1) / 12))) / 12;
     const insurance = i.homeInsuranceAnnual / 12 + (value * i.homeInsurancePct) / 12 + (balanceBefore * i.lifeInsurancePct) / 12;
     const maintenance = (value * i.maintenancePct) / 12;
     const buyerCost = payment + propertyTax + insurance + maintenance;

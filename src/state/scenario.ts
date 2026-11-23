@@ -31,7 +31,7 @@ const FIELD_DEFS = new Map(FIELDS.map((f) => [f.key, f]));
 export const clampSqm = (n: number) => Math.min(SQM_MAX, Math.max(SQM_MIN, n));
 
 /** Fields whose defaults scale with the home itself: its city, type and area. */
-const PLACE_DERIVED = ['price', 'rent'] as const satisfies readonly (keyof Inputs)[];
+const PLACE_DERIVED = ['price', 'rent', 'propertyTaxAnnual'] as const satisfies readonly (keyof Inputs)[];
 
 /**
  * Applies a change to the city, type, area or view. A new place means a different home, so an

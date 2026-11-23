@@ -38,7 +38,7 @@ Every value is a `SourcedValue`:
 | `validUntil` | Optional. The last day the value is known to apply, `YYYY-MM-DD`, for values with a scheduled change (IRCC). After that date the merge prints a warning. |
 | `status` | `manual` (hand-maintained), `ok` (fetched, and recent), or `stale` (fetched, but `asOf` is older than the fetcher's maximum age) |
 
-Values sit under `values` (global, keyed by `Inputs` field name, plus `eurRon`) or under `cities.<id>`: `name`, `priceSqmEurNew`, `priceSqmEurExisting`, `rentSqmEur`, and optionally `propertyTaxPct`, which replaces the global `propertyTaxPct` for that city.
+Values sit under `values` (global, keyed by `Inputs` field name, plus `eurRon`) or under `cities.<id>`: `name`, `priceSqmEurNew`, `priceSqmEurExisting`, `rentSqmEur`, and optionally `propertyTaxSqm`, which replaces the global `propertyTaxSqm` (lei per m² per year) for that city.
 
 The city `bucuresti` (`DEFAULT_CITY_ID` in `src/data/schema.ts`) must exist: an unknown city id, for example from an old shared link, falls back to it (`resolveCityId()` in `src/data/defaults.ts`).
 
@@ -59,13 +59,15 @@ For the chosen city, property type and size:
 
 ```
 price = €/m² (new or existing) × m² × EUR/RON rate × (1 − negotiationPct)
-rent  = rent €/m² × 55 × (m² / 55)^0.8 × EUR/RON rate
+rent  = rent €/m² × 55 × (m² / 55)^0.72 × EUR/RON rate
+property tax (lei/year) = property tax lei/m² (city, else global) × m²
 ```
 
 Both are rounded to whole lei. Users can override either.
 
 - **Price:** the indexes report asking prices. `negotiationPct` takes off the typical gap between the last asking price and the price actually paid.
-- **Rent:** rent per m² falls as homes get larger. The city figures are averages over flats of about 55 m², so the curve (`rentForSize()` in `src/data/defaults.ts`) matches them at 55 m² and charges less per m² above that size and more below it. The 0.8 exponent fits room-by-room asking rents (studio, 2 and 3 rooms) in the largest cities.
+- **Rent:** rent per m² falls as homes get larger. The city figures are averages over flats of about 55 m², so the curve (`rentForSize()` in `src/data/defaults.ts`) matches them at 55 m² and charges less per m² above that size and more below it. The 0.72 exponent fits apartamente.org's room-by-room medians (studio, 2 and 3 rooms) in Cluj, Timișoara, Brașov and Iași.
+- **Area** is usable area without balconies, which is what the price indexes use.
 
 Other inputs that depend on the property type: `buyerAgencyPct` comes from `buyerAgencyPct` for existing homes and from `buyerAgencyPctNew` for new builds, which are usually bought from the developer without an agent.
 

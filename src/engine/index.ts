@@ -5,3 +5,4 @@ export {
 } from './sanitize';
 export { equivalentRent, finalGap, sensitivity, SENSITIVITY_STEPS } from './solve';
 export type { EquivalentRent } from './solve';
+export { acquisitionCosts, mortgageSetupCosts } from './costs';

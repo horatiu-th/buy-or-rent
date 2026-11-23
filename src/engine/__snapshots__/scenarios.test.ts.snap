@@ -3,34 +3,34 @@
 exports[`2-room flat, existing build 1`] = `
 {
   "breakEvenMonth": 37,
-  "buyer": 1666272,
+  "buyer": 1657035,
   "equivalentRent": {
     "kind": "value",
-    "rent": 1509.93,
+    "rent": 1522.54,
   },
-  "renter": 508608,
+  "renter": 517855,
 }
 `;
 
 exports[`3-room flat, new build 1`] = `
 {
-  "breakEvenMonth": 43,
-  "buyer": 2478066,
+  "breakEvenMonth": 44,
+  "buyer": 2487247,
   "equivalentRent": {
     "kind": "value",
-    "rent": 2513.64,
+    "rent": 2508.19,
   },
-  "renter": 1032793,
+  "renter": 1033983,
 }
 `;
 
 exports[`cash purchase, short horizon 1`] = `
 {
   "breakEvenMonth": 37,
-  "buyer": 710345,
+  "buyer": 710336,
   "equivalentRent": {
     "kind": "value",
-    "rent": 1984.08,
+    "rent": 1984.21,
   },
   "renter": 671550,
 }

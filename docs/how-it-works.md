@@ -16,7 +16,7 @@ Three households start with **the same amount of cash** and spend **the same amo
 
 | | Buyer | Renter |
 |---|---|---|
-| Pays | Down payment + acquisition costs (notary, land registry, buyer agency fee, bank fees) | Rental deposit + rental agency fee |
+| Pays | Down payment + acquisition costs (notary, land registry, buyer agency fee, bank fees, and the loan-based mortgage fees from `mortgageSetupCosts()`: 0.1% of the loan plus the notary's fee for the mortgage contract) | Rental deposit + rental agency fee |
 | Keeps | Nothing, if their upfront costs are higher | The difference, invested or saved |
 
 If the renter's upfront costs are larger than the buyer's (rare), the buyer keeps and invests the difference instead. The deposit comes back at the end; the agency fee doesn't.
@@ -25,7 +25,7 @@ If the renter's upfront costs are larger than the buyer's (rare), the buyer keep
 
 **Buyer's cost**
 - Loan payment from the amortization schedule (see below).
-- Property tax: `property value × propertyTaxPct / 12`.
+- Property tax: `propertyTaxAnnual / 12`, raised once a year by `inflation`. Local taxes are set per m² and indexed with inflation, so they don't follow the market value. This is the one place inflation affects the simulation itself.
 - Insurance: the mandatory PAD policy per year / 12, the optional home policy banks require (`property value × homeInsurancePct / 12`), and life insurance on the loan balance.
 - Maintenance: `property value × maintenancePct / 12`.
 
@@ -90,7 +90,7 @@ The bisection assumes the buyer's final lead grows with rent, which `solve.test.
 
 ## Today's money vs nominal
 
-Each row carries a `deflator = (1 + inflation)^(months / 12)`. The interface divides by it to show values **in today's lei**, which is the default view. Inflation is used only for this; it doesn't change the simulation itself.
+Each row carries a `deflator = (1 + inflation)^(months / 12)`. The interface divides by it to show values **in today's lei**, which is the default view. Apart from indexing the property tax, inflation is used only for this.
 
 Two views always stay nominal, and say so when the rest of the page shows today's money:
 
@@ -123,7 +123,7 @@ These are deliberate simplifications:
 - **IRCC follows one fixed path**: from today's value to the long-run one over three years, then flat.
 - **Fixed annual lei amounts aren't indexed.** The PAD policy (`homeInsuranceAnnual`) and renter's insurance (`renterInsuranceAnnual`) stay the same nominal amount for the whole horizon, so they shrink in today's money.
 - **The rent deposit isn't topped up** as rent rises; it stays at `depositMonths` × the starting rent.
-- **Property tax is a share of market value.** In reality it applies to a statutory value that is usually well below market price, and varies by locality; the default is set to approximate that.
+- **Property tax uses one zone per city.** The real bill depends on the zone within the city (about ±6% around the default) and on the local rate.
 - **No CASS** (health contribution) on investment income above the thresholds.
 - **The buyer always invests** any monthly surplus at the investment return, even when compared with the saving renter.
 - **One rental agency fee only.** The renter pays it once at the start; renters who move pay it again, which isn't modelled. No moving, furnishing or renovation costs either.

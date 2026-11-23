@@ -16,7 +16,7 @@ export interface Inputs {
   variableMargin: number; // bank margin over IRCC
 
   // Ownership
-  propertyTaxPct: number; // annual, of property value
+  propertyTaxAnnual: number; // lei/year today; it depends on floor area, not value, and is indexed with inflation
   homeInsuranceAnnual: number; // lei/year, mandatory PAD policy
   homeInsurancePct: number; // annual, of property value: the optional policy banks require
   lifeInsurancePct: number; // annual, of outstanding loan balance

@@ -17,7 +17,7 @@ export interface CityData {
   priceSqmEurNew: SourcedValue;
   priceSqmEurExisting: SourcedValue;
   rentSqmEur: SourcedValue;
-  propertyTaxPct?: SourcedValue;
+  propertyTaxSqm?: SourcedValue;
 }
 
 export interface DataFile {
@@ -33,7 +33,7 @@ export interface PartialDataFile {
 /** Global defaults every merged file must contain. */
 export const REQUIRED_VALUE_KEYS = [
   'eurRon', 'downPaymentPct', 'notaryPct', 'registryPct', 'bankFees', 'loanTermYears',
-  'fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'propertyTaxPct', 'homeInsuranceAnnual',
+  'fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'propertyTaxSqm', 'homeInsuranceAnnual',
   'lifeInsurancePct', 'maintenancePct', 'propertyGrowth', 'rentGrowth', 'renterInsuranceAnnual',
   'depositMonths', 'investReturn', 'investTaxRate', 'savingsRate', 'savingsTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
@@ -44,7 +44,7 @@ export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
 export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur'] as const;
 
 /** The city fields that hold a SourcedValue, required or optional. */
-export const CITY_VALUE_KEYS = ['priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'propertyTaxPct'] as const;
+export const CITY_VALUE_KEYS = ['priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'propertyTaxSqm'] as const;
 export type CityValueKey = (typeof CITY_VALUE_KEYS)[number];
 
 /** Where a fetched value is written, e.g. "values.eurRon" or "cities.cluj.rentSqmEur". */

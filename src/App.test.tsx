@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { loadDefaults } from './data/defaults';
+import { ro } from './i18n/ro';
 
 // Recharts' ResponsiveContainer needs ResizeObserver, which jsdom lacks.
 beforeAll(() => {
@@ -88,7 +89,7 @@ it('moves between chart tabs with Home and End', async () => {
 
 it('lets the area be cleared and retyped', async () => {
   render(<App />);
-  const sqm = screen.getByLabelText('Suprafață (m²)');
+  const sqm = screen.getByLabelText(ro.sqm);
   await userEvent.clear(sqm);
   expect(sqm).toHaveValue('');
   await userEvent.type(sqm, '7');
@@ -211,7 +212,7 @@ describe('typed values', () => {
 
   it('caps the area at its maximum', async () => {
     render(<App />);
-    const sqm = screen.getByLabelText('Suprafață (m²)');
+    const sqm = screen.getByLabelText(ro.sqm);
     await userEvent.clear(sqm);
     await userEvent.type(sqm, '5000');
     expect(new URLSearchParams(window.location.search).get('mp')).toBe('500');

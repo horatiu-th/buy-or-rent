@@ -26,8 +26,10 @@ describe('simulate', () => {
   });
 
   it('adds the buyer agency fee to the sunk purchase costs', () => {
-    const r0 = simulate({ ...flatWorld, buyerAgencyPct: 0.02 }).rows[0];
-    expect(r0.renterNetWorth - r0.buyerNetWorth).toBeCloseTo(flatWorld.price * 0.02, 6);
+    const withFee = simulate({ ...flatWorld, buyerAgencyPct: 0.02 }).rows[0];
+    const without = simulate(flatWorld).rows[0];
+    const gap = (r: typeof without) => r.renterNetWorth - r.buyerNetWorth;
+    expect(gap(withFee) - gap(without)).toBeCloseTo(flatWorld.price * 0.02, 6);
   });
 
   it('charges the optional home policy on the current property value', () => {
@@ -213,6 +215,17 @@ describe('renter who keeps savings in a bank deposit', () => {
       simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate, investTaxRate }).rows.at(-1)!.renterCashNetWorth;
     expect(at(0.1, 0)).toBeLessThan(at(0, 0));
     expect(at(0.1, 0)).toBeCloseTo(at(0.1, 0.5), 6);
+  });
+});
+
+describe('property tax', () => {
+  it('starts at the annual amount and rises with inflation once a year, whatever the home is worth', () => {
+    const i = { ...flatWorld, propertyTaxAnnual: 1_200, inflation: 0.05, propertyGrowth: 0.1 };
+    const { rows } = simulate(i);
+    const tax = (m: number) => simulate({ ...i, propertyTaxAnnual: 0 }).rows[m].buyerMonthlyCost;
+    expect(rows[1].buyerMonthlyCost - tax(1)).toBeCloseTo(100, 9);
+    expect(rows[12].buyerMonthlyCost - tax(12)).toBeCloseTo(100, 9);
+    expect(rows[13].buyerMonthlyCost - tax(13)).toBeCloseTo(105, 9);
   });
 });
 

@@ -37,7 +37,7 @@ export const FIELDS: FieldDef[] = [
   { key: 'bankFees', unit: 'money', topic: 'purchaseCosts', min: 0, max: 1_000_000, step: 100 },
   { key: 'buyerAgencyPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.1, step: 0.001 },
 
-  { key: 'propertyTaxPct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.05, step: 0.0005 },
+  { key: 'propertyTaxAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 10 },
   { key: 'homeInsuranceAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 10 },
   { key: 'homeInsurancePct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.02, step: 0.0005 },
   { key: 'lifeInsurancePct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.05, step: 0.0005 },

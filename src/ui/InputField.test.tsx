@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import type { SourcedValue } from '../data/schema';
 import { FIELDS } from './fields';
 import { InputField } from './InputField';
+import { ro } from '../i18n/ro';
 
 const def = (key: string) => FIELDS.find((f) => f.key === key)!;
 
@@ -125,12 +126,12 @@ describe('InputField', () => {
     const input = screen.getByLabelText('Chirie lunară');
     const toggle = screen.getByRole('button', { name: /Ajutor/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText('Chiria pentru o locuință comparabilă.')).not.toBeVisible();
+    expect(screen.getByText(ro.fields.rent.help)).not.toBeVisible();
     expect(input).toHaveAccessibleDescription(/Sursa X/);
 
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText('Chiria pentru o locuință comparabilă.')).toBeVisible();
+    expect(screen.getByText(ro.fields.rent.help)).toBeVisible();
     expect(input).toHaveAccessibleDescription(/Chiria pentru o locuință comparabilă\..*Sursa X/);
   });
 
@@ -140,7 +141,7 @@ describe('InputField', () => {
     await userEvent.click(toggle);
     const popover = screen.getByRole('note');
     expect(popover).toBeVisible();
-    expect(popover).toHaveTextContent('Chiria pentru o locuință comparabilă.');
+    expect(popover).toHaveTextContent(ro.fields.rent.help);
     expect(popover).toHaveTextContent('Sursa X');
     expect(toggle.parentElement).toContainElement(popover);
   });

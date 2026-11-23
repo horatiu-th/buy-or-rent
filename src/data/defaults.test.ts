@@ -27,13 +27,16 @@ describe('buildInputs', () => {
     expect(sourceFor(data, 'cluj', 'new', 'buyerAgencyPct')).toBe(data.values.buyerAgencyPctNew);
   });
 
-  it('uses a city property tax rate where one is set', () => {
-    expect(buildInputs(data, 'cluj', 'existing', 50).propertyTaxPct).toBe(data.cities.cluj.propertyTaxPct!.value);
-    expect(buildInputs(data, 'iasi', 'existing', 50).propertyTaxPct).toBe(data.values.propertyTaxPct.value);
+  it('sets property tax per m², using a city rate where one is set', () => {
+    expect(buildInputs(data, 'iasi', 'existing', 50).propertyTaxAnnual).toBe(Math.round(data.cities.iasi.propertyTaxSqm!.value * 50));
+    expect(buildInputs(data, 'sibiu', 'existing', 50).propertyTaxAnnual).toBe(Math.round(data.values.propertyTaxSqm.value * 50));
   });
 
   it('uses existing-build prices for existing properties', () => {
-    expect(buildInputs(data, 'cluj', 'existing', 50).price).toBeLessThan(buildInputs(data, 'cluj', 'new', 50).price);
+    const c = data.cities.bucuresti;
+    expect(c.priceSqmEurExisting.value).not.toBe(c.priceSqmEurNew.value);
+    const ratio = buildInputs(data, 'bucuresti', 'existing', 50).price / buildInputs(data, 'bucuresti', 'new', 50).price;
+    expect(ratio).toBeCloseTo(c.priceSqmEurExisting.value / c.priceSqmEurNew.value, 4);
   });
 
   it('uses the default city for an unknown id', () => {
