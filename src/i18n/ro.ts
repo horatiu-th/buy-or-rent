@@ -16,8 +16,6 @@ export const ro = {
   help: 'Ajutor',
   presets: { label: 'Tip dobândă', fixed5: 'Fix 5 ani', variable: 'Variabilă' },
   currency: 'Monedă',
-  provisional:
-    'Valorile implicite sunt provizorii până la verificarea din surse oficiale. Poți modifica orice cifră; sursa apare când selectezi un câmp.',
   scale: {
     label: 'Ajustează chiria',
     rentWins: 'Închirierea câștigă',
@@ -27,13 +25,16 @@ export const ro = {
   },
   atHorizon: (after: string) => `Avere netă după ${after}`,
   tabsLabel: 'Grafice',
+  footer: {
+    rate: (rate: string, date: string) => `Curs BNR: ${rate} lei/€, din ${date.split('-').reverse().join('.')}.`,
+    sources: 'Surse și ipoteze pentru valorile implicite',
+  },
   resultsLabel: 'Rezultate',
   breakEvenMark: 'Cumpărarea trece în față',
   realValues: (currency: Currency) => `Ajustat cu inflația (${currency === 'EUR' ? '€' : 'lei'} de azi)`,
   nominalNote: 'Valori nominale',
   source: 'sursa',
   stale: 'date vechi',
-  placeholder: 'valoare provizorie',
   assumptions: 'Valorile implicite sunt ipoteze, nu prognoze. Verifică-le pentru situația ta.',
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
@@ -55,7 +56,7 @@ export const ro = {
     sensitivity: 'Sensibilitate',
   },
   breakdown: {
-    downPayment: 'Avans', acquisitionCosts: 'Costuri achiziție', interest: 'Dobândă',
+    acquisitionCosts: 'Costuri achiziție', interest: 'Dobândă',
     propertyTax: 'Impozit', insurance: 'Asigurări', maintenance: 'Întreținere',
     saleCosts: 'Costuri vânzare', investmentTax: 'Impozit investiții', rent: 'Chirie',
   },

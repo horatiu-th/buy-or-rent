@@ -143,3 +143,10 @@ it('collapses a group and counts the edits inside it', async () => {
   expect(screen.getByLabelText('Chirie lunară')).not.toBeVisible();
   expect(within(toggle).getByText('2 valori modificate')).toBeInTheDocument();
 });
+
+it('shows the exchange rate in use and when BNR published it', () => {
+  render(<App />);
+  const { value, asOf } = loadDefaults().values.eurRon;
+  const date = asOf.split('-').reverse().join('.');
+  expect(screen.getByText(new RegExp(`Curs BNR: ${value.toLocaleString('ro-RO', { maximumFractionDigits: 4 })} lei/€, din ${date}`))).toBeInTheDocument();
+});

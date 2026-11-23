@@ -28,16 +28,6 @@ function renderField(props: Partial<Parameters<typeof InputField>[0]> = {}) {
 }
 
 describe('InputField', () => {
-  it('marks placeholder defaults in the source tag', () => {
-    renderField({ source: source({ status: 'manual', source: 'Placeholder – de verificat' }) });
-    expect(screen.getByText(/valoare provizorie/)).toBeInTheDocument();
-  });
-
-  it('does not mark verified manual values as placeholders', () => {
-    renderField({ source: source({ status: 'manual', source: 'BNR' }) });
-    expect(screen.queryByText(/valoare provizorie/)).not.toBeInTheDocument();
-  });
-
   it('converts percentages without float noise', async () => {
     const onChange = renderField({ def: def('downPaymentPct'), value: 0.15 });
     const input = screen.getByLabelText('Avans');

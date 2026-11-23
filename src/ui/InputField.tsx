@@ -46,12 +46,10 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     if (!focused && typeof value === 'number') setDraft(String(toDisplay(def, value, currency, eurRon)));
   }, [value, focused, def, currency, eurRon]);
 
-  const isPlaceholder = source?.status === 'manual' && source.source.startsWith('Placeholder');
   const sourceTag = source && !isOverridden && (
     <small id={sourceId} className={`source source-${source.status}`}>
       {ro.source}: {source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.source}</a> : source.source}, {source.asOf}
       {source.status === 'stale' && ` · ${ro.stale}`}
-      {isPlaceholder && ` · ${ro.placeholder}`}
     </small>
   );
 

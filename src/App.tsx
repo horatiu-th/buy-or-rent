@@ -10,14 +10,12 @@ import type { Currency } from './ui/format';
 import { useScenario } from './state/useScenario';
 
 const data = loadDefaults();
+const SOURCES_URL = 'https://github.com/horatiu-th/buy-or-rent/blob/main/data/SOURCES.md';
 
 const CURRENCIES = [
   { value: 'RON', label: 'lei' },
   { value: 'EUR', label: '€' },
 ] as const;
-
-const hasPlaceholders = [...Object.values(data.values), ...Object.values(data.cities).flatMap((c) => [c.priceSqmEurNew, c.rentSqmEur])]
-  .some((v) => v.status === 'manual' && v.source.startsWith('Placeholder'));
 
 export default function App() {
   const { scenario, update, setField, resetField, resetAll } = useScenario();
@@ -57,7 +55,6 @@ export default function App() {
 
       <main className="layout">
         <aside className="inputs-column">
-          {hasPlaceholders && <p className="provisional">{ro.provisional}</p>}
           <InputsPanel
             data={data}
             cityId={cityId}
@@ -79,6 +76,16 @@ export default function App() {
           />
         </section>
       </main>
+
+      <footer className="site-footer">
+        <p>
+          {ro.footer.rate(data.values.eurRon.value.toLocaleString('ro-RO', { maximumFractionDigits: 4 }), data.values.eurRon.asOf)}
+          {data.values.eurRon.status === 'stale' && ` (${ro.stale})`}
+        </p>
+        <p>
+          <a href={SOURCES_URL} target="_blank" rel="noreferrer">{ro.footer.sources}</a>
+        </p>
+      </footer>
     </div>
   );
 }

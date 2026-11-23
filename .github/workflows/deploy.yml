@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # A deploy already running finishes rather than being cut off half-published.
+  cancel-in-progress: false
 
 jobs:
   build:
