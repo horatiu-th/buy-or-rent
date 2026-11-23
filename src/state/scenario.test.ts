@@ -1,4 +1,4 @@
-import { decodeScenario, encodeScenario, DEFAULT_SCENARIO } from './scenario';
+import { applyScenarioPatch, clampSqm, decodeScenario, encodeScenario, DEFAULT_SCENARIO } from './scenario';
 
 describe('scenario URL encoding', () => {
   it('round-trips city, type, size and overrides', () => {
@@ -30,8 +30,13 @@ describe('scenario URL hardening', () => {
   });
 
   it('clamps numeric overrides to the field limits', () => {
-    const s = decodeScenario(new URLSearchParams('horizonYears=5000&downPaymentPct=-3&price=999999999'));
-    expect(s.overrides).toEqual({ horizonYears: 50, downPaymentPct: 0, price: 999999999 });
+    const s = decodeScenario(new URLSearchParams('horizonYears=5000&downPaymentPct=-3&price=1e300&rent=2500'));
+    expect(s.overrides).toEqual({ horizonYears: 50, downPaymentPct: 0, price: 100_000_000, rent: 2500 });
+  });
+
+  it('rounds periods counted in whole years or months', () => {
+    const s = decodeScenario(new URLSearchParams('horizonYears=2.5&loanTermYears=24.4&depositMonths=1.6'));
+    expect(s.overrides).toEqual({ horizonYears: 3, loanTermYears: 24, depositMonths: 2 });
   });
 });
 
@@ -59,5 +64,33 @@ describe('inflation-adjusted view', () => {
 
   it('ignores malformed values', () => {
     expect(decodeScenario(new URLSearchParams('real=yes')).real).toBe(true);
+  });
+});
+
+describe('clampSqm', () => {
+  it('keeps the area within the supported range', () => {
+    expect(clampSqm(5000)).toBe(500);
+    expect(clampSqm(3)).toBe(10);
+    expect(clampSqm(72.5)).toBe(72.5);
+  });
+});
+
+describe('changing the place', () => {
+  const edited = { ...DEFAULT_SCENARIO, overrides: { price: 500000, rent: 3000, fixedRate: 0.06 } };
+
+  it.each([
+    ['city', { cityId: 'iasi' }],
+    ['property type', { propertyType: 'new' as const }],
+    ['area', { sqm: 80 }],
+  ])('drops price and rent edits when the %s changes, keeping the rest', (_, patch) => {
+    expect(applyScenarioPatch(edited, patch).overrides).toEqual({ fixedRate: 0.06 });
+  });
+
+  it('keeps every edit when only the view changes', () => {
+    expect(applyScenarioPatch(edited, { currency: 'EUR', real: false }).overrides).toBe(edited.overrides);
+  });
+
+  it('keeps every edit when the place is set to what it already is', () => {
+    expect(applyScenarioPatch(edited, { cityId: edited.cityId }).overrides).toBe(edited.overrides);
   });
 });

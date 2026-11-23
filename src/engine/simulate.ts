@@ -20,10 +20,13 @@ function contribute(p: Portfolio, amount: number) {
   p.basis += amount;
 }
 
+// A tie counts as the buyer being ahead, so breakEvenMonth and buyerEverAhead use the same test.
+const buyerAhead = (r: MonthRow) => r.buyerNetWorth >= r.renterNetWorth;
+
 export function breakEven(rows: MonthRow[]): number | null {
   // Counted from the last month the buyer is behind, so an early, temporary lead doesn't count.
-  let lastBehind = 0;
-  for (const r of rows) if (r.month > 0 && r.buyerNetWorth < r.renterNetWorth) lastBehind = r.month;
+  let lastBehind = -1;
+  for (const r of rows) if (!buyerAhead(r)) lastBehind = r.month;
   const end = rows[rows.length - 1].month;
   return lastBehind === end ? null : lastBehind + 1;
 }
@@ -124,5 +127,5 @@ export function simulate(raw: Inputs): Result {
   buyer.investmentTax = liquidate(buyerPf, i.investTaxRate).tax;
   renter.investmentTax = liquidate(renterPf, i.investTaxRate).tax;
 
-  return { rows, buyer, renter, breakEvenMonth: breakEven(rows) };
+  return { rows, buyer, renter, breakEvenMonth: breakEven(rows), buyerEverAhead: rows.some(buyerAhead) };
 }

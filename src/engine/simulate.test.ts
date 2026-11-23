@@ -1,4 +1,5 @@
-import { simulate } from './simulate';
+import { breakEven, simulate } from './simulate';
+import type { MonthRow } from './types';
 import { acquisitionCosts } from './costs';
 import { amortize } from './mortgage';
 import { baseInputs, flatWorld } from './fixtures';
@@ -108,6 +109,51 @@ describe('simulate', () => {
     const after = r.rows.filter((row) => row.month >= r.breakEvenMonth!);
     expect(after.every((row) => row.buyerNetWorth >= row.renterNetWorth)).toBe(true);
     expect(simulate({ ...baseInputs, rent: 100 }).breakEvenMonth).toBeNull();
+  });
+
+  it('reports break-even at month 0 and the buyer ever ahead when buying costs nothing upfront', () => {
+    const r = simulate({ ...flatWorld, price: 0, rent: 1_000 });
+    expect(r.breakEvenMonth).toBe(0);
+    expect(r.buyerEverAhead).toBe(true);
+  });
+
+  it('reports the buyer never ahead when renting wins every month', () => {
+    const r = simulate({ ...baseInputs, rent: 100 });
+    expect(r.buyerEverAhead).toBe(false);
+  });
+
+  it('reports the buyer ever ahead when an early lead is later lost', () => {
+    // A cash buyer with no fees starts level; renting a dear home loses at first, then cheap rent and
+    // a collapsing property let the renter overtake.
+    const r = simulate({ ...flatWorld, downPaymentPct: 1, rent: 5_000, rentGrowth: -0.2, propertyGrowth: -0.1 });
+    expect(r.rows.some((row) => row.month > 0 && row.buyerNetWorth > row.renterNetWorth)).toBe(true);
+    expect(r.buyerEverAhead).toBe(true);
+    expect(r.breakEvenMonth).toBeNull();
+  });
+});
+
+describe('breakEven', () => {
+  const rows = (pairs: [number, number][]): MonthRow[] =>
+    pairs.map(([buyerNetWorth, renterNetWorth], month) => ({
+      month, buyerNetWorth, renterNetWorth, propertyValue: 0, loanBalance: 0, buyerMonthlyCost: 0,
+      renterMonthlyCost: 0, renterCashNetWorth: 0, deflator: 1,
+    }));
+
+  it('is 0 when the buyer is ahead from month 0 onward', () => {
+    expect(breakEven(rows([[10, 5], [11, 5], [12, 5]]))).toBe(0);
+  });
+
+  it('counts a tie as the buyer being ahead', () => {
+    expect(breakEven(rows([[5, 5], [5, 5], [5, 5]]))).toBe(0);
+    expect(breakEven(rows([[4, 5], [5, 5], [6, 5]]))).toBe(1);
+  });
+
+  it('starts after the last month the buyer is behind, ignoring an earlier lead', () => {
+    expect(breakEven(rows([[6, 5], [4, 5], [6, 5], [7, 5]]))).toBe(2);
+  });
+
+  it('is null when the buyer is behind at the horizon', () => {
+    expect(breakEven(rows([[6, 5], [6, 5], [4, 5]]))).toBeNull();
   });
 });
 

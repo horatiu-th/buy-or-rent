@@ -29,7 +29,7 @@ it('restores a scenario from the URL', () => {
   window.history.replaceState(null, '', '/?oras=iasi&rent=1999');
   render(<App />);
   expect(screen.getByLabelText('Oraș')).toHaveValue('iasi');
-  expect(screen.getByLabelText('Chirie lunară')).toHaveValue(1999);
+  expect(screen.getByLabelText('Chirie lunară')).toHaveValue('1.999');
 });
 
 it('removes a field from the URL when it is reset', async () => {
@@ -49,20 +49,48 @@ it('stores euro edits as whole lei in the URL', async () => {
   expect(new URLSearchParams(window.location.search).get('price')).toBe(String(Math.round(1234 * eurRon)));
 });
 
-it('flags nominal views when showing today\'s money', async () => {
+it('switches off the inflation adjustment where a view only has nominal values', async () => {
   window.history.replaceState(null, '', '/?moneda=EUR&real=1');
   render(<App />);
-  expect(screen.getByLabelText('Ajustat cu inflația (€ de azi)')).toBeChecked();
-  expect(screen.queryByText('Valori nominale')).not.toBeInTheDocument();
+  const toggle = screen.getByRole('switch', { name: /Ajustat cu inflația/ });
+  expect(toggle).toBeChecked();
+  expect(toggle).toBeEnabled();
+  expect(screen.queryByText(/Valori nominale/)).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
-  expect(screen.getByText('Valori nominale')).toBeInTheDocument();
+  expect(toggle).toBeDisabled();
+  expect(toggle).not.toBeChecked();
+  expect(toggle).toHaveAccessibleDescription(/Valori nominale/);
+  await userEvent.click(screen.getByRole('tab', { name: 'Avere netă' }));
+  expect(toggle).toBeEnabled();
+  expect(toggle).toBeChecked();
+});
+
+it('says what today\'s money means in euro', () => {
+  window.history.replaceState(null, '', '/?moneda=EUR');
+  render(<App />);
+  const toggle = screen.getByRole('switch', { name: /Ajustat cu inflația/ });
+  expect(toggle).toHaveAccessibleName(/inflația din România/);
+  expect(toggle).toHaveAccessibleName(/cursul de azi/);
+});
+
+it('moves between chart tabs with Home and End', async () => {
+  render(<App />);
+  const first = screen.getByRole('tab', { name: 'Avere netă' });
+  first.focus();
+  await userEvent.keyboard('{End}');
+  const last = screen.getByRole('tab', { name: 'Sensibilitate' });
+  expect(last).toHaveFocus();
+  expect(last).toHaveAttribute('aria-selected', 'true');
+  await userEvent.keyboard('{Home}');
+  expect(first).toHaveFocus();
+  expect(first).toHaveAttribute('aria-selected', 'true');
 });
 
 it('lets the area be cleared and retyped', async () => {
   render(<App />);
   const sqm = screen.getByLabelText('Suprafață (m²)');
   await userEvent.clear(sqm);
-  expect(sqm).toHaveValue(null);
+  expect(sqm).toHaveValue('');
   await userEvent.type(sqm, '7');
   expect(window.location.search).not.toContain('mp=');
   await userEvent.type(sqm, '0');
@@ -108,7 +136,7 @@ it('moves the rent with the rent scale slider', () => {
   const slider = screen.getByRole('slider', { name: 'Ajustează chiria' });
   fireEvent.change(slider, { target: { value: '1500' } });
   expect(new URLSearchParams(window.location.search).get('rent')).toBe('1500');
-  expect(screen.getByLabelText('Chirie lunară')).toHaveValue(1500);
+  expect(screen.getByLabelText('Chirie lunară')).toHaveValue('1.500');
 });
 
 it('groups inputs by buying, renting, investing and general', () => {
@@ -149,4 +177,63 @@ it('shows the exchange rate in use and when BNR published it', () => {
   const { value, asOf } = loadDefaults().values.eurRon;
   const date = asOf.split('-').reverse().join('.');
   expect(screen.getByText(new RegExp(`Curs BNR: ${value.toLocaleString('ro-RO', { maximumFractionDigits: 4 })} lei/€, din ${date}`))).toBeInTheDocument();
+});
+
+describe('typed values', () => {
+  it('stores a capped value in the URL and shows it once the field is left', async () => {
+    render(<App />);
+    const horizon = screen.getByLabelText('Orizont de analiză');
+    await userEvent.clear(horizon);
+    await userEvent.type(horizon, '2000');
+    expect(new URLSearchParams(window.location.search).get('horizonYears')).toBe('50');
+    await userEvent.tab();
+    expect(horizon).toHaveValue('50');
+  });
+
+  it('shows the price the simulation uses when a negative one is typed', async () => {
+    render(<App />);
+    const price = screen.getByLabelText('Preț locuință');
+    await userEvent.clear(price);
+    await userEvent.type(price, '-100000');
+    expect(new URLSearchParams(window.location.search).get('price')).not.toBe('-100000');
+    await userEvent.tab();
+    expect(price).toHaveValue('0');
+    expect(new URLSearchParams(window.location.search).get('price')).toBe('0');
+  });
+
+  it('accepts a decimal comma', async () => {
+    render(<App />);
+    const down = screen.getByLabelText('Avans');
+    await userEvent.clear(down);
+    await userEvent.type(down, '22,5');
+    expect(new URLSearchParams(window.location.search).get('downPaymentPct')).toBe('0.225');
+  });
+
+  it('caps the area at its maximum', async () => {
+    render(<App />);
+    const sqm = screen.getByLabelText('Suprafață (m²)');
+    await userEvent.clear(sqm);
+    await userEvent.type(sqm, '5000');
+    expect(new URLSearchParams(window.location.search).get('mp')).toBe('500');
+    await userEvent.tab();
+    expect(sqm).toHaveValue('500');
+  });
+
+  it('rounds a fractional horizon from a link to whole years', () => {
+    window.history.replaceState(null, '', '/?horizonYears=2.5');
+    render(<App />);
+    expect(screen.getByLabelText('Orizont de analiză')).toHaveValue('3');
+    expect(new URLSearchParams(window.location.search).get('horizonYears')).toBe('3');
+  });
+});
+
+it('drops an edited price and rent when the city changes, so the new city shows its own', async () => {
+  window.history.replaceState(null, '', '/?price=123456&rent=1999&fixedRate=0.06');
+  render(<App />);
+  await userEvent.selectOptions(screen.getByLabelText('Oraș'), 'cluj');
+  const q = new URLSearchParams(window.location.search);
+  expect(q.has('price')).toBe(false);
+  expect(q.has('rent')).toBe(false);
+  expect(q.get('fixedRate')).toBe('0.06');
+  expect(screen.getByLabelText('Chirie lunară')).not.toHaveValue('1.999');
 });

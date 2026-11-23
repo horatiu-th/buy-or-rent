@@ -26,17 +26,17 @@ Monthly simulation over a horizon (default 30 years). Both households start with
 - Monthly: mortgage annuity, property tax, PAD + home insurance, life insurance if required, maintenance (% of property value/year).
 - Rate: fixed for N years, then IRCC + margin (IRCC user-configurable, default = current).
 - Property appreciates at a configurable %/year.
-- Optional sale costs at horizon (agency fee %, income tax on sale if held < 3 years) to compare net liquid wealth.
+- Optional sale costs at horizon (agency fee %, income tax on sale if held up to 3 years inclusive) to compare net liquid wealth.
 
 **Renter**
 - Monthly: rent + renter's insurance; rent grows at configurable %/year.
 - Deposit (default 1–2 months), returned at horizon.
 - Invests the upfront cash the buyer spent, and each month invests the difference when the buyer's monthly cost exceeds rent. Symmetric: when rent is higher, the buyer invests the difference.
-- Investment return configurable, net of tax on gains (default 10%, verify).
+- Investment return configurable, gross; tax on gains is applied once, when the portfolio is liquidated.
 
 **Outputs**
 - `netWorth[month]` per side. Buyer: property value − remaining loan − sale costs + buyer investments. Renter: investments + deposit.
-- Break-even month: first month buyer net worth exceeds renter net worth.
+- Break-even month: first month from which the buyer's net worth stays at or above the renter's through the horizon (0 if from the start).
 - Equivalent rent: starting rent at which both net worths are equal at the horizon (bisection).
 - Nominal or real lei (inflation input).
 

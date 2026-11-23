@@ -1,5 +1,5 @@
 import raw from './defaults.json';
-import type { DataFile, SourcedValue } from './schema';
+import { DEFAULT_CITY_ID, type DataFile, type SourcedValue } from './schema';
 import type { Inputs } from '../engine';
 
 export type PropertyType = 'new' | 'existing';
@@ -8,8 +8,17 @@ export function loadDefaults(): DataFile {
   return raw as DataFile;
 }
 
+/**
+ * The city id the defaults are actually built from: the id itself if known, otherwise the default
+ * city. Display the result, not the raw id, so the label always matches the numbers.
+ */
+export function resolveCityId(cityId: string, data: DataFile = loadDefaults()): string {
+  // hasOwn, not `in`: ids come from URLs, and "toString" is "in" every object.
+  return Object.hasOwn(data.cities, cityId) ? cityId : DEFAULT_CITY_ID;
+}
+
 function cityOf(data: DataFile, cityId: string) {
-  return data.cities[cityId] ?? Object.values(data.cities)[0];
+  return data.cities[resolveCityId(cityId, data)];
 }
 
 export function buildInputs(data: DataFile, cityId: string, type: PropertyType, sqm: number): Inputs {

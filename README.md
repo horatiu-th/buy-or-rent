@@ -36,7 +36,7 @@ npm run dev    # http://localhost:5173
 | `npm run typecheck` | TypeScript check |
 | `npm run build` | Merge data, typecheck, build the static site into `dist/` |
 | `npm run preview` | Serve the production build locally |
-| `npm run data:fetch` | Refresh `data/auto.json` from BNR |
+| `npm run data:fetch` | Refresh `data/auto.json` from BNR (rewrites it only when a value changed) |
 | `npm run data:merge` | Rebuild `src/data/defaults.json` from `data/` |
 
 ## Project layout

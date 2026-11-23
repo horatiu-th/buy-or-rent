@@ -49,9 +49,9 @@
       "status": "manual"
     },
     "fixedRate": {
-      "value": 0.055,
+      "value": 0.056,
       "unit": "%",
-      "source": "BNR, dobânda medie la credite noi pentru locuințe (5,6%)",
+      "source": "BNR, dobânda medie la credite noi pentru locuințe în lei, septembrie 2026 (5,6%)",
       "sourceUrl": "https://financiarul.ro/finante-si-banci/costul-anual-mediu-al-creditelor-noi-pentru-locuinte-in-lei-a-scazut-la-6-35-de-la-7-60-acum-un-an/",
       "asOf": "2026-09-30",
       "status": "manual"
@@ -70,6 +70,7 @@
       "source": "BNR, IRCC 2026T2, aplicabil oct.–dec. 2026",
       "sourceUrl": "https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor",
       "asOf": "2026-10-01",
+      "validUntil": "2026-12-31",
       "status": "manual"
     },
     "variableMargin": {
@@ -237,7 +238,7 @@
       "rentSqmEur": {
         "value": 11,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -264,7 +265,7 @@
       "rentSqmEur": {
         "value": 10.3,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -291,7 +292,7 @@
       "rentSqmEur": {
         "value": 8.2,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -318,7 +319,7 @@
       "rentSqmEur": {
         "value": 8.6,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -345,7 +346,7 @@
       "rentSqmEur": {
         "value": 9.4,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -372,7 +373,7 @@
       "rentSqmEur": {
         "value": 9.3,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -399,7 +400,7 @@
       "rentSqmEur": {
         "value": 7,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -426,7 +427,7 @@
       "rentSqmEur": {
         "value": 7.7,
         "unit": "€/m²/lună",
-        "source": "apartamente.org, indice noiembrie 2026",
+        "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"

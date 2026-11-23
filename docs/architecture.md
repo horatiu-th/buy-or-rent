@@ -35,7 +35,7 @@ Pure functions, no React, no I/O. See [How the calculation works](how-it-works.m
 | File | Purpose |
 |---|---|
 | `types.ts` | `Inputs`, `MonthRow`, `Result` and the totals types |
-| `sanitize.ts` | Clamps inputs into the range the model is defined for |
+| `sanitize.ts` | Replaces non-finite inputs and clamps and rounds them into the range the model is defined for; exports the horizon and loan-term limits |
 | `mortgage.ts` | `annuityPayment()` and `amortize()` with the fixed-to-variable switch |
 | `costs.ts` | Acquisition and sale costs |
 | `simulate.ts` | The month-by-month simulation and the break-even month |

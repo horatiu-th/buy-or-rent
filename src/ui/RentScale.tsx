@@ -1,4 +1,4 @@
-import { useId, type CSSProperties } from 'react';
+import { useId, useState, type CSSProperties } from 'react';
 import type { EquivalentRent } from '../engine';
 import { ro } from '../i18n/ro';
 import { formatMoney, type Currency } from './format';
@@ -22,16 +22,22 @@ function niceCeil(x: number) {
 
 /**
  * Where the user's rent sits relative to the rent at which buying and renting end level.
- * The scale end depends only on the threshold (which doesn't depend on the rent itself),
- * so dragging the marker never rescales the bar under the pointer.
+ * The scale ends at twice that threshold, or further out when a typed rent is higher, so the
+ * slider never snaps the rent down. While the slider is in use the end is held, so dragging
+ * never rescales the bar under the pointer.
  */
 export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: Props) {
   const id = useId();
-  const max = niceCeil(eq.kind === 'value' ? eq.rent * 2 : price * 0.01);
+  const [heldMax, setHeldMax] = useState<number | null>(null);
+  const baseMax = niceCeil(eq.kind === 'value' ? eq.rent * 2 : price * 0.01);
+  const max = Math.max(heldMax ?? 0, rent > baseMax ? niceCeil(rent) : baseMax);
   const threshold = eq.kind === 'value' ? eq.rent / max : eq.kind === 'alwaysBuy' ? 0 : 1;
   const marker = Math.min(rent, max) / max;
   const fmt = (v: number) => formatMoney(v, currency, eurRon);
-  const buyerWins = eq.kind === 'alwaysBuy' || (eq.kind === 'value' && rent > eq.rent);
+  const verdict =
+    eq.kind === 'invalid' ? ''
+    : eq.kind === 'alwaysBuy' || (eq.kind === 'value' && rent > eq.rent) ? 'buyer-wins'
+    : 'renter-wins';
 
   // Labels near either end anchor to that end instead of centring, so they never spill off the bar.
   const anchor = (p: number) => (p < 0.2 ? '0%' : p > 0.8 ? '-100%' : '-50%');
@@ -43,7 +49,7 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
   } as CSSProperties;
 
   return (
-    <div className={`rent-scale ${buyerWins ? 'buyer-wins' : 'renter-wins'}`} style={style}>
+    <div className={`rent-scale ${verdict}`.trim()} style={style}>
       <div className="rent-scale-marks" aria-hidden="true">
         <span className="rent-scale-you">
           {ro.scale.yourRent}: {fmt(rent)}
@@ -60,6 +66,8 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
           value={Math.min(rent, max)}
           aria-label={ro.scale.label}
           aria-valuetext={fmt(rent)}
+          onFocus={() => setHeldMax(max)}
+          onBlur={() => setHeldMax(null)}
           onChange={(e) => onRentChange(Number(e.target.value))}
         />
       </div>

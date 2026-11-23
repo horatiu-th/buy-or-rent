@@ -11,6 +11,10 @@
   --buyer-soft: #dce6f8;
   --renter: #b57a00;
   --renter-soft: #f6e9cc;
+  /* The series ochre is only 3.65:1 on white, too faint for small text, so text uses a darker shade. */
+  --renter-text: #8f6000;
+  /* Borders that identify a control need 3:1 against the surface; --line is decoration only. */
+  --control-line: #7d8794;
   --invest: #1d7f66;
   --invest-soft: #d6eee6;
   --focus: #2457c5;
@@ -43,6 +47,8 @@
     --buyer-soft: #1e2f4d;
     --renter: #e0a63a;
     --renter-soft: #3a2e14;
+    --renter-text: #e0a63a;
+    --control-line: #68737f;
     --invest: #4cc3a0;
     --invest-soft: #153a30;
     --focus: #6e9bf0;
@@ -132,8 +138,10 @@ button { cursor: pointer; }
   display: grid; grid-template-columns: minmax(18rem, 23rem) minmax(0, 1fr);
   gap: 3.5rem; padding-top: 2rem; align-items: start;
 }
-/* Results stay in view while the longer inputs column scrolls, so every edit shows its effect. */
-@media (min-width: 861px) {
+/* Results stay in view while the longer inputs column scrolls, so every edit shows its effect.
+   Only on screens tall enough to show the whole column; otherwise the bottom of the charts
+   could never be scrolled into view. */
+@media (min-width: 861px) and (min-height: 1080px) {
   .results-column { position: sticky; top: 1.5rem; }
 }
 @media (max-width: 860px) {
@@ -209,7 +217,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 }
 .help-popover[hidden] { display: none; }
 .help-popover .source { display: block; color: var(--muted); }
-.source-stale { color: var(--renter); }
+.source-stale { color: var(--renter-text); }
 @keyframes popover-in { from { opacity: 0; transform: translateY(4px); } }
 /* On phones there's no room to the right of the icon, so the popover starts at the label instead. */
 @media (max-width: 560px) {
@@ -220,7 +228,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 
 .help {
   flex: none; display: inline-grid; place-items: center; width: 1.15rem; height: 1.15rem; padding: 0;
-  border: 1px solid var(--line); border-radius: 50%; background: none; color: var(--muted);
+  border: 1px solid var(--control-line); border-radius: 50%; background: none; color: var(--muted);
   font-size: 0.7rem; font-weight: 700; font-style: italic; line-height: 1;
 }
 .help:hover, .help[aria-expanded='true'] { border-color: var(--muted); color: var(--ink); }
@@ -251,6 +259,8 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 }
 .switch input:checked { background: var(--ink); }
 .switch input:checked::after { transform: translateX(0.9rem); }
+.switch:has(input:disabled) { cursor: default; opacity: 0.6; }
+.switch input:disabled { cursor: default; }
 .field-bool { grid-template-columns: minmax(0, 1fr); }
 
 
@@ -277,7 +287,11 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .rent-scale-track { position: relative; height: 1.5rem; display: flex; align-items: center; }
 .rent-scale-track input[type='range'] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 0.6rem; margin: 0; border-radius: 999px;
-  background: linear-gradient(to right, var(--invest-soft) 0 var(--t), var(--buyer-soft) var(--t) 100%);
+  /* The two halves share a similar lightness, so the renter half is also striped: the split reads
+     without relying on hue, and both halves keep 3:1 against the page. */
+  background:
+    linear-gradient(to right, transparent 0 var(--t), var(--buyer) var(--t) 100%),
+    repeating-linear-gradient(135deg, var(--invest) 0 3px, var(--invest-soft) 3px 6px);
   cursor: pointer;
 }
 .rent-scale-track input[type='range']::-webkit-slider-thumb {
@@ -294,6 +308,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .rent-scale-threshold {
   position: absolute; left: var(--t); top: 0; bottom: 0; width: 2px; transform: translateX(-1px);
   background: var(--ink); border-radius: 1px; pointer-events: none;
+  box-shadow: 0 0 0 2px var(--surface);
 }
 .rent-scale-legend {
   position: relative; display: flex; justify-content: space-between; margin-top: 0.5rem;
@@ -336,6 +351,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 [role='tab'][aria-selected='true'] { color: var(--ink); border-bottom-color: var(--ink); }
 .chart-toolbar .switch { font-size: var(--step--1); color: var(--muted); padding: 0.4rem 0; }
 .chart-panel { min-height: 340px; }
+.chart-figure { margin: 0; }
 
 .chart-tip {
   background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
@@ -347,8 +363,9 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .swatch { flex: none; width: 0.9rem; height: 3px; border-radius: 2px; background: currentColor; }
 .swatch.dashed { background: repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 7px); }
 
-.sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; }
-.sensitivity { border-collapse: collapse; width: 100%; font-size: var(--step-0); }
+.table-scroll { overflow-x: auto; }
+.sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; caption-side: top; text-align: left; }
+.sensitivity { border-collapse: collapse; width: 100%; min-width: 28rem; font-size: var(--step-0); }
 .sensitivity th, .sensitivity td { padding: 0.65rem 0.75rem; text-align: right; border-bottom: 1px solid var(--line); }
 .sensitivity thead th { font-size: var(--step--1); font-weight: 500; color: var(--muted); }
 .sensitivity thead th:first-child { text-align: left; }
@@ -356,7 +373,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 /* Amounts stay in ink; a side bar marks the winner. The comparison is against the investing renter, hence green. */
 .sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
 .sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--invest); }
-.sensitivity tbody tr:nth-child(2) td:nth-of-type(2) { font-weight: 650; }
+.sensitivity td.is-base { font-weight: 650; }
 
 .site-footer {
   margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
@@ -379,5 +396,5 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }

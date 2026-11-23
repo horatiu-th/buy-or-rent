@@ -8,6 +8,7 @@ function renderHeadline(props: Partial<Parameters<typeof Headline>[0]> = {}) {
     <Headline
       eq={{ kind: 'value', rent: 2500 }}
       breakEvenMonth={27}
+      buyerEverAhead
       sale={sale}
       currency="RON"
       eurRon={5}
@@ -26,6 +27,38 @@ describe('Headline', () => {
     ).toBeInTheDocument();
   });
 
+  it('says buying is ahead from the start instead of after zero months', () => {
+    renderHeadline({ breakEvenMonth: 0 });
+    expect(screen.getByText(/trece în față|e în față/)).toHaveTextContent(
+      'Pentru cifrele tale, cumpărarea e în față de la început și rămâne în față până la final.',
+    );
+    expect(screen.queryByText(/după 0 luni/)).not.toBeInTheDocument();
+  });
+
+  it('says renting wins over the whole horizon only when the buyer is never ahead', () => {
+    renderHeadline({ breakEvenMonth: null, buyerEverAhead: false });
+    expect(screen.getByText('Pentru cifrele tale, închirierea rămâne mai avantajoasă pe tot orizontul.')).toBeInTheDocument();
+  });
+
+  it('says renting wins at the end when the buyer led only part of the way', () => {
+    renderHeadline({ breakEvenMonth: null, buyerEverAhead: true });
+    expect(screen.queryByText(/pe tot orizontul/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Pentru cifrele tale, închirierea e mai avantajoasă la final, deși cumpărarea a fost în față o vreme.'),
+    ).toBeInTheDocument();
+  });
+
+  it('asks to check the inputs when they cannot be computed', () => {
+    renderHeadline({ eq: { kind: 'invalid' } });
+    expect(screen.getByTestId('headline')).toHaveTextContent('Verifică valorile introduse');
+    expect(screen.queryByText(/trece în față/)).not.toBeInTheDocument();
+  });
+
+  it('rounds a fractional short-hold threshold to whole months', () => {
+    renderHeadline({ sale: { ...sale, saleTaxShortHoldYears: 3.3 } });
+    expect(screen.getByText(NOTE)).toHaveTextContent('scade după 3 ani și 4 luni,');
+  });
+
   it('explains the sale-tax step with a grammatical duration', () => {
     renderHeadline();
     expect(screen.getByText(NOTE)).toHaveTextContent('scade după 3 ani,');
@@ -39,6 +72,7 @@ describe('Headline', () => {
   it.each([
     ['sale costs are excluded', { sale: { ...sale, includeSaleCosts: false } }],
     ['there is no break-even', { breakEvenMonth: null }],
+    ['the buyer is ahead from the start', { breakEvenMonth: 0 }],
     ['the short-hold tax is not higher', { sale: { ...sale, saleTaxShortPct: 0.01 } }],
     ['there is no short-hold threshold', { sale: { ...sale, saleTaxShortHoldYears: 0 } }],
   ])('hides the sale-tax note when %s', (_, props) => {

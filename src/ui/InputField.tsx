@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { SourcedValue } from '../data/schema';
 import { ro } from '../i18n/ro';
-import type { FieldDef } from './fields';
-import type { Currency } from './format';
+import { isWholeField, normalizeField, type FieldDef } from './fields';
+import { unitWord, type Currency } from './format';
+import { NumberInput } from './NumberInput';
 
 interface Props {
   def: FieldDef;
@@ -29,21 +30,36 @@ function fromDisplay(def: FieldDef, v: number, currency: Currency, eurRon: numbe
   return v;
 }
 
-const suffix = (def: FieldDef, currency: Currency) =>
-  ({ pct: '%', money: currency === 'EUR' ? '€' : 'lei', years: 'ani', months: 'luni', bool: '' })[def.unit];
+// ISO dates compare correctly as strings.
+const today = () => new Date().toISOString().slice(0, 10);
+
+/** The nearest 1, 2 or 5 × 10ⁿ, so a lei step converted to euro still moves in round amounts. */
+function roundStep(x: number) {
+  const pow = 10 ** Math.floor(Math.log10(x));
+  const m = x / pow;
+  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * pow;
+}
+
+const suffix = (def: FieldDef, currency: Currency, n: number) =>
+  ({
+    pct: '%',
+    money: currency === 'EUR' ? '€' : 'lei',
+    years: unitWord(n, 'an', 'ani'),
+    months: unitWord(n, 'lună', 'luni'),
+    bool: '',
+  })[def.unit];
 
 export function InputField({ def, value, isOverridden, source, currency, eurRon, onChange, onReset, disabled }: Props) {
   const id = useId();
   const helpId = `${id}-help`;
   const sourceId = `${id}-source`;
   const text = ro.fields[def.key];
-  const [draft, setDraft] = useState('');
-  const [focused, setFocused] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const anchorRef = useRef<HTMLSpanElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
-  // A popover should get out of the way the moment attention moves elsewhere.
+  // A popover should get out of the way the moment attention moves elsewhere: a click outside,
+  // Escape, or focus leaving it (handled on the anchor below).
   useEffect(() => {
     if (!showHelp) return;
     const onPointer = (e: PointerEvent) => {
@@ -62,15 +78,11 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     };
   }, [showHelp]);
 
-  // Keep the draft as a string while typing so "0." or "" aren't clobbered mid-edit.
-  useEffect(() => {
-    if (!focused && typeof value === 'number') setDraft(String(toDisplay(def, value, currency, eurRon)));
-  }, [value, focused, def, currency, eurRon]);
-
   const sourceTag = source && !isOverridden && (
     <small id={sourceId} className={`source source-${source.status}`}>
       {ro.source}: {source.sourceUrl ? <a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.source}</a> : source.source}, {source.asOf}
       {source.status === 'stale' && ` · ${ro.stale}`}
+      {source.validUntil !== undefined && source.validUntil < today() && ` · ${ro.toCheck}`}
     </small>
   );
 
@@ -82,7 +94,13 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
 
   const popoverId = `${id}-popover`;
   const helpToggle = (
-    <span className="help-anchor" ref={anchorRef}>
+    <span
+      className="help-anchor"
+      ref={anchorRef}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setShowHelp(false);
+      }}
+    >
       <button
         ref={toggleRef}
         type="button"
@@ -121,35 +139,30 @@ export function InputField({ def, value, isOverridden, source, currency, eurRon,
     );
   }
 
-  const min = def.min !== undefined ? toDisplay(def, def.min, currency, eurRon) : undefined;
-  const max = def.max !== undefined ? toDisplay(def, def.max, currency, eurRon) : undefined;
-  // A lei step converted to euro gives odd increments (e.g. 196 €), so euro money inputs step freely.
-  const step = def.unit === 'money' && currency === 'EUR' ? 'any'
-    : def.step !== undefined ? toDisplay(def, def.step, currency, eurRon) : undefined;
+  // A lei step converted to euro gives odd increments (e.g. 196 €), so euro amounts step by a round number.
+  const step = def.step === undefined ? undefined
+    : def.unit === 'money' && currency === 'EUR' ? roundStep(def.step / eurRon)
+    : toDisplay(def, def.step, currency, eurRon);
 
   return (
     <div className={`field${isOverridden ? ' is-edited' : ''}${disabled ? ' is-disabled' : ''}`}>
       {head(<label htmlFor={id}>{text.label}</label>)}
       <div className="number-box">
-        <input
+        <NumberInput
           id={id}
           aria-describedby={describedBy}
           disabled={disabled}
-          type="number"
-          inputMode="decimal"
-          value={draft}
-          min={min}
-          max={max}
+          kind={def.unit === 'money' ? 'amount' : 'decimal'}
+          whole={isWholeField(def)}
           step={step}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            const n = Number(e.target.value);
-            if (e.target.value !== '' && Number.isFinite(n)) onChange(fromDisplay(def, n, currency, eurRon));
+          value={toDisplay(def, value as number, currency, eurRon)}
+          onValue={(n, phase) => {
+            const v = fromDisplay(def, n, currency, eurRon);
+            if (phase === 'typing' && def.min !== undefined && v < def.min) return;
+            onChange(normalizeField(def, v));
           }}
         />
-        <span className="suffix" aria-hidden="true">{suffix(def, currency)}</span>
+        <span className="suffix" aria-hidden="true">{suffix(def, currency, value as number)}</span>
       </div>
     </div>
   );

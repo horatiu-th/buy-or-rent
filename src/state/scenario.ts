@@ -1,7 +1,8 @@
 import type { Inputs } from '../engine';
 import type { PropertyType } from '../data/defaults';
+import { DEFAULT_CITY_ID } from '../data/schema';
 import type { Currency } from '../ui/format';
-import { FIELDS } from '../ui/fields';
+import { FIELDS, normalizeField } from '../ui/fields';
 
 export interface Scenario {
   cityId: string;
@@ -13,7 +14,7 @@ export interface Scenario {
 }
 
 export const DEFAULT_SCENARIO: Scenario = {
-  cityId: 'bucuresti',
+  cityId: DEFAULT_CITY_ID,
   propertyType: 'existing',
   sqm: 55,
   currency: 'RON',
@@ -26,6 +27,25 @@ export const SQM_MIN = 10;
 export const SQM_MAX = 500;
 
 const FIELD_DEFS = new Map(FIELDS.map((f) => [f.key, f]));
+
+export const clampSqm = (n: number) => Math.min(SQM_MAX, Math.max(SQM_MIN, n));
+
+/** Fields whose defaults scale with the home itself: its city, type and area. */
+const PLACE_DERIVED = ['price', 'rent'] as const satisfies readonly (keyof Inputs)[];
+
+/**
+ * Applies a change to the city, type, area or view. A new place means a different home, so an
+ * edited price or rent is dropped and the new place's own values show; other edits (loan terms,
+ * growth rates) are about the financing and the market rather than this home, so they stay.
+ */
+export function applyScenarioPatch(s: Scenario, patch: Partial<Omit<Scenario, 'overrides'>>): Scenario {
+  const next = { ...s, ...patch };
+  const placeChanged = next.cityId !== s.cityId || next.propertyType !== s.propertyType || next.sqm !== s.sqm;
+  if (!placeChanged || !PLACE_DERIVED.some((k) => k in s.overrides)) return next;
+  const overrides = { ...s.overrides };
+  for (const k of PLACE_DERIVED) delete overrides[k];
+  return { ...next, overrides };
+}
 
 export function encodeScenario(s: Scenario): URLSearchParams {
   const p = new URLSearchParams();
@@ -51,7 +71,7 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
   const sqmNum = Number(rawSqm);
   const sqm = rawSqm === null || rawSqm === '' || !Number.isFinite(sqmNum)
     ? d.sqm
-    : Math.min(SQM_MAX, Math.max(SQM_MIN, sqmNum));
+    : clampSqm(sqmNum);
   const overrides: Partial<Inputs> = {};
   for (const [k, raw] of p.entries()) {
     const def = FIELD_DEFS.get(k as keyof Inputs);
@@ -59,11 +79,9 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
     if (def.unit === 'bool') {
       if (raw === '0' || raw === '1') (overrides as Record<string, boolean>)[k] = raw === '1';
     } else {
-      let n = Number(raw);
+      const n = Number(raw);
       if (raw === '' || !Number.isFinite(n)) continue;
-      if (def.min !== undefined) n = Math.max(def.min, n);
-      if (def.max !== undefined) n = Math.min(def.max, n);
-      (overrides as Record<string, number>)[k] = n;
+      (overrides as Record<string, number>)[k] = normalizeField(def, n);
     }
   }
   const city = p.get('oras');

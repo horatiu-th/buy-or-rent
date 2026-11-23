@@ -1,4 +1,5 @@
-import { sanitizeInputs } from './sanitize';
+import { MAX_HORIZON_YEARS, MAX_LOAN_TERM_YEARS, MIN_HORIZON_YEARS, MIN_LOAN_TERM_YEARS, sanitizeInputs } from './sanitize';
+import type { Inputs } from './types';
 import { simulate } from './simulate';
 import { baseInputs } from './fixtures';
 
@@ -35,14 +36,51 @@ describe('sanitizeInputs', () => {
     const s = sanitizeInputs({
       ...baseInputs, price: -1, rent: -1, notaryPct: -1, registryPct: -1, bankFees: -1, propertyTaxPct: -1,
       homeInsuranceAnnual: -1, lifeInsurancePct: -1, maintenancePct: -1, renterInsuranceAnnual: -1,
-      depositMonths: -1, investTaxRate: -1, saleAgencyPct: -1, saleTaxShortPct: -1, saleTaxLongPct: -1,
-      saleTaxShortHoldYears: -1,
+      depositMonths: -1, investTaxRate: -1, savingsTaxRate: -1, saleAgencyPct: -1, saleTaxShortPct: -1,
+      saleTaxLongPct: -1, saleTaxShortHoldYears: -1,
     });
     expect(s).toMatchObject({
       price: 0, rent: 0, notaryPct: 0, registryPct: 0, bankFees: 0, propertyTaxPct: 0, homeInsuranceAnnual: 0,
       lifeInsurancePct: 0, maintenancePct: 0, renterInsuranceAnnual: 0, depositMonths: 0, investTaxRate: 0,
-      saleAgencyPct: 0, saleTaxShortPct: 0, saleTaxShortHoldYears: 0, saleTaxLongPct: 0,
+      savingsTaxRate: 0, saleAgencyPct: 0, saleTaxShortPct: 0, saleTaxShortHoldYears: 0, saleTaxLongPct: 0,
     });
+  });
+
+  it('floors loan rates at zero, so the bank never pays the borrower', () => {
+    const s = sanitizeInputs({ ...baseInputs, fixedRate: -0.02, ircc: -0.01, variableMargin: -0.03 });
+    expect(s).toMatchObject({ fixedRate: 0, ircc: 0, variableMargin: 0 });
+  });
+
+  it('caps tax rates at 100%', () => {
+    const s = sanitizeInputs({
+      ...baseInputs, investTaxRate: 1.5, savingsTaxRate: 2, saleTaxShortPct: 1.1, saleTaxLongPct: 3,
+    });
+    expect(s).toMatchObject({ investTaxRate: 1, savingsTaxRate: 1, saleTaxShortPct: 1, saleTaxLongPct: 1 });
+  });
+
+  it('caps the horizon and the loan term at the longest periods the interface offers', () => {
+    const s = sanitizeInputs({ ...baseInputs, horizonYears: 500, loanTermYears: 200 });
+    expect(s.horizonYears).toBe(MAX_HORIZON_YEARS);
+    expect(s.loanTermYears).toBe(MAX_LOAN_TERM_YEARS);
+  });
+
+  it('rounds periods counted in whole years or months', () => {
+    const s = sanitizeInputs({ ...baseInputs, horizonYears: 9.6, loanTermYears: 24.4, fixedYears: 2.5, depositMonths: 1.7 });
+    expect(s).toMatchObject({ horizonYears: 10, loanTermYears: 24, fixedYears: 3, depositMonths: 2 });
+  });
+
+  it('replaces NaN and infinite numbers before clamping', () => {
+    const numericKeys = (Object.keys(baseInputs) as (keyof Inputs)[]).filter((k) => typeof baseInputs[k] === 'number');
+    for (const bad of [NaN, Infinity, -Infinity]) {
+      const raw = { ...baseInputs } as Record<keyof Inputs, unknown>;
+      for (const k of numericKeys) raw[k] = bad;
+      const s = sanitizeInputs(raw as Inputs);
+      for (const k of numericKeys) expect(Number.isFinite(s[k]), `${k} from ${bad}`).toBe(true);
+      expect(s.horizonYears).toBe(MIN_HORIZON_YEARS);
+      expect(s.loanTermYears).toBe(MIN_LOAN_TERM_YEARS);
+      expect(s.price).toBe(0);
+      expect(s.investReturn).toBe(0);
+    }
   });
 });
 
@@ -65,5 +103,23 @@ describe('simulate with out-of-range inputs', () => {
     expect(allFinite({ ...baseInputs, investReturn: -1 })).toBe(true);
     expect(allFinite({ ...baseInputs, inflation: -1 })).toBe(true);
     expect(Number.isFinite(last(simulate({ ...baseInputs, propertyGrowth: -2 }).rows).buyerNetWorth)).toBe(true);
+  });
+
+  it('stays finite when any single input is NaN or infinite', () => {
+    for (const k of Object.keys(baseInputs) as (keyof Inputs)[]) {
+      if (typeof baseInputs[k] !== 'number') continue;
+      for (const bad of [NaN, Infinity, -Infinity]) expect(allFinite({ ...baseInputs, [k]: bad }), `${k}=${bad}`).toBe(true);
+    }
+  });
+
+  it('runs no longer than the maximum horizon', () => {
+    expect(simulate({ ...baseInputs, horizonYears: 1e6 }).rows).toHaveLength(MAX_HORIZON_YEARS * 12 + 1);
+  });
+
+  it('treats a fixed period longer than the loan as fixed for the whole term', () => {
+    const longer = simulate({ ...baseInputs, fixedYears: 40, loanTermYears: 30 });
+    const whole = simulate({ ...baseInputs, fixedYears: 30, loanTermYears: 30 });
+    expect(longer.buyer.interest).toBeCloseTo(whole.buyer.interest, 6);
+    expect(longer.rows[360].loanBalance).toBe(0);
   });
 });

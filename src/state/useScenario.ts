@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Inputs } from '../engine';
 import { loadDefaults } from '../data/defaults';
-import { decodeScenario, encodeScenario, DEFAULT_SCENARIO, type Scenario } from './scenario';
+import { applyScenarioPatch, decodeScenario, encodeScenario, DEFAULT_SCENARIO, type Scenario } from './scenario';
 
 const CITY_IDS = Object.keys(loadDefaults().cities);
 
@@ -17,7 +17,7 @@ export function useScenario() {
   }, [scenario]);
 
   const update = useCallback((patch: Partial<Omit<Scenario, 'overrides'>>) => {
-    setScenario((s) => ({ ...s, ...patch }));
+    setScenario((s) => applyScenarioPatch(s, patch));
   }, []);
 
   const setField = useCallback(<K extends keyof Inputs>(key: K, value: Inputs[K]) => {

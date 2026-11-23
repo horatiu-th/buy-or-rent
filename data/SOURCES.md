@@ -9,8 +9,8 @@ Every default is a starting point for the user, not a forecast. Values marked **
 | Key | Value | Source | Notes |
 |---|---|---|---|
 | `eurRon` | 5.3485 | [BNR reference rate](https://curs.bnr.ro/nbrfxrates.xml), 2026-11-23 | Refreshed automatically once the pipeline runs. |
-| `ircc` | 5.57% | [BNR, IRCC page](https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor): quarterly index 2026T2 | The index computed for a quarter applies two quarters later, so 2026T2 applies 2026-10-01 to 2026-12-31. **5.61% applies from 2027-01-01** (reported by [cursbnr.ro](https://www.cursbnr.ro/ircc); not yet on BNR's page on 2026-11-23): update on or after that date. |
-| `fixedRate` | 5.5% | BNR average rate on new RON housing loans: 5.6% (Sep 2026), via [Financiarul](https://financiarul.ro/finante-si-banci/costul-anual-mediu-al-creditelor-noi-pentru-locuinte-in-lei-a-scazut-la-6-35-de-la-7-60-acum-un-an/) | Bank offers range 4.65–6.4%; the lowest require salary transfer and other conditions. |
+| `ircc` | 5.57% | [BNR, IRCC page](https://www.bnr.ro/1974-indicele-de-referinta-pentru-creditele-consumatorilor): quarterly index 2026T2 | The index computed for a quarter applies two quarters later, so 2026T2 applies 2026-10-01 to 2026-12-31 (`validUntil: 2026-12-31`; the merge warns after that). **Unverified:** [cursbnr.ro](https://www.cursbnr.ro/ircc), a third-party site, lists 5.61% from 2027-01-01; this was not on BNR's own page on 2026-11-23. Confirm it on the BNR page before updating, on or after that date. |
+| `fixedRate` | 5.6% | BNR average interest rate on new RON housing loans: 5.6% (Sep 2026), via [Financiarul](https://financiarul.ro/finante-si-banci/costul-anual-mediu-al-creditelor-noi-pentru-locuinte-in-lei-a-scazut-la-6-35-de-la-7-60-acum-un-an/) (checked 2026-11-23; the 6.35% in the article's headline is a separate "cost anual mediu" series, not the interest rate) | The BNR average covers all new housing loans, not only fixed-rate ones. Bank offers range 4.65–6.4%; the lowest require salary transfer and other conditions. |
 | `fixedYears` | 5 | Common 3–5 year fixed offers ([ipotecare.ro via cursbnr](https://www.cursbnr.ro/dobanda-medie-credite-ipotecare-lei)) | |
 | `variableMargin` | 2.5% | Bank margins 1.9–3.5% over IRCC; ipotecare.ro average variable rate (8.05% vs IRCC 5.56%, Aug 2026) implies ~2.5% | |
 | `downPaymentPct` | 15% | [BNR Regulation 17/2012](https://www.avocatnet.ro/articol_31655/Regulamentul-BNR-nr-17-2012-unele-conditii-de-creditare.html): LTV cap 85% for RON loans | Banks may ask 25% if the buyer already owns a home. Noua Casă (state-guaranteed) allows 5% up to €70k; not added as a preset because the 2026 guarantee ceiling ends 2026-12-31 and changes are pending in Parliament. |
@@ -69,7 +69,7 @@ Every default is a starting point for the user, not a forecast. Values marked **
 | National | 2,019 | 2,019 | 8.1 (estimate) |
 
 - Sale prices (new / existing): [Storia analysis, July 2026](https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie). Average asking prices for 1–3 room flats.
-- Rent: [apartamente.org index, November 2026](https://apartamente.org/raport-piata). Median asking rent, deduplicated across portals. The November edition was still being recalculated until 2026-12-01.
+- Rent: [apartamente.org index, November 2026](https://apartamente.org/raport-piata). Median asking rent, deduplicated across portals. **Provisional:** the figures were read on 2026-11-23 (their `asOf`), while the November edition was still being recalculated until 2026-12-01. Re-check them after that date; the final figures may differ.
 - National sale price: imobiliare.ro index, September 2026 (via [Financiarul](https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/)), not split by new/existing, so used for both.
 - National rent is an **estimate**: the national price × the average gross rental yield of the eight cities (4.83%/year) ÷ 12.
 
@@ -78,6 +78,16 @@ Known oddities, kept as published:
 - Cluj rent looks low relative to its prices (3.8% gross yield vs ~5% elsewhere).
 - Storia reports averages; imobiliare.ro and apartamente.org report medians. Brașov new builds differ most between sources (2,331 vs ~2,800).
 - Asking prices are above transaction prices; the negotiation discount is not published.
+
+### VAT on new builds (unverified)
+
+The calculator treats every price as the total the buyer pays, VAT included. Whether that holds for the new-build figures is **not verified**:
+
+- Storia's [July 2026 analysis](https://www.storia.ro/blog/newsroom/analiza-storia-preturile-apartamentelor-au-crescut-in-medie-cu-6-fata-de-anul-trecut-si-s-au-mentinut-relativ-stabile-fata-de-iunie) says only that it uses "prețurile medii solicitate de vânzători în anunțurile publicate pe Storia". It does not mention VAT.
+- Storia's [guide to new-home costs](https://www.storia.ro/blog/uncategorized/costurile-unei-locuinte-noi) (October 2026) tells buyers to "verifică dacă prețul din ofertă include TVA", so listings evidently differ. Some listings state "TVA inclus".
+- Standard VAT on new homes is 21%. The reduced 9% rate survives only for transitional contracts. Storia's guide says that window ended on 2026-07-31; [StartupCafe](https://startupcafe.ro/termenul-pentru-tva-de-9-la-locuinte-prelungit-oficial-descarca-legea-161-2026-ce-aduce-nou-si-cine-poate-cere-restituirea-diferentei-de-tva-104534) (2026-08-04) reports that Law 161/2026 extended it to deliveries by 2026-09-30. Neither was checked against the law's text.
+
+If a large share of new-build listings is net of VAT, new-build prices here are too low by up to 21%. The values are kept as published until this is settled. Existing homes sold by individuals are generally outside VAT, so their prices should be unaffected.
 
 ## Automated collection
 

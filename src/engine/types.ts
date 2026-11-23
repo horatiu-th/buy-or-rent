@@ -82,6 +82,11 @@ export interface Result {
   rows: MonthRow[];
   buyer: BuyerTotals;
   renter: RenterTotals;
-  /** First month from which the buyer stays ahead through the horizon; null if never. */
+  /**
+   * First month from which the buyer stays ahead through the horizon: 0 if ahead from the start,
+   * null if behind at the horizon. A tie counts as ahead.
+   */
   breakEvenMonth: number | null;
+  /** Whether the buyer is ahead (or level) in any month, including month 0, even if the lead is later lost. */
+  buyerEverAhead: boolean;
 }

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { SENSITIVITY_STEPS } from '../engine';
 import { ro } from '../i18n/ro';
 import { formatMoney, type Currency } from './format';
@@ -5,25 +6,38 @@ import { formatMoney, type Currency } from './format';
 interface Props { grid: number[][]; baseGrowth: number; baseReturn: number; currency: Currency; eurRon: number }
 
 const pct = (x: number) => `${(x * 100).toLocaleString('ro-RO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+const BASE = SENSITIVITY_STEPS.indexOf(0);
 
 export function SensitivityTable({ grid, baseGrowth, baseReturn, currency, eurRon }: Props) {
+  const captionId = useId();
   return (
-    <div>
-      <p className="sensitivity-intro">{ro.sensitivityHelp}</p>
+    // Focusable so keyboard users can scroll it sideways when it is wider than a phone screen.
+    <div className="table-scroll" role="region" aria-labelledby={captionId} tabIndex={0}>
       <table className="sensitivity">
+        <caption id={captionId} className="sensitivity-intro">{ro.sensitivityHelp}</caption>
         <thead>
           <tr>
-            <th>{ro.sensitivityRows} ↓ / {ro.sensitivityCols} →</th>
-            {SENSITIVITY_STEPS.map((d) => <th key={d}>{pct(baseReturn + d)}</th>)}
+            <th scope="col">{ro.sensitivityRows} ↓ / {ro.sensitivityCols} →</th>
+            {SENSITIVITY_STEPS.map((d) => <th scope="col" key={d}>{pct(baseReturn + d)}</th>)}
           </tr>
         </thead>
         <tbody>
           {grid.map((row, i) => (
             <tr key={i}>
-              <th>{pct(baseGrowth + SENSITIVITY_STEPS[i])}</th>
-              {row.map((gap, j) => (
-                <td key={j} className={gap >= 0 ? 'buy-wins' : 'rent-wins'}>{formatMoney(gap, currency, eurRon)}</td>
-              ))}
+              <th scope="row">{pct(baseGrowth + SENSITIVITY_STEPS[i])}</th>
+              {row.map((gap, j) => {
+                const buyWins = gap >= 0;
+                const isBase = i === BASE && j === BASE;
+                return (
+                  <td key={j} className={`${buyWins ? 'buy-wins' : 'rent-wins'}${isBase ? ' is-base' : ''}`}>
+                    {/* The sign says who wins for those who can't tell the side bar's colour. */}
+                    {gap > 0 && '+'}{formatMoney(gap, currency, eurRon)}
+                    <span className="visually-hidden">
+                      {' '}({buyWins ? ro.sensitivityBuyWins : ro.sensitivityRentWins}{isBase && `, ${ro.sensitivityBase}`})
+                    </span>
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

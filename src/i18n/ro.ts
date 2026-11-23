@@ -31,22 +31,44 @@ export const ro = {
   },
   resultsLabel: 'Rezultate',
   breakEvenMark: 'Cumpărarea trece în față',
-  realValues: (currency: Currency) => `Ajustat cu inflația (${currency === 'EUR' ? '€' : 'lei'} de azi)`,
-  nominalNote: 'Valori nominale',
+  // Values are divided by Romanian inflation; euro amounts are then converted at today's fixed rate,
+  // so "euro of today" would wrongly suggest euro-area inflation.
+  realValues: (currency: Currency) =>
+    currency === 'EUR'
+      ? 'Ajustat cu inflația din România (lei de azi, convertiți în € la cursul de azi)'
+      : 'Ajustat cu inflația din România (lei de azi)',
+  nominalNote: 'Valori nominale: aici sumele nu sunt ajustate cu inflația.',
   source: 'sursa',
   stale: 'date vechi',
+  toCheck: 'de verificat',
   assumptions: 'Valorile implicite sunt ipoteze, nu prognoze. Verifică-le pentru situația ta.',
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
   renterInvesting: 'Chiriaș care investește',
   renterCash: 'Chiriaș cu economii la depozit',
-  year: 'An',
+  chartStart: 'La început',
+  afterTime: (d: string) => `După ${d}`,
+  monthN: (n: number) => `Luna ${n}`,
+  charts: {
+    netWorth: 'Grafic: averea netă în timp',
+    monthly: 'Grafic: costurile lunare în timp',
+    breakdown: 'Grafic: unde se duc banii',
+    netWorthSummary: (span: string, buyer: string, renter: string, cash: string) =>
+      `Averea netă lună de lună, pe ${span}. La final: cumpărător ${buyer}, chiriaș care investește ${renter}, chiriaș cu economii la depozit ${cash}.`,
+    breakEvenSummary: (after: string) => `Cumpărarea trece definitiv în față după ${after}.`,
+    monthlySummary: (firstBuyer: string, firstRenter: string, lastBuyer: string, lastRenter: string) =>
+      `Costul lunar în prima lună: cumpărător ${firstBuyer}, chiriaș ${firstRenter}. În ultima lună: cumpărător ${lastBuyer}, chiriaș ${lastRenter}.`,
+    breakdownSummary: (items: string) => `Totaluri pe tot orizontul, în valori nominale. ${items}.`,
+  },
   headlineValue: (rent: string) => `Cumpărarea merită dacă o chirie similară e peste ${rent}/lună.`,
   headlineAlwaysBuy: 'Cu aceste ipoteze, cumpărarea câștigă chiar și la chirie zero.',
   headlineAlwaysRent: 'Cu aceste ipoteze, închirierea câștigă la orice chirie realistă.',
   verdictBuy: (after: string) =>
     `Pentru cifrele tale, cumpărarea trece în față după ${after} și rămâne în față până la final.`,
+  verdictBuyFromStart: 'Pentru cifrele tale, cumpărarea e în față de la început și rămâne în față până la final.',
   verdictRent: 'Pentru cifrele tale, închirierea rămâne mai avantajoasă pe tot orizontul.',
+  verdictRentAtEnd: 'Pentru cifrele tale, închirierea e mai avantajoasă la final, deși cumpărarea a fost în față o vreme.',
+  headlineInvalid: 'Verifică valorile introduse: calculul nu poate fi făcut cu ele.',
   saleTaxNote: (after: string) =>
     `Averea cumpărătorului presupune vânzarea în luna respectivă. Impozitul la vânzare scade după ${after}, ceea ce poate muta momentul în care cumpărarea devine avantajoasă.`,
   tabs: {
@@ -61,7 +83,10 @@ export const ro = {
     saleCosts: 'Costuri vânzare', investmentTax: 'Impozit investiții', rent: 'Chirie',
   },
   sensitivityHelp:
-    'Diferența de avere netă la final (cumpărător − chiriașul care investește) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale.',
+    'Diferența de avere netă la final (cumpărător − chiriașul care investește) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale. Un plus înseamnă că cumpărarea câștigă, un minus că închirierea câștigă; în centru sunt valorile tale.',
+  sensitivityBuyWins: 'cumpărarea câștigă',
+  sensitivityRentWins: 'închirierea câștigă',
+  sensitivityBase: 'valorile tale',
   sensitivityRows: 'Creștere preț locuință',
   sensitivityCols: 'Randament investiții',
   groups: {
@@ -98,7 +123,7 @@ export const ro = {
     maintenancePct: { label: 'Întreținere și reparații', help: 'Procent anual din valoarea locuinței.' },
     propertyGrowth: { label: 'Creștere preț locuință', help: 'Creștere anuală presupusă.' },
     rentGrowth: { label: 'Creștere chirie', help: 'Creștere anuală presupusă.' },
-    inflation: { label: 'Inflație', help: 'Folosită doar pentru afișarea în lei de azi.' },
+    inflation: { label: 'Inflație', help: 'Inflația anuală din România. Folosită doar pentru afișarea în lei de azi: sumele viitoare sunt readuse la puterea de cumpărare de azi, iar în € sunt apoi convertite la cursul de azi.' },
     investReturn: { label: 'Randament investiții', help: 'Randament anual brut al banilor neinvestiți în locuință.' },
     investTaxRate: { label: 'Impozit pe câștig', help: 'Aplicat câștigului din investiții la final. În 2026: 3% prin broker românesc pentru dețineri de peste un an, 16% prin broker străin.' },
     savingsRate: { label: 'Dobândă depozit', help: 'Dobânda anuală a chiriașului care își ține economiile într-un depozit bancar în loc să investească.' },

@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useMemo } from 'react';
-import { buildInputs, loadDefaults } from './data/defaults';
+import { buildInputs, loadDefaults, resolveCityId } from './data/defaults';
 import type { Inputs } from './engine';
 import { ro } from './i18n/ro';
 import { CityPicker } from './ui/CityPicker';
@@ -19,7 +19,9 @@ const CURRENCIES = [
 
 export default function App() {
   const { scenario, update, setField, resetField, resetAll } = useScenario();
-  const { cityId, propertyType, sqm, overrides, currency, real } = scenario;
+  const { propertyType, sqm, overrides, currency, real } = scenario;
+  // One resolved id for the select, the defaults and the sources, so they can never disagree.
+  const cityId = resolveCityId(scenario.cityId, data);
   // Narrow deps so toggling currency or real values doesn't rebuild inputs and rerun the simulation.
   const inputs: Inputs = useMemo(
     () => ({ ...buildInputs(data, cityId, propertyType, sqm), ...overrides }),

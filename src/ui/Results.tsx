@@ -47,15 +47,22 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
   const [tab, setTab] = useState<Tab>('netWorth');
   const panelId = useId();
   const result = useMemo(() => simulate(inputs), [inputs]);
-  const eq = useMemo(() => equivalentRent(inputs), [inputs]);
+  // The break-even rent doesn't depend on the rent, and it is the costliest figure here (a search
+  // over many simulations), so it is recomputed only when something other than the rent changes.
+  const rentFreeKey = JSON.stringify({ ...inputs, rent: 0 });
+  const eq = useMemo(() => equivalentRent(inputs), [rentFreeKey]);
   const grid = useMemo(() => (tab === 'sensitivity' ? sensitivity(inputs) : null), [inputs, tab]);
   const tabs = Object.keys(ro.tabs) as Tab[];
+  const noteId = useId();
+  // These views add up or compare nominal sums, so the inflation switch has nothing to adjust there.
+  const nominalOnly = tab === 'breakdown' || tab === 'sensitivity';
 
   return (
     <div className="results">
       <Headline
         eq={eq}
         breakEvenMonth={result.breakEvenMonth}
+        buyerEverAhead={result.buyerEverAhead}
         sale={inputs}
         currency={view.currency}
         eurRon={view.eurRon}
@@ -83,9 +90,16 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
                 tabIndex={tab === t ? 0 : -1}
                 onClick={() => setTab(t)}
                 onKeyDown={(e) => {
-                  const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-                  if (!step) return;
-                  const next = tabs[(tabs.indexOf(t) + step + tabs.length) % tabs.length];
+                  const i = tabs.indexOf(t);
+                  const target =
+                    e.key === 'ArrowRight' ? (i + 1) % tabs.length
+                    : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length
+                    : e.key === 'Home' ? 0
+                    : e.key === 'End' ? tabs.length - 1
+                    : null;
+                  if (target === null) return;
+                  e.preventDefault();
+                  const next = tabs[target];
                   setTab(next);
                   document.getElementById(`${panelId}-${next}`)?.focus();
                 }}
@@ -95,7 +109,14 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
             ))}
           </div>
           <label className="switch">
-            <input type="checkbox" role="switch" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} />
+            <input
+              type="checkbox"
+              role="switch"
+              checked={view.real && !nominalOnly}
+              disabled={nominalOnly}
+              aria-describedby={nominalOnly ? noteId : undefined}
+              onChange={(e) => onToggleReal(e.target.checked)}
+            />
             <span>{ro.realValues(view.currency)}</span>
           </label>
         </div>
@@ -106,8 +127,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
           {tab === 'sensitivity' && grid && (
             <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} currency={view.currency} eurRon={view.eurRon} />
           )}
-          {/* These two views are always nominal, so say so when the rest of the page is in today's money. */}
-          {view.real && (tab === 'breakdown' || tab === 'sensitivity') && <p className="note">{ro.nominalNote}</p>}
+          {nominalOnly && <p id={noteId} className="note">{ro.nominalNote}</p>}
         </div>
       </div>
       <p className="note">{ro.assumptions}</p>

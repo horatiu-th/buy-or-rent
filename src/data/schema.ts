@@ -1,4 +1,5 @@
-export type Status = 'ok' | 'stale' | 'manual';
+export const STATUSES = ['ok', 'stale', 'manual'] as const;
+export type Status = (typeof STATUSES)[number];
 
 export interface SourcedValue {
   value: number;
@@ -6,6 +7,8 @@ export interface SourcedValue {
   source: string;
   sourceUrl?: string;
   asOf: string; // YYYY-MM-DD
+  /** Last day the value is known to apply (YYYY-MM-DD), for values with a scheduled change. */
+  validUntil?: string;
   status: Status;
 }
 
@@ -35,5 +38,16 @@ export const REQUIRED_VALUE_KEYS = [
   'depositMonths', 'investReturn', 'investTaxRate', 'savingsRate', 'savingsTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
 ] as const;
+export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
 
 export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur'] as const;
+
+/** The city fields that hold a SourcedValue, required or optional. */
+export const CITY_VALUE_KEYS = ['priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'propertyTaxPct'] as const;
+export type CityValueKey = (typeof CITY_VALUE_KEYS)[number];
+
+/** Where a fetched value is written, e.g. "values.eurRon" or "cities.cluj.rentSqmEur". */
+export type DataPath = `values.${ValueKey}` | `cities.${string}.${CityValueKey}`;
+
+/** Used when a city id is unknown, e.g. from an old shared link. The merge fails if it is missing. */
+export const DEFAULT_CITY_ID = 'bucuresti';
