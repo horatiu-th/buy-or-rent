@@ -1,5 +1,6 @@
 import { amortize } from './mortgage';
 import { acquisitionCosts, saleCosts } from './costs';
+import { sanitizeInputs } from './sanitize';
 import type { BuyerTotals, Inputs, MonthRow, RenterTotals, Result } from './types';
 
 interface Portfolio {
@@ -27,7 +28,8 @@ export function breakEven(rows: MonthRow[]): number | null {
   return lastBehind === end ? null : lastBehind + 1;
 }
 
-export function simulate(i: Inputs): Result {
+export function simulate(raw: Inputs): Result {
+  const i = sanitizeInputs(raw);
   const months = Math.round(i.horizonYears * 12);
   const loanAmount = i.price * (1 - i.downPaymentPct);
   const downPayment = i.price - loanAmount;
