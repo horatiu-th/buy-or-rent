@@ -73,3 +73,19 @@ describe('amortize', () => {
     expect(s.every((m) => m.payment === 0 && m.balance === 0)).toBe(true);
   });
 });
+
+describe('amortize with a variable rate path', () => {
+  it('recomputes the payment on the remaining balance and term each time the rate changes', () => {
+    const path = (m: number) => (m <= 72 ? 0.07 : 0.06);
+    const s = amortize({ principal: 300_000, termMonths: 360, fixedRate: 0.05, fixedMonths: 60, variableRate: path });
+    expect(s[60].payment).toBeCloseTo(annuityPayment(s[59].balance, 0.07, 300), 6);
+    expect(s[72].payment).toBeCloseTo(annuityPayment(s[71].balance, 0.06, 288), 6);
+    expect(s[359].balance).toBe(0);
+  });
+
+  it('matches a constant rate when the path is flat', () => {
+    const flat = amortize({ principal: 200_000, termMonths: 240, fixedRate: 0.05, fixedMonths: 36, variableRate: 0.07 });
+    const path = amortize({ principal: 200_000, termMonths: 240, fixedRate: 0.05, fixedMonths: 36, variableRate: () => 0.07 });
+    expect(path).toEqual(flat);
+  });
+});

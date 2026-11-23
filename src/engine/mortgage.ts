@@ -10,7 +10,8 @@ export interface LoanParams {
   termMonths: number;
   fixedRate: number;
   fixedMonths: number;
-  variableRate: number;
+  /** A constant rate, or the rate for each month (1-based) of the variable period. */
+  variableRate: number | ((month: number) => number);
 }
 
 export interface LoanMonth {
@@ -22,14 +23,17 @@ export interface LoanMonth {
 
 export function amortize(p: LoanParams): LoanMonth[] {
   const schedule: LoanMonth[] = [];
+  const variableAt = typeof p.variableRate === 'number' ? () => p.variableRate as number : p.variableRate;
   let balance = p.principal;
-  let rate = p.fixedMonths > 0 ? p.fixedRate : p.variableRate;
-  let payment = annuityPayment(balance, rate, p.termMonths);
+  let rate = NaN;
+  let payment = 0;
 
   for (let m = 1; m <= p.termMonths; m++) {
-    if (p.fixedMonths > 0 && m === p.fixedMonths + 1) {
-      rate = p.variableRate;
-      payment = annuityPayment(balance, rate, p.termMonths - p.fixedMonths);
+    const next = m <= p.fixedMonths ? p.fixedRate : variableAt(m);
+    // Banks recompute the annuity on the remaining balance and term whenever the applied rate changes.
+    if (next !== rate) {
+      rate = next;
+      payment = annuityPayment(balance, rate, p.termMonths - m + 1);
     }
     const interest = (balance * rate) / 12;
     // The last payment absorbs floating-point drift so the loan closes at exactly zero.

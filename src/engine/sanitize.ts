@@ -11,7 +11,8 @@ const MIN_RATE = -0.99;
 const NON_NEGATIVE = [
   'price', 'rent', 'notaryPct', 'registryPct', 'bankFees', 'propertyTaxPct', 'homeInsuranceAnnual',
   'lifeInsurancePct', 'maintenancePct', 'renterInsuranceAnnual', 'depositMonths', 'saleAgencyPct',
-  'saleTaxShortHoldYears', 'fixedYears', 'fixedRate', 'ircc', 'variableMargin',
+  'saleTaxShortHoldYears', 'fixedYears', 'fixedRate', 'ircc', 'irccLongRun', 'variableMargin',
+  'buyerAgencyPct', 'homeInsurancePct', 'rentAgencyPct',
 ] as const satisfies readonly (keyof Inputs)[];
 
 const TAX_RATES = ['investTaxRate', 'savingsTaxRate', 'saleTaxShortPct', 'saleTaxLongPct'] as const satisfies readonly (keyof Inputs)[];

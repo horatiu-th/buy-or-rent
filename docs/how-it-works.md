@@ -16,17 +16,17 @@ Three households start with **the same amount of cash** and spend **the same amo
 
 | | Buyer | Renter |
 |---|---|---|
-| Pays | Down payment + acquisition costs (notary, land registry, bank fees) | Rental deposit |
+| Pays | Down payment + acquisition costs (notary, land registry, buyer agency fee, bank fees) | Rental deposit + rental agency fee |
 | Keeps | Nothing, if their upfront costs are higher | The difference, invested or saved |
 
-If the deposit is larger than the buyer's upfront costs (rare), the buyer keeps and invests the difference instead.
+If the renter's upfront costs are larger than the buyer's (rare), the buyer keeps and invests the difference instead. The deposit comes back at the end; the agency fee doesn't.
 
 ### Every month after
 
 **Buyer's cost**
 - Loan payment from the amortization schedule (see below).
 - Property tax: `property value × propertyTaxPct / 12`.
-- Insurance: home insurance per year / 12, plus life insurance on the loan balance.
+- Insurance: the mandatory PAD policy per year / 12, the optional home policy banks require (`property value × homeInsurancePct / 12`), and life insurance on the loan balance.
 - Maintenance: `property value × maintenancePct / 12`.
 
 **Renter's cost**
@@ -53,7 +53,8 @@ If the deposit is larger than the buyer's upfront costs (rare), the buyer keeps 
 
 - Rates are nominal: each month's interest is `balance × rate / 12`.
 - During the fixed period, the rate is `fixedRate`.
-- After it, the payment is recalculated on the remaining balance at `ircc + variableMargin`, held constant until the end of the term.
+- After it, the rate is `IRCC + variableMargin`. IRCC moves in a straight line, once a quarter, from today's `ircc` to `irccLongRun` over `IRCC_CONVERGENCE_MONTHS` (36), then stays there. With a 5-year fixed period the borrower only ever sees the long-run level.
+- Whenever the applied rate changes, the payment is recalculated on the remaining balance and term, as Romanian banks do for variable-rate loans.
 - If `fixedYears` is 0, the loan is variable from the start; if it is as long as the term or longer, the loan stays fixed throughout.
 - The last payment absorbs rounding so the balance ends at exactly zero.
 
@@ -119,13 +120,13 @@ The interface also limits each field to a sensible range (`src/ui/fields.ts`) an
 These are deliberate simplifications:
 
 - **No uncertainty.** Growth rates and returns are fixed for the whole horizon. The sensitivity table is the only view of "what if they differ".
-- **IRCC stays constant** after the fixed period.
-- **Fixed annual lei amounts aren't indexed.** Home insurance (`homeInsuranceAnnual`) and renter's insurance (`renterInsuranceAnnual`) stay the same nominal amount for the whole horizon, so they shrink in today's money.
+- **IRCC follows one fixed path**: from today's value to the long-run one over three years, then flat.
+- **Fixed annual lei amounts aren't indexed.** The PAD policy (`homeInsuranceAnnual`) and renter's insurance (`renterInsuranceAnnual`) stay the same nominal amount for the whole horizon, so they shrink in today's money.
 - **The rent deposit isn't topped up** as rent rises; it stays at `depositMonths` × the starting rent.
 - **Property tax is a share of market value.** In reality it applies to a statutory value that is usually well below market price, and varies by locality; the default is set to approximate that.
 - **No CASS** (health contribution) on investment income above the thresholds.
 - **The buyer always invests** any monthly surplus at the investment return, even when compared with the saving renter.
-- **No moving costs, agency fees for renting, furnishing or renovation.**
+- **One rental agency fee only.** The renter pays it once at the start; renters who move pay it again, which isn't modelled. No moving, furnishing or renovation costs either.
 - **No Noua Casă preset.** The programme's 2027 terms weren't known when the defaults were set; users can enter a 5% down payment and IRCC + 2% themselves.
 
 ## Tests

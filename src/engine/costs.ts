@@ -1,7 +1,7 @@
 import type { Inputs } from './types';
 
 export function acquisitionCosts(i: Inputs): number {
-  return i.price * (i.notaryPct + i.registryPct) + i.bankFees;
+  return i.price * (i.notaryPct + i.registryPct + i.buyerAgencyPct) + i.bankFees;
 }
 
 export function saleCosts(value: number, monthsHeld: number, i: Inputs): number {

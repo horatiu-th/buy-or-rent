@@ -28,15 +28,18 @@ export const FIELDS: FieldDef[] = [
   { key: 'fixedRate', unit: 'pct', topic: 'loan', min: 0, max: 0.3, step: 0.001 },
   { key: 'fixedYears', unit: 'years', topic: 'loan', min: 0, max: 30, step: 1 },
   { key: 'ircc', unit: 'pct', topic: 'loan', min: 0, max: 0.3, step: 0.001 },
+  { key: 'irccLongRun', unit: 'pct', topic: 'loan', min: 0, max: 0.3, step: 0.001 },
   { key: 'variableMargin', unit: 'pct', topic: 'loan', min: 0, max: 0.1, step: 0.001 },
   { key: 'loanTermYears', unit: 'years', topic: 'loan', min: MIN_LOAN_TERM_YEARS, max: MAX_LOAN_TERM_YEARS, step: 1 },
 
   { key: 'notaryPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.1, step: 0.001 },
   { key: 'registryPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.05, step: 0.0005 },
   { key: 'bankFees', unit: 'money', topic: 'purchaseCosts', min: 0, max: 1_000_000, step: 100 },
+  { key: 'buyerAgencyPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.1, step: 0.001 },
 
   { key: 'propertyTaxPct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.05, step: 0.0005 },
-  { key: 'homeInsuranceAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 50 },
+  { key: 'homeInsuranceAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 10 },
+  { key: 'homeInsurancePct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.02, step: 0.0005 },
   { key: 'lifeInsurancePct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.05, step: 0.0005 },
   { key: 'maintenancePct', unit: 'pct', topic: 'ownershipCosts', min: 0, max: 0.1, step: 0.001 },
 
@@ -49,6 +52,7 @@ export const FIELDS: FieldDef[] = [
   { key: 'rent', unit: 'money', topic: 'renting', min: 0, max: 1_000_000, step: 50 },
   { key: 'rentGrowth', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },
   { key: 'depositMonths', unit: 'months', topic: 'renting', min: 0, max: 12, step: 1 },
+  { key: 'rentAgencyPct', unit: 'pct', topic: 'renting', min: 0, max: 3, step: 0.05 },
   { key: 'renterInsuranceAnnual', unit: 'money', topic: 'renting', min: 0, max: 100_000, step: 50 },
 
   { key: 'investReturn', unit: 'pct', topic: 'investing', min: -0.2, max: 0.3, step: 0.005 },

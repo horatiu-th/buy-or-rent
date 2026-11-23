@@ -5,17 +5,20 @@ export interface Inputs {
   notaryPct: number; // of price
   registryPct: number; // ANCPI registration, of price
   bankFees: number; // lei, valuation + loan fees
+  buyerAgencyPct: number; // buyer-side agency commission, of price, VAT included
 
   // Loan
   loanTermYears: number;
   fixedRate: number; // annual, during the fixed period
   fixedYears: number; // 0 = variable from the start
-  ircc: number; // annual, assumed for the whole variable period
+  ircc: number; // annual, the index that applies today
+  irccLongRun: number; // annual, the level IRCC moves to over IRCC_CONVERGENCE_MONTHS
   variableMargin: number; // bank margin over IRCC
 
   // Ownership
   propertyTaxPct: number; // annual, of property value
-  homeInsuranceAnnual: number; // lei/year, PAD + optional home policy
+  homeInsuranceAnnual: number; // lei/year, mandatory PAD policy
+  homeInsurancePct: number; // annual, of property value: the optional policy banks require
   lifeInsurancePct: number; // annual, of outstanding loan balance
   maintenancePct: number; // annual, of property value
   propertyGrowth: number; // annual
@@ -25,6 +28,7 @@ export interface Inputs {
   rentGrowth: number; // annual, applied once per year
   renterInsuranceAnnual: number; // lei/year
   depositMonths: number;
+  rentAgencyPct: number; // agency fee for renting, as a share of one month's starting rent, not refunded
 
   // Investing
   investReturn: number; // annual, gross
@@ -72,6 +76,7 @@ export interface BuyerTotals {
 }
 
 export interface RenterTotals {
+  agencyFee: number;
   rent: number;
   insurance: number;
   investmentTax: number;

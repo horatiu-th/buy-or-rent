@@ -23,6 +23,20 @@ function contribute(p: Portfolio, amount: number) {
 // A tie counts as the buyer being ahead, so breakEvenMonth and buyerEverAhead use the same test.
 const buyerAhead = (r: MonthRow) => r.buyerNetWorth >= r.renterNetWorth;
 
+/**
+ * Months over which IRCC moves in a straight line from today's value to the long-run one. IRCC is a
+ * trailing average of interbank rates and follows policy-rate changes with a lag of about two quarters,
+ * so it takes a few years to settle once inflation returns towards the target.
+ */
+export const IRCC_CONVERGENCE_MONTHS = 36;
+
+/** The IRCC that applies in a month (1-based), changing once a quarter as the published index does. */
+export function irccAt(month: number, i: Pick<Inputs, 'ircc' | 'irccLongRun'>): number {
+  const quarterStart = Math.floor((month - 1) / 3) * 3;
+  const progress = Math.min(1, quarterStart / IRCC_CONVERGENCE_MONTHS);
+  return i.ircc + (i.irccLongRun - i.ircc) * progress;
+}
+
 export function breakEven(rows: MonthRow[]): number | null {
   // Counted from the last month the buyer is behind, so an early, temporary lead doesn't count.
   let lastBehind = -1;
@@ -39,17 +53,18 @@ export function simulate(raw: Inputs): Result {
   const acq = acquisitionCosts(i);
   const upfront = downPayment + acq;
   const deposit = i.rent * i.depositMonths;
+  const rentAgencyFee = i.rent * i.rentAgencyPct;
 
   const schedule = amortize({
     principal: loanAmount,
     termMonths: Math.round(i.loanTermYears * 12),
     fixedRate: i.fixedRate,
     fixedMonths: Math.round(i.fixedYears * 12),
-    variableRate: i.ircc + i.variableMargin,
+    variableRate: (m) => irccAt(m, i) + i.variableMargin,
   });
 
   // Both households start with the same cash; whoever spends less upfront invests the difference.
-  const startGap = upfront - deposit;
+  const startGap = upfront - deposit - rentAgencyFee;
   const buyerPf: Portfolio = { value: 0, basis: 0 };
   const renterPf: Portfolio = { value: 0, basis: 0 };
   // The same renter's savings held in a bank deposit instead: identical contributions, deposit interest.
@@ -61,7 +76,10 @@ export function simulate(raw: Inputs): Result {
     downPayment, acquisitionCosts: acq, interest: 0, principal: 0, propertyTax: 0,
     insurance: 0, maintenance: 0, saleCosts: 0, investmentTax: 0, cashOut: upfront + buyerPf.basis,
   };
-  const renter: RenterTotals = { rent: 0, insurance: 0, investmentTax: 0, cashOut: deposit + renterPf.basis };
+  const renter: RenterTotals = {
+    agencyFee: rentAgencyFee, rent: 0, insurance: 0, investmentTax: 0,
+    cashOut: deposit + rentAgencyFee + renterPf.basis,
+  };
 
   const gProp = monthlyRate(i.propertyGrowth);
   const gInv = monthlyRate(i.investReturn);
@@ -98,7 +116,7 @@ export function simulate(raw: Inputs): Result {
       balance = loanMonth.balance;
     }
     const propertyTax = (value * i.propertyTaxPct) / 12;
-    const insurance = i.homeInsuranceAnnual / 12 + (balanceBefore * i.lifeInsurancePct) / 12;
+    const insurance = i.homeInsuranceAnnual / 12 + (value * i.homeInsurancePct) / 12 + (balanceBefore * i.lifeInsurancePct) / 12;
     const maintenance = (value * i.maintenancePct) / 12;
     const buyerCost = payment + propertyTax + insurance + maintenance;
     buyer.propertyTax += propertyTax;

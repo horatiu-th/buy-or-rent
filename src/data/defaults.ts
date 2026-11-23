@@ -21,6 +21,19 @@ function cityOf(data: DataFile, cityId: string) {
   return data.cities[resolveCityId(cityId, data)];
 }
 
+// Rent per m² falls as flats get larger: room-by-room asking rents in the largest cities grow with
+// roughly the 0.8th power of floor area. City figures are averages over flats of about this size, so
+// the curve passes through them there and bends below them for larger homes.
+export const RENT_REFERENCE_SQM = 55;
+export const RENT_SIZE_EXPONENT = 0.8;
+
+export function rentForSize(rentSqm: number, sqm: number): number {
+  if (sqm <= 0) return 0;
+  return rentSqm * RENT_REFERENCE_SQM * Math.pow(sqm / RENT_REFERENCE_SQM, RENT_SIZE_EXPONENT);
+}
+
+const agencyKey = (type: PropertyType) => (type === 'new' ? 'buyerAgencyPctNew' : 'buyerAgencyPct');
+
 export function buildInputs(data: DataFile, cityId: string, type: PropertyType, sqm: number): Inputs {
   const v = (k: string) => {
     const x = data.values[k];
@@ -32,26 +45,31 @@ export function buildInputs(data: DataFile, cityId: string, type: PropertyType, 
   const priceSqm = type === 'new' ? city.priceSqmEurNew.value : city.priceSqmEurExisting.value;
 
   return {
-    price: Math.round(priceSqm * sqm * eur),
-    rent: Math.round(city.rentSqmEur.value * sqm * eur),
+    // Index prices are asking prices; buyers usually negotiate a few percent off.
+    price: Math.round(priceSqm * sqm * eur * (1 - v('negotiationPct'))),
+    rent: Math.round(rentForSize(city.rentSqmEur.value, sqm) * eur),
     propertyTaxPct: city.propertyTaxPct?.value ?? v('propertyTaxPct'),
     includeSaleCosts: true,
     downPaymentPct: v('downPaymentPct'),
     notaryPct: v('notaryPct'),
     registryPct: v('registryPct'),
     bankFees: v('bankFees'),
+    buyerAgencyPct: v(agencyKey(type)),
     loanTermYears: v('loanTermYears'),
     fixedRate: v('fixedRate'),
     fixedYears: v('fixedYears'),
     ircc: v('ircc'),
+    irccLongRun: v('irccLongRun'),
     variableMargin: v('variableMargin'),
     homeInsuranceAnnual: v('homeInsuranceAnnual'),
+    homeInsurancePct: v('homeInsurancePct'),
     lifeInsurancePct: v('lifeInsurancePct'),
     maintenancePct: v('maintenancePct'),
     propertyGrowth: v('propertyGrowth'),
     rentGrowth: v('rentGrowth'),
     renterInsuranceAnnual: v('renterInsuranceAnnual'),
     depositMonths: v('depositMonths'),
+    rentAgencyPct: v('rentAgencyPct'),
     investReturn: v('investReturn'),
     investTaxRate: v('investTaxRate'),
     savingsRate: v('savingsRate'),
@@ -71,5 +89,6 @@ export function sourceFor(data: DataFile, cityId: string, type: PropertyType, ke
   if (key === 'price') return type === 'new' ? city.priceSqmEurNew : city.priceSqmEurExisting;
   if (key === 'rent') return city.rentSqmEur;
   if (key === 'propertyTaxPct') return city.propertyTaxPct ?? data.values.propertyTaxPct;
+  if (key === 'buyerAgencyPct') return data.values[agencyKey(type)];
   return data.values[key];
 }

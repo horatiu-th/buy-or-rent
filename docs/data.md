@@ -58,15 +58,20 @@ It prints a warning, without stopping, when a key is in both data files or a `va
 For the chosen city, property type and size:
 
 ```
-price = €/m² (new or existing) × m² × EUR/RON rate
-rent  = rent €/m² × m² × EUR/RON rate
+price = €/m² (new or existing) × m² × EUR/RON rate × (1 − negotiationPct)
+rent  = rent €/m² × 55 × (m² / 55)^0.8 × EUR/RON rate
 ```
 
 Both are rounded to whole lei. Users can override either.
 
+- **Price:** the indexes report asking prices. `negotiationPct` takes off the typical gap between the last asking price and the price actually paid.
+- **Rent:** rent per m² falls as homes get larger. The city figures are averages over flats of about 55 m², so the curve (`rentForSize()` in `src/data/defaults.ts`) matches them at 55 m² and charges less per m² above that size and more below it. The 0.8 exponent fits room-by-room asking rents (studio, 2 and 3 rooms) in the largest cities.
+
+Other inputs that depend on the property type: `buyerAgencyPct` comes from `buyerAgencyPct` for existing homes and from `buyerAgencyPctNew` for new builds, which are usually bought from the developer without an agent.
+
 ### VAT on new builds (unverified assumption)
 
-The engine treats `price` as the full amount the buyer pays, VAT included. New-build prices come from Storia's average asking prices. Storia's monthly analyses do not say whether the prices they average include VAT; some listings state "TVA inclus", and Storia's own buyer guide tells readers to check whether an offer's price includes VAT. If a large share of new-build listings is net of VAT, the real cost would be up to 21% higher (the standard rate; the reduced 9% rate for homes now applies only to transitional contracts, and sources disagree on whether that window closed on 2026-07-31 or 2026-09-30). This has not been verified, so the numbers are unchanged. See `data/SOURCES.md`.
+The engine treats `price` as the full amount the buyer pays, VAT included. New-build prices come from Storia's average asking prices. Storia's monthly analyses do not say whether the prices they average include VAT; some listings state "TVA inclus", and Storia's own buyer guide tells readers to check whether an offer's price includes VAT. If a large share of new-build listings is net of VAT, the real cost would be up to 21% higher (the standard rate; the transitional 9% rate ended with deliveries by 2026-09-30). Many developers quote prices without VAT, and none of the indexes says how it treats VAT, so the numbers are unchanged and the price field's help text tells users to check. See `data/SOURCES.md`.
 
 ## Automatic updates
 

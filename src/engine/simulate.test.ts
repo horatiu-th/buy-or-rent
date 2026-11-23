@@ -1,4 +1,4 @@
-import { breakEven, simulate } from './simulate';
+import { breakEven, irccAt, IRCC_CONVERGENCE_MONTHS, simulate } from './simulate';
 import type { MonthRow } from './types';
 import { acquisitionCosts } from './costs';
 import { amortize } from './mortgage';
@@ -11,10 +11,33 @@ describe('simulate', () => {
     expect(simulate(baseInputs).rows).toHaveLength(30 * 12 + 1);
   });
 
-  it('starts the renter ahead by exactly the sunk acquisition costs', () => {
+  it("starts the renter ahead by the buyer's sunk costs less the renter's agency fee", () => {
     const i = { ...baseInputs, includeSaleCosts: false };
     const r0 = simulate(i).rows[0];
-    expect(r0.renterNetWorth - r0.buyerNetWorth).toBeCloseTo(acquisitionCosts(i), 6);
+    expect(r0.renterNetWorth - r0.buyerNetWorth).toBeCloseTo(acquisitionCosts(i) - i.rent * i.rentAgencyPct, 6);
+  });
+
+  it('charges the renting agency fee once and does not refund it', () => {
+    const withFee = simulate({ ...flatWorld, rentAgencyPct: 0.5 });
+    const without = simulate({ ...flatWorld, rentAgencyPct: 0 });
+    const fee = flatWorld.rent * 0.5;
+    expect(withFee.renter.agencyFee).toBe(fee);
+    expect(last(without.rows).renterNetWorth - last(withFee.rows).renterNetWorth).toBeCloseTo(fee, 6);
+  });
+
+  it('adds the buyer agency fee to the sunk purchase costs', () => {
+    const r0 = simulate({ ...flatWorld, buyerAgencyPct: 0.02 }).rows[0];
+    expect(r0.renterNetWorth - r0.buyerNetWorth).toBeCloseTo(flatWorld.price * 0.02, 6);
+  });
+
+  it('charges the optional home policy on the current property value', () => {
+    const i = { ...flatWorld, homeInsurancePct: 0.001, propertyGrowth: 0.05 };
+    const { rows } = simulate(i);
+    const payment = amortize({
+      principal: i.price * (1 - i.downPaymentPct), termMonths: 360, fixedRate: i.fixedRate,
+      fixedMonths: i.fixedYears * 12, variableRate: (m) => irccAt(m, i) + i.variableMargin,
+    });
+    expect(rows[13].buyerMonthlyCost - payment[12].payment).toBeCloseTo(rows[13].propertyValue * 0.001 / 12, 6);
   });
 
   it('spends the same total cash on both sides, every month', () => {
@@ -24,7 +47,7 @@ describe('simulate', () => {
     const upfront = i.price * i.downPaymentPct + acquisitionCosts(i);
     const deposit = i.rent * i.depositMonths;
     let buyerSpent = upfront;
-    let renterSpent = deposit;
+    let renterSpent = deposit + i.rent * i.rentAgencyPct;
     let buyerPf = 0;
     for (const row of simulate(i).rows) {
       buyerSpent += row.buyerMonthlyCost;
@@ -49,7 +72,7 @@ describe('simulate', () => {
     const { rows } = simulate(i);
     const finalPayment = amortize({
       principal: i.price * (1 - i.downPaymentPct), termMonths: 120, fixedRate: i.fixedRate,
-      fixedMonths: i.fixedYears * 12, variableRate: i.ircc + i.variableMargin,
+      fixedMonths: i.fixedYears * 12, variableRate: (m) => irccAt(m, i) + i.variableMargin,
     })[119].payment;
     expect(rows[120].buyerMonthlyCost - rows[121].buyerMonthlyCost).toBeCloseTo(finalPayment, 6);
     expect(rows[121].buyerMonthlyCost).toBe(0);
@@ -172,7 +195,7 @@ describe('renter who keeps savings in a bank deposit', () => {
   it('holds exactly the deposit plus every lei not spent at a zero deposit rate', () => {
     const i = { ...baseInputs, investReturn: 0.08, savingsRate: 0 };
     const { rows } = simulate(i);
-    const upfront = i.price * i.downPaymentPct + i.price * (i.notaryPct + i.registryPct) + i.bankFees;
+    const upfront = i.price * i.downPaymentPct + acquisitionCosts(i) - i.rent * i.rentAgencyPct;
     const saved = rows.slice(1).reduce((s, r) => s + Math.max(0, r.buyerMonthlyCost - r.renterMonthlyCost), 0);
     expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(upfront + saved, 4);
   });
@@ -190,5 +213,25 @@ describe('renter who keeps savings in a bank deposit', () => {
       simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate, investTaxRate }).rows.at(-1)!.renterCashNetWorth;
     expect(at(0.1, 0)).toBeLessThan(at(0, 0));
     expect(at(0.1, 0)).toBeCloseTo(at(0.1, 0.5), 6);
+  });
+});
+
+describe('irccAt', () => {
+  const i = { ircc: 0.06, irccLongRun: 0.045 };
+
+  it('starts at today\'s IRCC and reaches the long-run level after the convergence period', () => {
+    expect(irccAt(1, i)).toBe(0.06);
+    expect(irccAt(IRCC_CONVERGENCE_MONTHS + 1, i)).toBeCloseTo(0.045, 12);
+    expect(irccAt(300, i)).toBeCloseTo(0.045, 12);
+  });
+
+  it('changes only at the start of a quarter', () => {
+    expect(irccAt(2, i)).toBe(irccAt(1, i));
+    expect(irccAt(3, i)).toBe(irccAt(1, i));
+    expect(irccAt(4, i)).toBeLessThan(irccAt(3, i));
+  });
+
+  it('stays flat when the long-run level equals today\'s', () => {
+    expect(irccAt(100, { ircc: 0.05, irccLongRun: 0.05 })).toBe(0.05);
   });
 });

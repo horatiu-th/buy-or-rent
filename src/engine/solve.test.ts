@@ -22,7 +22,7 @@ describe('equivalentRent', () => {
   });
 
   it('finds a rent far above 2% of the price when owning is ruinously expensive', () => {
-    const i = { ...baseInputs, propertyGrowth: -0.1, investReturn: 0.15, fixedRate: 0.4, ircc: 0.4 };
+    const i = { ...baseInputs, propertyGrowth: -0.1, investReturn: 0.15, fixedRate: 0.4, ircc: 0.4, irccLongRun: 0.4 };
     const r = equivalentRent(i);
     expect(r.kind).toBe('value');
     if (r.kind !== 'value') return;

@@ -1,4 +1,6 @@
-import { buildInputs, sourceFor, loadDefaults, resolveCityId } from './defaults';
+import {
+  buildInputs, sourceFor, loadDefaults, resolveCityId, rentForSize, RENT_REFERENCE_SQM,
+} from './defaults';
 import { DEFAULT_CITY_ID } from './schema';
 
 const data = loadDefaults();
@@ -11,12 +13,23 @@ describe('resolveCityId', () => {
 });
 
 describe('buildInputs', () => {
-  it('derives price and rent from city €/m², size and the exchange rate', () => {
+  it('derives price and rent from city €/m², size, the negotiation margin and the exchange rate', () => {
     const i = buildInputs(data, 'cluj', 'new', 50);
     const c = data.cities.cluj;
     const eur = data.values.eurRon.value;
-    expect(i.price).toBe(Math.round(c.priceSqmEurNew.value * 50 * eur));
-    expect(i.rent).toBe(Math.round(c.rentSqmEur.value * 50 * eur));
+    expect(i.price).toBe(Math.round(c.priceSqmEurNew.value * 50 * eur * (1 - data.values.negotiationPct.value)));
+    expect(i.rent).toBe(Math.round(rentForSize(c.rentSqmEur.value, 50) * eur));
+  });
+
+  it('charges a buyer agency fee on existing homes only', () => {
+    expect(buildInputs(data, 'cluj', 'existing', 50).buyerAgencyPct).toBe(data.values.buyerAgencyPct.value);
+    expect(buildInputs(data, 'cluj', 'new', 50).buyerAgencyPct).toBe(data.values.buyerAgencyPctNew.value);
+    expect(sourceFor(data, 'cluj', 'new', 'buyerAgencyPct')).toBe(data.values.buyerAgencyPctNew);
+  });
+
+  it('uses a city property tax rate where one is set', () => {
+    expect(buildInputs(data, 'cluj', 'existing', 50).propertyTaxPct).toBe(data.cities.cluj.propertyTaxPct!.value);
+    expect(buildInputs(data, 'iasi', 'existing', 50).propertyTaxPct).toBe(data.values.propertyTaxPct.value);
   });
 
   it('uses existing-build prices for existing properties', () => {
@@ -38,4 +51,18 @@ describe('sourceFor', () => {
   it('uses the default city for an unknown id, like buildInputs', () => {
     expect(sourceFor(data, 'nope', 'new', 'rent')).toBe(data.cities[DEFAULT_CITY_ID].rentSqmEur);
   });
+});
+
+describe('rentForSize', () => {
+  it('matches the city rate per m² at the reference size', () => {
+    expect(rentForSize(10, RENT_REFERENCE_SQM)).toBeCloseTo(10 * RENT_REFERENCE_SQM, 9);
+  });
+
+  it('charges less per m² for larger homes and more for smaller ones', () => {
+    expect(rentForSize(10, 80) / 80).toBeLessThan(10);
+    expect(rentForSize(10, 35) / 35).toBeGreaterThan(10);
+    expect(rentForSize(10, 80)).toBeGreaterThan(rentForSize(10, 60));
+  });
+
+  it('is zero for no area', () => expect(rentForSize(10, 0)).toBe(0));
 });

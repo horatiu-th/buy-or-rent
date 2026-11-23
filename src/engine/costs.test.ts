@@ -3,8 +3,8 @@ import { baseInputs } from './fixtures';
 
 describe('acquisitionCosts', () => {
   it('adds percentage fees on price plus fixed bank fees', () => {
-    // 500,000 × (1% + 0.15%) + 1,500
-    expect(acquisitionCosts(baseInputs)).toBeCloseTo(7_250, 6);
+    // 500,000 × (1% notary + 0.15% registry + 2% buyer agency) + 1,500
+    expect(acquisitionCosts(baseInputs)).toBeCloseTo(17_250, 6);
   });
 });
 
