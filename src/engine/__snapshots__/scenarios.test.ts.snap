@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`2-room flat, existing build 1`] = `
+{
+  "breakEvenMonth": 34,
+  "buyer": 1580504,
+  "equivalentRent": {
+    "kind": "value",
+    "rent": 1561.771106145443,
+  },
+  "renter": 500751,
+}
+`;
+
+exports[`3-room flat, new build 1`] = `
+{
+  "breakEvenMonth": 37,
+  "buyer": 2370443,
+  "equivalentRent": {
+    "kind": "value",
+    "rent": 2590.679022753193,
+  },
+  "renter": 1040446,
+}
+`;
+
+exports[`cash purchase, short horizon 1`] = `
+{
+  "breakEvenMonth": 31,
+  "buyer": 711874,
+  "equivalentRent": {
+    "kind": "value",
+    "rent": 1805.9444890559462,
+  },
+  "renter": 660136,
+}
+`;
