@@ -110,3 +110,23 @@ describe('simulate', () => {
     expect(simulate({ ...baseInputs, rent: 100 }).breakEvenMonth).toBeNull();
   });
 });
+
+describe('renter who keeps savings in cash', () => {
+  it('matches the investing renter when investments earn nothing', () => {
+    const { rows } = simulate({ ...baseInputs, investReturn: 0 });
+    for (const r of rows) expect(r.renterCashNetWorth).toBeCloseTo(r.renterNetWorth, 6);
+  });
+
+  it('falls behind the investing renter when investments grow', () => {
+    const end = simulate(baseInputs).rows.at(-1)!;
+    expect(end.renterCashNetWorth).toBeLessThan(end.renterNetWorth);
+  });
+
+  it('holds exactly the deposit plus every lei not spent', () => {
+    const i = { ...baseInputs, investReturn: 0.08 };
+    const { rows } = simulate(i);
+    const upfront = i.price * i.downPaymentPct + i.price * (i.notaryPct + i.registryPct) + i.bankFees;
+    const saved = rows.slice(1).reduce((s, r) => s + Math.max(0, r.buyerMonthlyCost - r.renterMonthlyCost), 0);
+    expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(upfront + saved, 4);
+  });
+});

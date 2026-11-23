@@ -50,6 +50,8 @@ export interface MonthRow {
   renterMonthlyCost: number;
   buyerNetWorth: number;
   renterNetWorth: number;
+  /** The same renter if every lei saved sat in cash instead of being invested. */
+  renterCashNetWorth: number;
   /** Divide a nominal value by this to get today's lei. */
   deflator: number;
 }

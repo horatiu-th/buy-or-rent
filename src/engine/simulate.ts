@@ -71,6 +71,8 @@ export function simulate(raw: Inputs): Result {
     renterMonthlyCost: renterCost,
     buyerNetWorth: value - balance - saleCosts(value, month, i) + liquidate(buyerPf, i.investTaxRate).net,
     renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
+    // Contributions are exactly what this renter saved, so the cash-only renter is the basis without growth.
+    renterCashNetWorth: renterPf.basis + deposit,
     deflator: Math.pow(1 + gInf, month),
   });
 
