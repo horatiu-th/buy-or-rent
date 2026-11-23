@@ -62,7 +62,8 @@ export function simulate(raw: Inputs): Result {
 
   const gProp = monthlyRate(i.propertyGrowth);
   const gInv = monthlyRate(i.investReturn);
-  const gSav = monthlyRate(i.savingsRate);
+  // Banks withhold deposit tax when interest is paid, so savings compound at the after-tax rate.
+  const gSav = monthlyRate(i.savingsRate * (1 - i.savingsTaxRate));
   const gInf = monthlyRate(i.inflation);
   let value = i.price;
   let balance = loanAmount;
@@ -75,7 +76,7 @@ export function simulate(raw: Inputs): Result {
     renterMonthlyCost: renterCost,
     buyerNetWorth: value - balance - saleCosts(value, month, i) + liquidate(buyerPf, i.investTaxRate).net,
     renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
-    renterCashNetWorth: liquidate(renterSavings, i.savingsTaxRate).net + deposit,
+    renterCashNetWorth: renterSavings.value + deposit,
     deflator: Math.pow(1 + gInf, month),
   });
 

@@ -112,8 +112,9 @@ describe('simulate', () => {
 });
 
 describe('renter who keeps savings in a bank deposit', () => {
-  it('matches the investing renter when the deposit pays the same as investing', () => {
-    const { rows } = simulate({ ...baseInputs, investReturn: 0.04, savingsRate: 0.04 });
+  // Without tax the two renters differ only in return; with tax they also differ in when it is paid.
+  it('matches the investing renter when the deposit pays the same and nothing is taxed', () => {
+    const { rows } = simulate({ ...baseInputs, investReturn: 0.04, savingsRate: 0.04, investTaxRate: 0, savingsTaxRate: 0 });
     for (const r of rows) expect(r.renterCashNetWorth).toBeCloseTo(r.renterNetWorth, 4);
   });
 
@@ -130,7 +131,15 @@ describe('renter who keeps savings in a bank deposit', () => {
     expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(upfront + saved, 4);
   });
 
-  it('taxes deposit interest at its own rate, independent of the investment tax', () => {
+  it('withholds deposit tax as interest is paid, so savings compound at the after-tax rate', () => {
+    // A rent far above the cost of owning means the renter never adds savings after day one.
+    const i = { ...baseInputs, rent: 20_000, depositMonths: 0, savingsRate: 0.04, savingsTaxRate: 0.1, horizonYears: 30 };
+    const { rows } = simulate(i);
+    const start = rows[0].renterCashNetWorth;
+    expect(rows.at(-1)!.renterCashNetWorth).toBeCloseTo(start * Math.pow(1 + 0.04 * 0.9, 30), 2);
+  });
+
+  it('taxes deposit interest independently of the investment tax', () => {
     const at = (savingsTaxRate: number, investTaxRate: number) =>
       simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate, investTaxRate }).rows.at(-1)!.renterCashNetWorth;
     expect(at(0.1, 0)).toBeLessThan(at(0, 0));
