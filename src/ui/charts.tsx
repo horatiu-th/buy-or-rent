@@ -10,6 +10,7 @@ export interface View { currency: Currency; eurRon: number; real: boolean }
 
 const BUYER = 'var(--buyer)';
 const RENTER = 'var(--renter)';
+const INVEST = 'var(--invest)';
 const GRID = 'var(--line)';
 const TICK = { fill: 'var(--muted)', fontSize: 12 };
 const AXIS = { stroke: 'var(--line)', tickLine: false } as const;
@@ -88,7 +89,7 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
           />
         )}
         <Line type="monotone" dataKey="renterCash" name={ro.renterCash} stroke={RENTER} dot={false} strokeWidth={2} strokeDasharray="5 4" activeDot={{ r: 3 }} />
-        <Line type="monotone" dataKey="renter" name={ro.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+        <Line type="monotone" dataKey="renter" name={ro.renterInvesting} stroke={INVEST} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
         <Line type="monotone" dataKey="buyer" name={ro.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
       </LineChart>
     </ResponsiveContainer>

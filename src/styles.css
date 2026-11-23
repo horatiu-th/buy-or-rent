@@ -306,7 +306,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .end-item dd { margin: 0.15rem 0 0; font-size: var(--step-2); font-weight: 650; letter-spacing: -0.01em; }
 .end-item dt::before { content: ''; flex: none; width: 0.9rem; height: 3px; border-radius: 2px; }
 .end-item.buyer dt::before { background: var(--buyer); }
-.end-item.renter dt::before { background: var(--renter); }
+.end-item.renter dt::before { background: var(--invest); }
 .end-item.renter-cash dt::before { background: repeating-linear-gradient(to right, var(--renter) 0 4px, transparent 4px 7px); }
 .end-item.renter-cash dd { color: var(--muted); font-weight: 500; }
 
