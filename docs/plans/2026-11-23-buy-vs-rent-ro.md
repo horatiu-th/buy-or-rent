@@ -910,7 +910,7 @@ it('cash purchase, short horizon', () => {
 });
 ```
 
-**Step 2: Run** — `npx vitest run src/engine/scenarios.test.ts` → snapshots written. Read them in `src/engine/__snapshots__/` and sanity-check (e.g. the 5-year cash scenario should favour renting because of fees and sale tax).
+**Step 2: Run** — `npx vitest run src/engine/scenarios.test.ts` → snapshots written. Read them in `src/engine/__snapshots__/` and sanity-check (e.g. the 5-year cash scenario favours buying at its 2,500 lei rent, a 6% gross yield on the price, and favours renting only below about 1,800 lei/month).
 
 **Step 3: Commit**
 
