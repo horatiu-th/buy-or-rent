@@ -1,4 +1,5 @@
 import type { Inputs } from '../engine';
+import type { Currency } from '../ui/format';
 
 type FieldText = { label: string; help: string };
 
@@ -15,7 +16,8 @@ export const ro = {
   reset: 'Revino la valoarea implicită',
   help: 'Ajutor',
   currency: 'Monedă',
-  realValues: 'Ajustat cu inflația (lei de azi)',
+  realValues: (currency: Currency) => `Ajustat cu inflația (${currency === 'EUR' ? '€' : 'lei'} de azi)`,
+  nominalNote: 'Valori nominale',
   source: 'sursa',
   stale: 'date vechi',
   placeholder: 'valoare provizorie',
@@ -29,8 +31,8 @@ export const ro = {
   verdictBuy: (after: string) =>
     `Pentru cifrele tale, cumpărarea trece în față după ${after} și rămâne în față până la final.`,
   verdictRent: 'Pentru cifrele tale, închirierea rămâne mai avantajoasă pe tot orizontul.',
-  saleTaxNote: (years: number) =>
-    `Averea cumpărătorului presupune vânzarea în luna respectivă. Impozitul la vânzare scade după ${years} ani, ceea ce poate muta momentul în care cumpărarea devine avantajoasă.`,
+  saleTaxNote: (after: string) =>
+    `Averea cumpărătorului presupune vânzarea în luna respectivă. Impozitul la vânzare scade după ${after}, ceea ce poate muta momentul în care cumpărarea devine avantajoasă.`,
   tabs: {
     netWorth: 'Avere netă',
     monthly: 'Costuri lunare',

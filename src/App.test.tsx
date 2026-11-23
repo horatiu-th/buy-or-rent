@@ -48,3 +48,12 @@ it('stores euro edits as whole lei in the URL', async () => {
   const eurRon = loadDefaults().values.eurRon.value;
   expect(new URLSearchParams(window.location.search).get('price')).toBe(String(Math.round(1234 * eurRon)));
 });
+
+it('flags nominal views when showing today\'s money', async () => {
+  window.history.replaceState(null, '', '/?moneda=EUR&real=1');
+  render(<App />);
+  expect(screen.getByLabelText('Ajustat cu inflația (€ de azi)')).toBeChecked();
+  expect(screen.queryByText('Valori nominale')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
+  expect(screen.getByText('Valori nominale')).toBeInTheDocument();
+});

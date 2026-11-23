@@ -8,7 +8,7 @@ export function formatMoney(lei: number, currency: Currency, eurRon: number): st
 }
 
 export function formatDuration(months: number): string {
-  // Break-even can be month 0 when there are no upfront costs; an empty string would break the sentence.
+  // Defensive: callers pass positive durations, but an empty string here would leave a sentence dangling.
   if (months <= 0) return '0 luni';
   const y = Math.floor(months / 12);
   const m = months % 12;

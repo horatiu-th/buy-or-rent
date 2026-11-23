@@ -18,13 +18,12 @@ export function Results({ inputs, view, onToggleReal }: { inputs: Inputs; view: 
       <Headline
         eq={eq}
         breakEvenMonth={result.breakEvenMonth}
-        includeSaleCosts={inputs.includeSaleCosts}
-        saleTaxShortHoldYears={inputs.saleTaxShortHoldYears}
+        sale={inputs}
         currency={view.currency}
         eurRon={view.eurRon}
       />
       <label className="real-toggle">
-        <input type="checkbox" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} /> {ro.realValues}
+        <input type="checkbox" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} /> {ro.realValues(view.currency)}
       </label>
       <div role="tablist">
         {(Object.keys(ro.tabs) as Tab[]).map((t) => (
@@ -37,6 +36,8 @@ export function Results({ inputs, view, onToggleReal }: { inputs: Inputs; view: 
       {tab === 'sensitivity' && grid && (
         <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} currency={view.currency} eurRon={view.eurRon} />
       )}
+      {/* These two views are always nominal, so say so when the rest of the page is in today's money. */}
+      {view.real && (tab === 'breakdown' || tab === 'sensitivity') && <p className="note">{ro.nominalNote}</p>}
       <p className="note">{ro.assumptions}</p>
     </div>
   );
