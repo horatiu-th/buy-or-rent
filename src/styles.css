@@ -1,0 +1,77 @@
+/* Series colours are validated for colour-blind separation and >= 3:1 contrast on each surface;
+   dark mode uses its own steps rather than an automatic inversion. */
+:root {
+  --bg: #fcfcfb;
+  --surface: #ffffff;
+  --text: #0b0b0b;
+  --text-secondary: #52514e;
+  --border: #e2e1dc;
+  --grid: #e9e8e4;
+  --buyer: #2a78d6;
+  --renter: #eb6834;
+  color-scheme: light;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.4;
+  color: var(--text);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a19;
+    --surface: #222220;
+    --text: #f0efec;
+    --text-secondary: #c3c2b7;
+    --border: #3a3a37;
+    --grid: #2e2e2c;
+    --buyer: #3987e5;
+    --renter: #d95926;
+    color-scheme: dark;
+  }
+}
+body { margin: 0; background: var(--bg); color: var(--text); }
+a { color: inherit; }
+
+.app { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+.app > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1rem; margin-bottom: 1rem; }
+.app > header h1 { margin: 0; font-size: 1.6rem; }
+.app > header p { margin: 0; color: var(--text-secondary); }
+.toolbar { margin-left: auto; display: flex; gap: 0.75rem; align-items: center; }
+
+.layout { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 2rem; }
+.layout > * { min-width: 0; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .toolbar { margin-left: 0; } }
+
+.city-picker { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; margin-bottom: 1rem; }
+.city-picker > label { display: flex; flex-direction: column; gap: 0.25rem; }
+.city-picker fieldset { display: flex; gap: 0.75rem; }
+
+input, select, button { font: inherit; color: inherit; }
+input[type='number'], select {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.45rem;
+}
+button { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.3rem 0.7rem; cursor: pointer; }
+fieldset { border: 1px solid var(--border); border-radius: 8px; margin: 0 0 1rem; }
+details > summary { cursor: pointer; margin: 0.5rem 0 1rem; font-weight: 600; }
+
+.field { margin-bottom: 0.75rem; }
+.input-row { display: flex; gap: 0.25rem; align-items: center; }
+.input-row input { width: 100%; }
+.suffix { color: var(--text-secondary); min-width: 2rem; }
+.reset { padding: 0.1rem 0.45rem; }
+.help { cursor: help; margin-left: 0.25rem; color: var(--text-secondary); }
+.source { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.15rem; }
+.source-stale, .source-manual { font-style: italic; }
+
+.headline h2 { margin: 0 0 0.25rem; font-size: 1.35rem; }
+.headline p { margin: 0 0 0.25rem; }
+.real-toggle { display: inline-block; margin-top: 0.5rem; }
+[role='tablist'] { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+[role='tab'][aria-selected='true'] { font-weight: 600; border-color: var(--text); }
+
+.sensitivity { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.sensitivity th, .sensitivity td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: right; }
+.sensitivity thead th:first-child { text-align: left; font-weight: 400; color: var(--text-secondary); }
+/* Text stays in ink colours; a side bar in the series colour marks which option wins. */
+.sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
+.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--renter); }
+
+.note { color: var(--text-secondary); font-size: 0.85rem; }
