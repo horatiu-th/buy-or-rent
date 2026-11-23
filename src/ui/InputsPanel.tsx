@@ -29,10 +29,10 @@ interface GroupLayout {
 }
 
 const LAYOUT: GroupLayout[] = [
+  { id: 'general', topics: ['general'] },
   { id: 'buying', topics: ['home', 'loan'], more: ['purchaseCosts', 'ownershipCosts', 'sale'] },
   { id: 'renting', topics: ['renting'] },
   { id: 'investing', topics: ['investing'] },
-  { id: 'general', topics: ['general'] },
 ];
 
 const PRESETS = [
@@ -119,6 +119,7 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
                   <summary>
                     <span>{ro.buyingMore}</span>
                     {hiddenEdits > 0 && <span className="edit-count">{ro.editedCount(hiddenEdits)}</span>}
+                    <span className="chevron" aria-hidden="true" />
                   </summary>
                   {group.more.map((t) => renderTopic(t, true))}
                 </details>
