@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { loadDefaults } from './data/defaults';
@@ -109,4 +109,25 @@ it('moves the rent with the rent scale slider', () => {
   fireEvent.change(slider, { target: { value: '1500' } });
   expect(new URLSearchParams(window.location.search).get('rent')).toBe('1500');
   expect(screen.getByLabelText('Chirie lunară')).toHaveValue(1500);
+});
+
+it('groups inputs by buying, renting, investing and general', () => {
+  render(<App />);
+  for (const name of ['Cumpărare', 'Închiriere', 'Investiții', 'General']) {
+    expect(screen.getByRole('region', { name })).toBeInTheDocument();
+  }
+  expect(within(screen.getByRole('region', { name: 'Închiriere' })).getByLabelText('Chirie lunară')).toBeInTheDocument();
+  expect(within(screen.getByRole('region', { name: 'Investiții' })).getByLabelText('Randament investiții')).toBeInTheDocument();
+});
+
+it('counts edits hidden inside the folded buying costs', () => {
+  window.history.replaceState(null, '', '/?notaryPct=0.02&bankFees=2000');
+  render(<App />);
+  expect(screen.getByText('2 valori modificate')).toBeInTheDocument();
+});
+
+it('shows the renter who keeps savings in cash next to the investing renter', () => {
+  render(<App />);
+  expect(screen.getByText('Chiriaș care investește')).toBeInTheDocument();
+  expect(screen.getByText('Chiriaș care nu investește')).toBeInTheDocument();
 });

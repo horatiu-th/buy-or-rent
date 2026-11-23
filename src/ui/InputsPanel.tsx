@@ -2,7 +2,7 @@ import type { Inputs } from '../engine';
 import type { DataFile } from '../data/schema';
 import { sourceFor, type PropertyType } from '../data/defaults';
 import { ro } from '../i18n/ro';
-import { FIELDS, type FieldDef, type Group } from './fields';
+import { FIELDS, type FieldDef, type Topic } from './fields';
 import { InputField } from './InputField';
 import type { Currency } from './format';
 
@@ -17,20 +17,30 @@ interface Props {
   resetField: (key: keyof Inputs) => void;
 }
 
-const ADVANCED_GROUPS: Group[] = ['acquisition', 'ownership', 'growth', 'investing', 'sale'];
+type GroupId = keyof typeof ro.groups;
 
-// The key inputs read better as a few short sections than as one long list.
-const KEY_SECTIONS: { title: string; keys: (keyof Inputs)[] }[] = [
-  { title: ro.sections.home, keys: ['price', 'downPaymentPct'] },
-  { title: ro.sections.rent, keys: ['rent'] },
-  { title: ro.sections.loan, keys: ['fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'loanTermYears'] },
-  { title: ro.sections.horizon, keys: ['horizonYears'] },
+interface GroupLayout {
+  id: GroupId;
+  /** Topics always shown. Buying names each one, since it mixes the home and the loan. */
+  topics: Topic[];
+  /** Topics folded away because they rarely change and would bury the rest. */
+  more?: Topic[];
+}
+
+const LAYOUT: GroupLayout[] = [
+  { id: 'buying', topics: ['home', 'loan'], more: ['purchaseCosts', 'ownershipCosts', 'sale'] },
+  { id: 'renting', topics: ['renting'] },
+  { id: 'investing', topics: ['investing'] },
+  { id: 'general', topics: ['general'] },
 ];
 
 const PRESETS = [
   { years: 5, label: ro.presets.fixed5 },
   { years: 0, label: ro.presets.variable },
 ] as const;
+
+const fieldsOf = (topic: Topic) => FIELDS.filter((f) => f.topic === topic);
+const topicTitle = (topic: Topic) => (topic in ro.topics ? ro.topics[topic as keyof typeof ro.topics] : undefined);
 
 export function InputsPanel({ data, cityId, propertyType, inputs, overrides, currency, setField, resetField }: Props) {
   const eurRon = data.values.eurRon.value;
@@ -63,25 +73,38 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
       />,
     ]);
 
-  const byKey = new Map(FIELDS.map((f) => [f.key, f]));
+  const renderTopic = (topic: Topic, named: boolean) => {
+    const title = named ? topicTitle(topic) : undefined;
+    return (
+      <div key={topic} className="topic">
+        {title && <h4>{title}</h4>}
+        {renderDefs(fieldsOf(topic))}
+      </div>
+    );
+  };
 
   return (
     <div className="inputs">
-      {KEY_SECTIONS.map((section) => (
-        <section key={section.title} className="input-section">
-          <h3>{section.title}</h3>
-          {renderDefs(section.keys.map((k) => byKey.get(k)!))}
-        </section>
-      ))}
-      <details className="advanced">
-        <summary>{ro.advanced}</summary>
-        {ADVANCED_GROUPS.map((g) => (
-          <section key={g} className="input-section">
-            <h3>{ro.groups[g]}</h3>
-            {renderDefs(FIELDS.filter((f) => f.group === g))}
+      {LAYOUT.map((group) => {
+        const named = group.topics.length > 1 || Boolean(group.more);
+        // Edits inside the folded part would otherwise be invisible, so the summary counts them.
+        const hiddenEdits = (group.more ?? []).flatMap(fieldsOf).filter((f) => f.key in overrides).length;
+        return (
+          <section key={group.id} className={`input-group group-${group.id}`} aria-labelledby={`group-${group.id}`}>
+            <h3 id={`group-${group.id}`}>{ro.groups[group.id]}</h3>
+            {group.topics.map((t) => renderTopic(t, named))}
+            {group.more && (
+              <details className="more">
+                <summary>
+                  <span>{ro.buyingMore}</span>
+                  {hiddenEdits > 0 && <span className="edit-count">{ro.editedCount(hiddenEdits)}</span>}
+                </summary>
+                {group.more.map((t) => renderTopic(t, true))}
+              </details>
+            )}
           </section>
-        ))}
-      </details>
+        );
+      })}
     </div>
   );
 }

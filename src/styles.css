@@ -128,6 +128,10 @@ button { cursor: pointer; }
   display: grid; grid-template-columns: minmax(18rem, 23rem) minmax(0, 1fr);
   gap: 3.5rem; padding-top: 2rem; align-items: start;
 }
+/* Results stay in view while the longer inputs column scrolls, so every edit shows its effect. */
+@media (min-width: 861px) {
+  .results-column { position: sticky; top: 1.5rem; }
+}
 @media (max-width: 860px) {
   .layout { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
   .results-column { order: -1; }
@@ -138,9 +142,34 @@ button { cursor: pointer; }
   border-left: 2px solid var(--renter); margin-bottom: 1.5rem;
 }
 
-.input-section { padding-bottom: 1.25rem; }
-.input-section + .input-section { padding-top: 1.25rem; border-top: 1px solid var(--line); }
-.input-section h3 { font-size: var(--step-0); font-weight: 650; margin-bottom: 0.6rem; }
+/* Input groups: one per side of the decision, plus investing and general settings */
+.input-group { padding: 1.5rem 0; border-top: 1px solid var(--line); }
+.input-group:first-of-type { border-top: none; padding-top: 0; }
+.input-group > h3 {
+  display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.75rem;
+  font-size: var(--step-1); font-weight: 700; letter-spacing: -0.01em;
+}
+/* The same colours as the chart lines tie each group to its side of the comparison. */
+.input-group > h3::before {
+  content: ''; width: 0.25rem; height: 1.1rem; border-radius: 2px; background: var(--line);
+}
+.group-buying > h3::before { background: var(--buyer); }
+.group-renting > h3::before { background: var(--renter); }
+.topic + .topic { margin-top: 1rem; }
+.topic h4 { font-size: var(--step--1); font-weight: 600; color: var(--muted); margin: 0 0 0.25rem; }
+
+details.more { margin-top: 1rem; }
+details.more > summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px dashed var(--line);
+  font-size: var(--step--1); color: var(--muted);
+}
+details.more > summary:hover { color: var(--ink); border-color: var(--muted); }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: '+'; font-size: var(--step-1); line-height: 1; width: 0.75rem; }
+details.more[open] > summary::before { content: '−'; }
+details.more[open] > summary { margin-bottom: 0.75rem; }
+.edit-count { margin-left: auto; color: var(--buyer); font-weight: 600; }
 
 .field {
   display: grid; grid-template-columns: minmax(0, 1fr) 9rem; align-items: center;
@@ -192,15 +221,6 @@ button { cursor: pointer; }
 .switch input:checked::after { transform: translateX(0.9rem); }
 .field-bool { grid-template-columns: minmax(0, 1fr); }
 
-details.advanced { margin-top: 0.5rem; border-top: 1px solid var(--line); }
-details.advanced > summary {
-  list-style: none; cursor: pointer; padding: 1rem 0; font-weight: 650;
-  display: flex; align-items: center; justify-content: space-between;
-}
-details.advanced > summary::-webkit-details-marker { display: none; }
-details.advanced > summary::after { content: '+'; color: var(--muted); font-weight: 400; font-size: var(--step-2); line-height: 1; }
-details.advanced[open] > summary::after { content: '−'; }
-details.advanced .input-section:first-of-type { border-top: none; padding-top: 0; }
 
 /* Results */
 .results { display: flex; flex-direction: column; gap: 2rem; }
@@ -263,12 +283,11 @@ details.advanced .input-section:first-of-type { border-top: none; padding-top: 0
 .end-summary dl { display: flex; flex-wrap: wrap; gap: 0.75rem 2.5rem; margin: 0; }
 .end-item dt { display: flex; align-items: center; gap: 0.45rem; font-size: var(--step--1); color: var(--muted); }
 .end-item dd { margin: 0.15rem 0 0; font-size: var(--step-2); font-weight: 650; letter-spacing: -0.01em; }
-.end-item.buyer dt::before, .end-item.renter dt::before {
-  content: ''; width: 0.9rem; height: 3px; border-radius: 2px;
-}
+.end-item dt::before { content: ''; flex: none; width: 0.9rem; height: 3px; border-radius: 2px; }
 .end-item.buyer dt::before { background: var(--buyer); }
 .end-item.renter dt::before { background: var(--renter); }
-.end-item.gap dd { color: var(--muted); font-weight: 500; }
+.end-item.renter-cash dt::before { background: repeating-linear-gradient(to right, var(--renter) 0 4px, transparent 4px 7px); }
+.end-item.renter-cash dd { color: var(--muted); font-weight: 500; }
 
 /* Chart area */
 .chart-toolbar {
@@ -293,7 +312,8 @@ details.advanced .input-section:first-of-type { border-top: none; padding-top: 0
 .chart-tip-title { color: var(--muted); margin-bottom: 0.25rem; }
 .chart-tip-row { display: flex; align-items: center; gap: 0.45rem; }
 .chart-tip-row strong { margin-left: auto; padding-left: 1rem; font-weight: 600; }
-.swatch { width: 0.7rem; height: 3px; border-radius: 2px; }
+.swatch { flex: none; width: 0.9rem; height: 3px; border-radius: 2px; background: currentColor; }
+.swatch.dashed { background: repeating-linear-gradient(to right, currentColor 0 4px, transparent 4px 7px); }
 
 .sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; }
 .sensitivity { border-collapse: collapse; width: 100%; font-size: var(--step-0); font-variant-numeric: tabular-nums; }

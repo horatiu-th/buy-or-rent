@@ -25,6 +25,7 @@ function yearly(result: Result, view: View) {
       year: r.month / 12,
       buyer: conv(r.buyerNetWorth, r.deflator),
       renter: conv(r.renterNetWorth, r.deflator),
+      renterCash: conv(r.renterCashNetWorth, r.deflator),
       buyerCost: conv(r.buyerMonthlyCost, r.deflator),
       renterCost: conv(r.renterMonthlyCost, r.deflator),
     }));
@@ -44,7 +45,7 @@ const axisShort = (view: View) => (v: number) => {
 
 interface TipProps {
   active?: boolean;
-  payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string }>;
+  payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string; dataKey?: unknown }>;
   label?: unknown;
   fmt: (v: number) => string;
   title?: (label: unknown) => string;
@@ -57,7 +58,7 @@ function ChartTip({ active, payload, label, fmt, title }: TipProps) {
       {title && <p className="chart-tip-title">{title(label)}</p>}
       {payload.map((p) => (
         <p key={String(p.name)} className="chart-tip-row">
-          <span className="swatch" style={{ background: p.color }} aria-hidden="true" />
+          <span className={`swatch${p.dataKey === 'renterCash' ? ' dashed' : ''}`} style={{ color: p.color }} aria-hidden="true" />
           <span>{p.name}</span>
           <strong>{typeof p.value === 'number' ? fmt(p.value) : String(p.value)}</strong>
         </p>
@@ -86,7 +87,8 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
             label={{ value: ro.breakEvenMark, position: 'top', offset: 14, fill: 'var(--muted)', fontSize: 12 }}
           />
         )}
-        <Line type="monotone" dataKey="renter" name={ro.renter} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+        <Line type="monotone" dataKey="renterCash" name={ro.renterCash} stroke={RENTER} dot={false} strokeWidth={2} strokeDasharray="5 4" activeDot={{ r: 3 }} />
+        <Line type="monotone" dataKey="renter" name={ro.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
         <Line type="monotone" dataKey="buyer" name={ro.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
       </LineChart>
     </ResponsiveContainer>

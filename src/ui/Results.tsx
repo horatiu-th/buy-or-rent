@@ -18,28 +18,25 @@ interface Props {
   onRentChange: (lei: number) => void;
 }
 
-/** End-of-horizon figures; the coloured swatches double as the legend for every chart below. */
+/** End-of-horizon figures; the swatches double as the legend for the charts below. */
 function EndSummary({ result, view }: { result: Result; view: View }) {
   const last = result.rows[result.rows.length - 1];
-  const conv = (v: number) => (view.real ? v / last.deflator : v);
-  const fmt = (v: number) => formatMoney(conv(v), view.currency, view.eurRon);
-  const gap = last.buyerNetWorth - last.renterNetWorth;
+  const fmt = (v: number) => formatMoney(view.real ? v / last.deflator : v, view.currency, view.eurRon);
+  const items = [
+    { cls: 'buyer', label: ro.buyer, value: last.buyerNetWorth },
+    { cls: 'renter', label: ro.renterInvesting, value: last.renterNetWorth },
+    { cls: 'renter-cash', label: ro.renterCash, value: last.renterCashNetWorth },
+  ];
   return (
     <div className="end-summary">
       <p className="end-summary-title">{ro.atHorizon(formatDuration(last.month))}</p>
       <dl>
-        <div className="end-item buyer">
-          <dt>{ro.buyer}</dt>
-          <dd>{fmt(last.buyerNetWorth)}</dd>
-        </div>
-        <div className="end-item renter">
-          <dt>{ro.renter}</dt>
-          <dd>{fmt(last.renterNetWorth)}</dd>
-        </div>
-        <div className="end-item gap">
-          <dt>{ro.difference}</dt>
-          <dd>{fmt(Math.abs(gap))}</dd>
-        </div>
+        {items.map((it) => (
+          <div key={it.cls} className={`end-item ${it.cls}`}>
+            <dt>{it.label}</dt>
+            <dd>{fmt(it.value)}</dd>
+          </div>
+        ))}
       </dl>
     </div>
   );
