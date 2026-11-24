@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import { SensitivityTable } from './SensitivityTable';
+import { SensitivityTable, SwingsTable } from './SensitivityTable';
 
 const grid = [
   [-30000, -10000, 5000],
@@ -50,3 +50,24 @@ describe('SensitivityTable', () => {
     expect(within(region as HTMLElement).getByRole('table')).toBe(table);
   });
 });
+
+describe('SwingsTable', () => {
+  const swings = [
+    { key: 'rent' as const, down: { value: 2_250, gap: -8_000 }, up: { value: 2_750, gap: 30_000 } },
+    { key: 'irccLongRun' as const, down: { value: 0.035, gap: 20_000 }, up: { value: 0.055, gap: 4_000 } },
+  ];
+
+  it('shows each assumption moved down and up next to the base case', () => {
+    render(<SwingsTable swings={swings} base={12_000} currency="RON" eurRon={5} />);
+    const [rent, ircc] = screen.getAllByRole('row').slice(1);
+    expect(within(rent).getByRole('rowheader')).toHaveTextContent('Chirie lunară (±10%)');
+    const cells = within(rent).getAllByRole('cell');
+    expect(cells[0]).toHaveTextContent('2.250 lei: -8.000 lei');
+    expect(cells[0]).toHaveTextContent('închirierea câștigă');
+    expect(cells[1]).toHaveTextContent('+12.000 lei');
+    expect(cells[1]).toHaveClass('is-base');
+    expect(cells[2]).toHaveTextContent('2.750 lei: +30.000 lei');
+    expect(within(ircc).getAllByRole('cell')[0]).toHaveTextContent('3,5%: +20.000 lei');
+  });
+});
+

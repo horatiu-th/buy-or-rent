@@ -36,6 +36,7 @@ export const FIELDS: FieldDef[] = [
   { key: 'registryPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.05, step: 0.0005 },
   { key: 'bankFees', unit: 'money', topic: 'purchaseCosts', min: 0, max: 1_000_000, step: 100 },
   { key: 'buyerAgencyPct', unit: 'pct', topic: 'purchaseCosts', min: 0, max: 0.1, step: 0.001 },
+  { key: 'fitOutCost', unit: 'money', topic: 'purchaseCosts', min: 0, max: 1_000_000, step: 1000 },
 
   { key: 'propertyTaxAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 10 },
   { key: 'homeInsuranceAnnual', unit: 'money', topic: 'ownershipCosts', min: 0, max: 100_000, step: 10 },
@@ -53,6 +54,8 @@ export const FIELDS: FieldDef[] = [
   { key: 'rentGrowth', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },
   { key: 'depositMonths', unit: 'months', topic: 'renting', min: 0, max: 12, step: 1 },
   { key: 'rentAgencyPct', unit: 'pct', topic: 'renting', min: 0, max: 3, step: 0.05 },
+  { key: 'moveEveryYears', unit: 'years', topic: 'renting', min: 0, max: 30, step: 1 },
+  { key: 'moveCost', unit: 'money', topic: 'renting', min: 0, max: 100_000, step: 100 },
   { key: 'renterInsuranceAnnual', unit: 'money', topic: 'renting', min: 0, max: 100_000, step: 50 },
 
   { key: 'investReturn', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },

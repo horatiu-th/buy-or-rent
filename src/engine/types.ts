@@ -6,6 +6,7 @@ export interface Inputs {
   registryPct: number; // ANCPI registration, of price
   bankFees: number; // lei, valuation + loan fees
   buyerAgencyPct: number; // buyer-side agency commission, of price, VAT included
+  fitOutCost: number; // lei, one-off at purchase: furnishing or works the rented comparable already has
 
   // Loan
   loanTermYears: number;
@@ -20,7 +21,7 @@ export interface Inputs {
   homeInsuranceAnnual: number; // lei/year, mandatory PAD policy
   homeInsurancePct: number; // annual, of property value: the optional policy banks require
   lifeInsurancePct: number; // annual, of outstanding loan balance
-  maintenancePct: number; // annual, of property value
+  maintenancePct: number; // annual, of property value, including periodic renovation
   propertyGrowth: number; // annual
 
   // Renting
@@ -28,7 +29,9 @@ export interface Inputs {
   rentGrowth: number; // annual, applied once per year
   renterInsuranceAnnual: number; // lei/year
   depositMonths: number;
-  rentAgencyPct: number; // agency fee for renting, as a share of one month's starting rent, not refunded
+  rentAgencyPct: number; // agency fee for renting, as a share of one month's rent, paid at the start and on every move
+  moveEveryYears: number; // 0 = never; otherwise the renter moves at the start of every this-many-th year
+  moveCost: number; // lei per move today (transport, cleaning), indexed with inflation
 
   // Investing
   investReturn: number; // annual, gross
@@ -43,7 +46,7 @@ export interface Inputs {
 
   // Analysis
   horizonYears: number;
-  inflation: number; // annual, used only for real-value display
+  inflation: number; // annual; indexes lei amounts set today and converts results to today's money
 }
 
 export interface MonthRow {
@@ -51,6 +54,7 @@ export interface MonthRow {
   propertyValue: number;
   loanBalance: number;
   buyerMonthlyCost: number;
+  /** Cash the renter spends on housing that month; in a move month this includes the move and the deposit top-up. */
   renterMonthlyCost: number;
   buyerNetWorth: number;
   renterNetWorth: number;
@@ -61,6 +65,7 @@ export interface MonthRow {
 export interface BuyerTotals {
   downPayment: number;
   acquisitionCosts: number;
+  fitOut: number;
   interest: number;
   principal: number;
   propertyTax: number;
@@ -74,7 +79,9 @@ export interface BuyerTotals {
 }
 
 export interface RenterTotals {
+  /** Every rental agency fee: the first one and one per move. */
   agencyFee: number;
+  moving: number;
   rent: number;
   insurance: number;
   investmentTax: number;

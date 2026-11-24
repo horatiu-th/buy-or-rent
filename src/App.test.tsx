@@ -242,3 +242,28 @@ it('drops an edited price and rent when the city changes, so the new city shows 
   expect(q.get('fixedRate')).toBe('0.06');
   expect(screen.getByLabelText('Chirie lunară')).not.toHaveValue('1.999');
 });
+
+it('moves the inflation-linked defaults when inflation is edited', async () => {
+  render(<App />);
+  const invest = screen.getByLabelText('Randament investiții');
+  const before = (invest as HTMLInputElement).value;
+  const inflation = screen.getByLabelText('Inflație');
+  await userEvent.clear(inflation);
+  await userEvent.type(inflation, '5');
+  expect((invest as HTMLInputElement).value).not.toBe(before);
+  expect(new URLSearchParams(window.location.search).has('investReturn')).toBe(false);
+});
+
+it('shows the verdict at other horizons next to the chosen one', () => {
+  render(<App />);
+  const table = screen.getByRole('table', { name: /Pe alte orizonturi/ });
+  expect(within(table).getByText(/orizontul tău/)).toBeInTheDocument();
+  expect(within(table).getAllByRole('row')).toHaveLength(5);
+});
+
+it('adds the other assumptions to the sensitivity tab', async () => {
+  render(<App />);
+  await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
+  expect(screen.getByRole('table', { name: /o singură altă ipoteză/ })).toBeInTheDocument();
+})
+;

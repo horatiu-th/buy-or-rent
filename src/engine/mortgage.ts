@@ -2,7 +2,9 @@ export function annuityPayment(principal: number, annualRate: number, months: nu
   if (principal <= 0 || months <= 0) return 0;
   const r = annualRate / 12;
   if (r === 0) return principal / months;
-  return (principal * r) / (1 - Math.pow(1 + r, -months));
+  // 1 − (1 + r)^−n written with expm1/log1p: the plain form rounds to zero for rates just above zero
+  // and divides by it.
+  return (principal * r) / -Math.expm1(-months * Math.log1p(r));
 }
 
 export interface LoanParams {

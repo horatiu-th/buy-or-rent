@@ -62,6 +62,11 @@ describe('Headline', () => {
     expect(screen.queryByText(/trece în față/)).not.toBeInTheDocument();
   });
 
+  it('says there is no rent threshold when a higher rent favours the renter', () => {
+    renderHeadline({ eq: { kind: 'noThreshold' } });
+    expect(screen.getByTestId('headline')).toHaveTextContent(/nu există o chirie peste care cumpărarea câștigă/);
+  });
+
   it('rounds a fractional short-hold threshold to whole months', () => {
     renderHeadline({ sale: { ...sale, saleTaxShortHoldYears: 3.3 } });
     expect(screen.getByText(NOTE)).toHaveTextContent('scade după 3 ani și 4 luni,');

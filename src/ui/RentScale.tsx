@@ -36,7 +36,7 @@ export function RentScale({ eq, rent, price, currency, eurRon, onRentChange }: P
   const marker = Math.min(rent, max) / max;
   const fmt = (v: number) => formatMoney(v, currency, eurRon);
   const verdict =
-    eq.kind === 'invalid' ? ''
+    eq.kind === 'invalid' || eq.kind === 'noThreshold' ? ''
     : eq.kind === 'alwaysBuy' || (eq.kind === 'value' && rent > eq.rent) ? 'buyer-wins'
     : 'renter-wins';
 

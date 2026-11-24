@@ -35,7 +35,7 @@
     "bankFees": {
       "value": 1800,
       "unit": "lei",
-      "source": "BCR/ING: analiză 900 + evaluare 590–803 + înscrierea ipotecii 100 lei + RNPM 88 lei (taxa ANCPI de 0,1% din credit și notarul ipotecii se calculează separat)",
+      "source": "BCR/ING: analiză 900 + evaluare 590–803 + înscrierea ipotecii 100 lei + RNPM 88 lei, doar cu credit (taxa ANCPI de 0,1% din credit și notarul ipotecii se calculează separat)",
       "sourceUrl": "https://ing.ro/persoane-fizice/credite/ipotecar",
       "asOf": "2026-11-23",
       "status": "manual"
@@ -97,27 +97,6 @@
       "asOf": "2026-09-21",
       "status": "manual"
     },
-    "maintenancePct": {
-      "value": 0.0075,
-      "unit": "%",
-      "source": "Estimare: terenul și amplasamentul sunt 40–60% din valoarea unui apartament, deci ~1,5% pe an din valoarea construcției",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
-    "propertyGrowth": {
-      "value": 0.04,
-      "unit": "%",
-      "source": "Estimare",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
-    "rentGrowth": {
-      "value": 0.035,
-      "unit": "%",
-      "source": "Estimare: egală cu inflația; chiriile au crescut cu inflația în 2015–2025 (Eurostat)",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
     "renterInsuranceAnnual": {
       "value": 150,
       "unit": "lei",
@@ -131,14 +110,6 @@
       "source": "Practica pieței de închirieri",
       "sourceUrl": "https://spotmedia.ro/stiri/casa-si-gradina/cat-costa-de-fapt-sa-inchiriezi-un-apartament-in-2026-taxe-garantii-si-comisioane-ascunse",
       "asOf": "2026-02-21",
-      "status": "manual"
-    },
-    "investReturn": {
-      "value": 0.07,
-      "unit": "%",
-      "source": "Estimare, ETF global de acțiuni în lei: JPM LTCMA 2027 acțiuni globale 7,5% în USD; Vanguard 5,3–7,3% (dezvoltate ex-SUA, USD); Amundi 6,4–6,9% (portofoliu dinamic, EUR); plus deprecierea leului (~1,7%/an față de euro, 2005–2025), minus costuri",
-      "sourceUrl": "https://am.jpmorgan.com/us/en/asset-management/institutional/about-us/media/press-releases/jp-morgan-releases-2027-long-term-capital-market-assumptions/",
-      "asOf": "2026-11-23",
       "status": "manual"
     },
     "investTaxRate": {
@@ -184,14 +155,6 @@
       "value": 30,
       "unit": "ani",
       "source": "Alegere implicită",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
-    "irccLongRun": {
-      "value": 0.045,
-      "unit": "%",
-      "source": "Ipoteză (interval plauzibil 3,5–5,5%): inflația pe termen lung 3,5% plus ~1 pp. Nicio prognoză IRCC/ROBOR publicată după 2027; BNR: inflație 2,5% din T3 2028",
-      "sourceUrl": "https://www.economica.net/?p=995886",
       "asOf": "2026-11-23",
       "status": "manual"
     },
@@ -245,8 +208,72 @@
     "inflation": {
       "value": 0.035,
       "unit": "%",
-      "source": "Estimare",
+      "source": "Estimare pe termen lung: BNR prognozează 3,7% la final de 2027 și 2,5% din T3 2028; CE: 4,4% (2027), 3,8% (2028); ținta BNR 2,5% ±1 pp",
       "asOf": "2026-11-23",
+      "status": "manual",
+      "sourceUrl": "https://www.economica.net/?p=995886"
+    },
+    "maintenancePct": {
+      "value": 0.01,
+      "unit": "%",
+      "source": "Alegere: regula uzuală de 1% pe an din valoarea locuinței, inclusiv o renovare completă la ~20 de ani. Verificare: renovarea standard (~2.100 lei/m² la nivel național, 2.600–3.500 în București) la 20 de ani înseamnă ~1,0% din prețul mediu național, ~1,3% în București, ~0,9% în Cluj",
+      "sourceUrl": "https://financiarul.ro/constructii/renovarea-unui-apartament-cu-doua-camere-costa-pana-la-3-400-ron-mp/",
+      "asOf": "2026-11-24",
+      "status": "manual"
+    },
+    "propertyRealGrowth": {
+      "value": 0,
+      "unit": "%",
+      "source": "Prețurile reale ale locuințelor au stagnat: BIS, România, 2015–2025, −0,09%/an real (+5,12%/an nominal); din 2009, −36,9% real. Creșterea implicită = inflația",
+      "sourceUrl": "https://fred.stlouisfed.org/series/QROR628BIS",
+      "asOf": "2025-12-31",
+      "status": "manual"
+    },
+    "rentRealGrowth": {
+      "value": 0,
+      "unit": "%",
+      "source": "Chiriile au crescut cu inflația: Eurostat HICP chirii +4,58%/an față de inflație +4,82%/an, 2015–2025. Creșterea implicită = inflația",
+      "sourceUrl": "https://fred.stlouisfed.org/series/CP0410ROM086NEST",
+      "asOf": "2025-12-31",
+      "status": "manual"
+    },
+    "investRealReturn": {
+      "value": 0.035,
+      "unit": "%",
+      "source": "Estimare, ETF global de acțiuni, peste inflație, după costurile fondului: JPM LTCMA 2027 acțiuni globale 7,5% (USD), Vanguard (dec. 2025) SUA 4–5%, ex-SUA 4,9–6,9% (USD); minus inflația globală 2,6% (JPM) dă ~4,8% și ~2,4% real, media ~3,6%; minus TER 0,14–0,20%",
+      "sourceUrl": "https://am.jpmorgan.com/us/en/asset-management/institutional/about-us/media/press-releases/jp-morgan-releases-2027-long-term-capital-market-assumptions/",
+      "asOf": "2026-10-19",
+      "status": "manual"
+    },
+    "irccLongRunSpread": {
+      "value": 0.01,
+      "unit": "pp",
+      "source": "Ipoteză: IRCC pe termen lung = inflația + ~1 pp (interval plauzibil 3,5–5,5% la inflație 3,5%). Nicio prognoză IRCC/ROBOR publicată după 2027",
+      "sourceUrl": "https://www.economica.net/?p=995886",
+      "asOf": "2026-11-23",
+      "status": "manual"
+    },
+    "fitOutCost": {
+      "value": 0,
+      "unit": "lei",
+      "source": "Implicit 0: nu există date despre câte chirii sunt mobilate. Mobilarea unui apartament de 2 camere: 35.000–55.000 lei nivel mediu, fără electrocasnice (Club Antreprenor, aprilie 2026)",
+      "sourceUrl": "https://www.clubantreprenor.ro/2026/04/14/cat-costa-sa-mobilezi-un-apartament-cu-2-camere-in-2026-buget-real-piesa-cu-piesa/",
+      "asOf": "2026-04-14",
+      "status": "manual"
+    },
+    "moveEveryYears": {
+      "value": 0,
+      "unit": "ani",
+      "source": "Implicit 0 (fără mutări): nu există date publicate despre cât stau chiriașii într-o locuință; contractele sunt de obicei de 12 luni",
+      "sourceUrl": "https://www.storia.ro/blog/ghid-chirie/chirias/contract-inchiriere-locuinta-anaf",
+      "asOf": "2026-11-24",
+      "status": "manual"
+    },
+    "moveCost": {
+      "value": 0,
+      "unit": "lei",
+      "source": "Implicit 0: nu am găsit un preț publicat pentru transportul unei mutări. Comisionul de agenție și completarea garanției se adaugă automat la fiecare mutare",
+      "asOf": "2026-11-24",
       "status": "manual"
     }
   },
@@ -284,6 +311,14 @@
         "sourceUrl": "https://static.anaf.ro/static/10/Anaf/legislatie/L_239_2025.pdf",
         "asOf": "2026-11-23",
         "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 2229,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
       }
     },
     "cluj": {
@@ -311,6 +346,14 @@
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 3177,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
       }
     },
     "timisoara": {
@@ -335,6 +378,14 @@
         "value": 8.2,
         "unit": "€/m²/lună",
         "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 1984,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -373,6 +424,14 @@
         "sourceUrl": "https://static.anaf.ro/static/10/Anaf/legislatie/L_239_2025.pdf",
         "asOf": "2026-11-23",
         "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 1911,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
       }
     },
     "brasov": {
@@ -397,6 +456,14 @@
         "value": 9.4,
         "unit": "€/m²/lună",
         "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 2265,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -427,6 +494,14 @@
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 1967,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
       }
     },
     "oradea": {
@@ -451,6 +526,14 @@
         "value": 7,
         "unit": "€/m²/lună",
         "source": "apartamente.org, indice noiembrie 2026 (provizoriu, citit pe 23.11.2026; recalculat până la 1.12.2026)",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 1873,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
@@ -481,6 +564,14 @@
         "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 2037,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețului cerut la vânzare, același indice ca chiria, noiembrie 2026 (provizoriu până la 1.12.2026); transformă chiria în randament pentru prețul ales",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
       }
     },
     "ro": {
@@ -502,9 +593,18 @@
         "status": "manual"
       },
       "rentSqmEur": {
-        "value": 8.1,
+        "value": 7.7,
         "unit": "€/m²/lună",
-        "source": "Estimare",
+        "source": "apartamente.org, mediana chiriei în orașele urmărite, noiembrie 2026 (provizoriu până la 1.12.2026)",
+        "sourceUrl": "https://apartamente.org/raport-piata",
+        "asOf": "2026-11-23",
+        "status": "manual"
+      },
+      "rentPriceSqmEur": {
+        "value": 2010.5,
+        "unit": "€/m²",
+        "source": "apartamente.org, mediana prețurilor de vânzare ale celor opt orașe, noiembrie 2026 (calculată), pereche cu mediana chiriei",
+        "sourceUrl": "https://apartamente.org/raport-piata",
         "asOf": "2026-11-23",
         "status": "manual"
       }

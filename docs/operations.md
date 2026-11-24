@@ -68,7 +68,7 @@ Most defaults are maintained by hand. Follow [Updating values by hand](data.md#u
 | Every 3 months | Mortgage rates and bank margins | BNR new-loan interest statistics; major banks' product sheets |
 | Every 3–6 months | City prices (€/m², new and existing) and rents | Storia, imobiliare.ro and apartamente.org monthly reports |
 | Every January | Taxes: property tax, sale tax and investment tax; notary and land-registry fees | Codul fiscal, ANAF, PwC Tax Summaries for Romania |
-| Once a year | Long-run assumptions: inflation, property and rent growth, investment returns | BNR inflation report, Eurostat house price index |
+| Once a year | Long-run assumptions: inflation and the real parts of property growth, rent growth, investment returns and long-run IRCC; upkeep rate | BNR inflation report, Eurostat house price index |
 | Once a year | Insurance costs, typical rental deposit | PAD tariffs, insurers, press |
 | When announced | Noua Casă terms (a preset was postponed until the 2027 terms are known) | FNGCIMM, Ministry of Finance |
 

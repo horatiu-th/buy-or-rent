@@ -32,9 +32,40 @@ export function rentForSize(rentSqm: number, sqm: number): number {
   return rentSqm * RENT_REFERENCE_SQM * Math.pow(sqm / RENT_REFERENCE_SQM, RENT_SIZE_EXPONENT);
 }
 
+/**
+ * Rent per m² for the price being used. The rent index and the sale index it is paired with cover the
+ * same listings, so their ratio is a yield free of differences in area definitions or stock between
+ * sources. Applying that yield to the chosen price gives a rent for a comparable home; the price split
+ * by building age has no published rent counterpart, so new and existing homes share the city's yield.
+ */
+export function rentSqmFor(data: DataFile, cityId: string, type: PropertyType): number {
+  const city = cityOf(data, cityId);
+  const priceSqm = type === 'new' ? city.priceSqmEurNew.value : city.priceSqmEurExisting.value;
+  return (city.rentSqmEur.value * priceSqm) / city.rentPriceSqmEur.value;
+}
+
 const agencyKey = (type: PropertyType) => (type === 'new' ? 'buyerAgencyPctNew' : 'buyerAgencyPct');
 
-export function buildInputs(data: DataFile, cityId: string, type: PropertyType, sqm: number): Inputs {
+/** A nominal annual rate from inflation and a real rate, rounded so float noise stays out of fields and links. */
+const nominal = (inflation: number, real: number) => +((1 + inflation) * (1 + real) - 1).toFixed(6);
+
+/**
+ * Defaults that follow inflation: each is inflation plus a real component from the data. Kept in one place
+ * so a changed inflation moves them together, instead of leaving them set for a different price level.
+ */
+export function inflationLinked(data: DataFile, inflation: number) {
+  const v = (k: string) => data.values[k].value;
+  return {
+    propertyGrowth: nominal(inflation, v('propertyRealGrowth')),
+    rentGrowth: nominal(inflation, v('rentRealGrowth')),
+    investReturn: nominal(inflation, v('investRealReturn')),
+    irccLongRun: Math.max(0, +(inflation + v('irccLongRunSpread')).toFixed(6)),
+  };
+}
+
+export function buildInputs(
+  data: DataFile, cityId: string, type: PropertyType, sqm: number, inflation = data.values.inflation.value,
+): Inputs {
   const v = (k: string) => {
     const x = data.values[k];
     if (!x) throw new Error(`Missing default: ${k}`);
@@ -47,7 +78,7 @@ export function buildInputs(data: DataFile, cityId: string, type: PropertyType, 
   return {
     // Index prices are asking prices; buyers usually negotiate a few percent off.
     price: Math.round(priceSqm * sqm * eur * (1 - v('negotiationPct'))),
-    rent: Math.round(rentForSize(city.rentSqmEur.value, sqm) * eur),
+    rent: Math.round(rentForSize(rentSqmFor(data, cityId, type), sqm) * eur),
     propertyTaxAnnual: Math.round((city.propertyTaxSqm?.value ?? v('propertyTaxSqm')) * sqm),
     includeSaleCosts: true,
     downPaymentPct: v('downPaymentPct'),
@@ -55,31 +86,48 @@ export function buildInputs(data: DataFile, cityId: string, type: PropertyType, 
     registryPct: v('registryPct'),
     bankFees: v('bankFees'),
     buyerAgencyPct: v(agencyKey(type)),
+    fitOutCost: v('fitOutCost'),
     loanTermYears: v('loanTermYears'),
     fixedRate: v('fixedRate'),
     fixedYears: v('fixedYears'),
     ircc: v('ircc'),
-    irccLongRun: v('irccLongRun'),
     variableMargin: v('variableMargin'),
     homeInsuranceAnnual: v('homeInsuranceAnnual'),
     homeInsurancePct: v('homeInsurancePct'),
     lifeInsurancePct: v('lifeInsurancePct'),
     maintenancePct: v('maintenancePct'),
-    propertyGrowth: v('propertyGrowth'),
-    rentGrowth: v('rentGrowth'),
     renterInsuranceAnnual: v('renterInsuranceAnnual'),
     depositMonths: v('depositMonths'),
     rentAgencyPct: v('rentAgencyPct'),
-    investReturn: v('investReturn'),
+    moveEveryYears: v('moveEveryYears'),
+    moveCost: v('moveCost'),
     investTaxRate: v('investTaxRate'),
     saleAgencyPct: v('saleAgencyPct'),
     saleTaxShortPct: v('saleTaxShortPct'),
     saleTaxLongPct: v('saleTaxLongPct'),
     saleTaxShortHoldYears: v('saleTaxShortHoldYears'),
     horizonYears: v('horizonYears'),
-    inflation: v('inflation'),
+    inflation,
+    ...inflationLinked(data, inflation),
   };
 }
+
+/**
+ * The inputs the simulation runs on: the place's defaults with the user's edits on top. An edited
+ * inflation also moves the defaults that follow it, unless those were edited too.
+ */
+export function resolveInputs(
+  data: DataFile, cityId: string, type: PropertyType, sqm: number, overrides: Partial<Inputs>,
+): Inputs {
+  return { ...buildInputs(data, cityId, type, sqm, overrides.inflation), ...overrides };
+}
+
+const REAL_PART: Partial<Record<keyof Inputs, string>> = {
+  propertyGrowth: 'propertyRealGrowth',
+  rentGrowth: 'rentRealGrowth',
+  investReturn: 'investRealReturn',
+  irccLongRun: 'irccLongRunSpread',
+};
 
 /** Where a field's default came from, for the source tag next to each input. */
 export function sourceFor(data: DataFile, cityId: string, type: PropertyType, key: keyof Inputs): SourcedValue | undefined {
@@ -88,5 +136,7 @@ export function sourceFor(data: DataFile, cityId: string, type: PropertyType, ke
   if (key === 'rent') return city.rentSqmEur;
   if (key === 'propertyTaxAnnual') return city.propertyTaxSqm ?? data.values.propertyTaxSqm;
   if (key === 'buyerAgencyPct') return data.values[agencyKey(type)];
+  const real = REAL_PART[key];
+  if (real) return data.values[real];
   return data.values[key];
 }

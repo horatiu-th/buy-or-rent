@@ -1,4 +1,4 @@
-import { breakEven, irccAt, IRCC_CONVERGENCE_MONTHS, simulate } from './simulate';
+import { breakEven, irccAt, isMoveMonth, IRCC_CONVERGENCE_MONTHS, simulate } from './simulate';
 import type { MonthRow } from './types';
 import { acquisitionCosts } from './costs';
 import { amortize } from './mortgage';
@@ -9,6 +9,12 @@ const last = <T,>(xs: T[]) => xs[xs.length - 1];
 describe('simulate', () => {
   it('produces one row per month plus month 0', () => {
     expect(simulate(baseInputs).rows).toHaveLength(30 * 12 + 1);
+  });
+
+  it('charges bank fees only when there is a loan', () => {
+    const cash = simulate({ ...flatWorld, downPaymentPct: 1, bankFees: 1_800 }).rows[0];
+    const cashNoFees = simulate({ ...flatWorld, downPaymentPct: 1, bankFees: 0 }).rows[0];
+    expect(cash.buyerNetWorth).toBeCloseTo(cashNoFees.buyerNetWorth, 6);
   });
 
   it("starts the renter ahead by the buyer's sunk costs less the renter's agency fee", () => {
@@ -190,6 +196,71 @@ describe('property tax', () => {
     expect(rows[1].buyerMonthlyCost - tax(1)).toBeCloseTo(100, 9);
     expect(rows[12].buyerMonthlyCost - tax(12)).toBeCloseTo(100, 9);
     expect(rows[13].buyerMonthlyCost - tax(13)).toBeCloseTo(105, 9);
+  });
+});
+
+describe('maintenance', () => {
+  it('is a share of the current property value', () => {
+    const i = { ...flatWorld, maintenancePct: 0.012, propertyGrowth: 0.05 };
+    const without = simulate({ ...i, maintenancePct: 0 }).rows;
+    const { rows } = simulate(i);
+    for (const m of [1, 13, 120]) {
+      expect(rows[m].buyerMonthlyCost - without[m].buyerMonthlyCost).toBeCloseTo((rows[m].propertyValue * 0.012) / 12, 6);
+    }
+  });
+});
+
+describe('fit-out at purchase', () => {
+  it('is paid upfront by the buyer and has no resale value', () => {
+    const withFitOut = simulate({ ...flatWorld, fitOutCost: 30_000 });
+    const without = simulate(flatWorld);
+    const gap = (r: typeof without, m: number) => r.rows[m].renterNetWorth - r.rows[m].buyerNetWorth;
+    expect(gap(withFitOut, 0) - gap(without, 0)).toBeCloseTo(30_000, 6);
+    expect(gap(withFitOut, 360) - gap(without, 360)).toBeCloseTo(30_000, 6);
+    expect(withFitOut.buyer.fitOut).toBe(30_000);
+  });
+});
+
+describe('renter moves', () => {
+  it('happen at the start of every n-th year after the first', () => {
+    expect([1, 12, 13, 24, 25, 49].filter((m) => isMoveMonth(m, 2))).toEqual([25, 49]);
+    expect([1, 13, 25].filter((m) => isMoveMonth(m, 0))).toEqual([]);
+  });
+
+  it('cost a fresh agency fee and the move itself each time', () => {
+    // A move every 2 years over 30 years is 14 moves; with no growth each costs 1,250 + 2,000 lei.
+    const i = { ...flatWorld, rentAgencyPct: 0.5, moveEveryYears: 2, moveCost: 2_000 };
+    const moving = simulate(i);
+    const staying = simulate({ ...i, moveEveryYears: 0 });
+    expect(moving.renter.agencyFee - staying.renter.agencyFee).toBeCloseTo(14 * 1_250, 6);
+    expect(moving.renter.moving).toBeCloseTo(14 * 2_000, 6);
+    // Whoever spends less invests the difference, so the cost shows up in the gap, not always in the renter's own wealth.
+    const gap = (r: typeof moving) => last(r.rows).buyerNetWorth - last(r.rows).renterNetWorth;
+    expect(gap(moving) - gap(staying)).toBeCloseTo(14 * 3_250, 6);
+  });
+
+  it('charge the agency fee on the rent at the time of the move and index the moving cost', () => {
+    const i = { ...flatWorld, rentAgencyPct: 1, moveEveryYears: 1, moveCost: 1_000, rentGrowth: 0.1, inflation: 0.05, horizonYears: 2 };
+    const r = simulate(i);
+    expect(r.renter.agencyFee).toBeCloseTo(2_500 + 2_750, 6);
+    expect(r.renter.moving).toBeCloseTo(1_050, 6);
+  });
+
+  it('reset the deposit to the current rent, returned in full at the end', () => {
+    // At zero return a deposit is as good as cash, so topping it up changes nothing at the horizon.
+    const i = { ...flatWorld, rentGrowth: 0.1, moveEveryYears: 3 };
+    const gap = (depositMonths: number) => {
+      const end = last(simulate({ ...i, depositMonths }).rows);
+      return end.buyerNetWorth - end.renterNetWorth;
+    };
+    expect(gap(2)).toBeCloseTo(gap(0), 6);
+  });
+
+  it('count a deposit top-up as cash spent in the month of the move', () => {
+    const i = { ...flatWorld, rentGrowth: 0.1, moveEveryYears: 1, depositMonths: 2, rentAgencyPct: 0 };
+    const { rows } = simulate(i);
+    // Month 13: the rent is 2,750, and the deposit grows from 5,000 to 5,500.
+    expect(rows[13].renterMonthlyCost).toBeCloseTo(2_750 + 500, 6);
   });
 });
 

@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useMemo } from 'react';
-import { buildInputs, loadDefaults, resolveCityId } from './data/defaults';
+import { loadDefaults, resolveCityId, resolveInputs } from './data/defaults';
 import type { Inputs } from './engine';
 import { ro } from './i18n/ro';
 import { CityPicker } from './ui/CityPicker';
@@ -24,7 +24,7 @@ export default function App() {
   const cityId = resolveCityId(scenario.cityId, data);
   // Narrow deps so toggling currency or real values doesn't rebuild inputs and rerun the simulation.
   const inputs: Inputs = useMemo(
-    () => ({ ...buildInputs(data, cityId, propertyType, sqm), ...overrides }),
+    () => resolveInputs(data, cityId, propertyType, sqm, overrides),
     [cityId, propertyType, sqm, overrides],
   );
   // Keeps typing responsive: results re-render at lower priority than the input that changed.

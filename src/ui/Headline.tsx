@@ -27,6 +27,7 @@ export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sa
   const main =
     eq.kind === 'value' ? ro.headlineValue(after, formatMoney(eq.rent, currency, eurRon))
     : eq.kind === 'alwaysBuy' ? ro.headlineAlwaysBuy(after)
+    : eq.kind === 'noThreshold' ? ro.headlineNoThreshold(after)
     : ro.headlineAlwaysRent(after);
   const verdict =
     breakEvenMonth === 0 ? ro.verdictBuyFromStart

@@ -374,6 +374,10 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
 .sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--renter); }
 .sensitivity td.is-base { font-weight: 650; }
+.sensitivity tr.is-base th, .sensitivity tr.is-base td { font-weight: 650; }
+.horizon-yours { font-weight: 400; color: var(--muted); }
+.swing-setting { color: var(--muted); font-size: var(--step--1); }
+.swings { margin-top: 2rem; }
 
 .site-footer {
   margin-top: 4rem; padding-top: 1.25rem; border-top: 1px solid var(--line);

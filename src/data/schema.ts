@@ -17,6 +17,8 @@ export interface CityData {
   priceSqmEurNew: SourcedValue;
   priceSqmEurExisting: SourcedValue;
   rentSqmEur: SourcedValue;
+  /** Sale €/m² from the same index as the rent, so rent ÷ this is a yield measured on one set of listings. */
+  rentPriceSqmEur: SourcedValue;
   propertyTaxSqm?: SourcedValue;
 }
 
@@ -34,17 +36,20 @@ export interface PartialDataFile {
 export const REQUIRED_VALUE_KEYS = [
   'eurRon', 'downPaymentPct', 'notaryPct', 'registryPct', 'bankFees', 'loanTermYears',
   'fixedRate', 'fixedYears', 'ircc', 'variableMargin', 'propertyTaxSqm', 'homeInsuranceAnnual',
-  'lifeInsurancePct', 'maintenancePct', 'propertyGrowth', 'rentGrowth', 'renterInsuranceAnnual',
-  'depositMonths', 'investReturn', 'investTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
+  'lifeInsurancePct', 'maintenancePct', 'propertyRealGrowth', 'rentRealGrowth', 'renterInsuranceAnnual',
+  'depositMonths', 'investRealReturn', 'investTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
-  'buyerAgencyPct', 'buyerAgencyPctNew', 'irccLongRun', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
+  'buyerAgencyPct', 'buyerAgencyPctNew', 'irccLongRunSpread', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
+  'fitOutCost', 'moveEveryYears', 'moveCost',
 ] as const;
 export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
 
-export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur'] as const;
+export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'rentPriceSqmEur'] as const;
 
 /** The city fields that hold a SourcedValue, required or optional. */
-export const CITY_VALUE_KEYS = ['priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'propertyTaxSqm'] as const;
+export const CITY_VALUE_KEYS = [
+  'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'rentPriceSqmEur', 'propertyTaxSqm',
+] as const;
 export type CityValueKey = (typeof CITY_VALUE_KEYS)[number];
 
 /** Where a fetched value is written, e.g. "values.eurRon" or "cities.cluj.rentSqmEur". */

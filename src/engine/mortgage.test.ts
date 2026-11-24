@@ -89,3 +89,9 @@ describe('amortize with a variable rate path', () => {
     expect(path).toEqual(flat);
   });
 });
+
+describe('annuityPayment at rates just above zero', () => {
+  it('stays finite and matches straight-line repayment', () => {
+    expect(annuityPayment(100_000, 1e-16, 360)).toBeCloseTo(100_000 / 360, 6);
+  });
+});

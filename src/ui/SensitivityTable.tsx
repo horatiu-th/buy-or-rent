@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { SENSITIVITY_STEPS } from '../engine';
+import { SENSITIVITY_STEPS, type Swing, type SwingKey } from '../engine';
 import { ro } from '../i18n/ro';
 import { formatMoney, type Currency } from './format';
 
@@ -38,6 +38,54 @@ export function SensitivityTable({ grid, baseGrowth, baseReturn, currency, eurRo
                   </td>
                 );
               })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+interface SwingsProps { swings: Swing[]; base: number; currency: Currency; eurRon: number }
+
+const isPctSwing = (key: SwingKey) => key !== 'rent';
+
+/** One assumption at a time moved down and up, for the inputs the grid above leaves fixed. */
+export function SwingsTable({ swings, base, currency, eurRon }: SwingsProps) {
+  const captionId = useId();
+  const money = (v: number) => formatMoney(v, currency, eurRon);
+  const setting = (key: SwingKey, v: number) => (isPctSwing(key) ? pct(v) : money(v));
+  const cell = (gap: number, label?: string, isBase = false) => {
+    const buyWins = gap >= 0;
+    return (
+      <td className={`${buyWins ? 'buy-wins' : 'rent-wins'}${isBase ? ' is-base' : ''}`}>
+        {label && <span className="swing-setting">{label}: </span>}
+        {gap > 0 && '+'}{money(gap)}
+        <span className="visually-hidden">
+          {' '}({buyWins ? ro.sensitivityBuyWins : ro.sensitivityRentWins}{isBase && `, ${ro.sensitivityBase}`})
+        </span>
+      </td>
+    );
+  };
+  return (
+    <div className="table-scroll" role="region" aria-labelledby={captionId} tabIndex={0}>
+      <table className="sensitivity swings">
+        <caption id={captionId} className="sensitivity-intro">{ro.swingsHelp}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{ro.swingsAssumption}</th>
+            <th scope="col">{ro.swingsDown}</th>
+            <th scope="col">{ro.swingsBase}</th>
+            <th scope="col">{ro.swingsUp}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {swings.map((s) => (
+            <tr key={s.key}>
+              <th scope="row">{ro.swingLabels[s.key]}</th>
+              {cell(s.down.gap, setting(s.key, s.down.value))}
+              {cell(base, undefined, true)}
+              {cell(s.up.gap, setting(s.key, s.up.value))}
             </tr>
           ))}
         </tbody>

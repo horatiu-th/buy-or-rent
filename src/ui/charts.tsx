@@ -241,7 +241,7 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
     { ...t.interest, buyer: conv(b.interest), renter: 0 },
     { ...t.maintenance, buyer: conv(b.maintenance), renter: 0 },
     { ...t.saleAgencyFee, buyer: conv(b.saleAgencyFee), renter: 0 },
-    { ...t.acquisitionCosts, buyer: conv(b.acquisitionCosts), renter: conv(r.agencyFee) },
+    { ...t.acquisitionCosts, buyer: conv(b.acquisitionCosts + b.fitOut), renter: conv(r.agencyFee + r.moving) },
     { ...t.insurance, buyer: conv(b.insurance), renter: conv(r.insurance) },
     { ...t.taxes, buyer: conv(b.propertyTax + b.investmentTax + b.saleTax), renter: conv(r.investmentTax) },
   ];

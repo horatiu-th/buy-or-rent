@@ -15,7 +15,8 @@ It shows:
 
 - **The verdict:** the rent above which buying wins, and when the buyer pulls ahead for good.
 - **A rent scale:** where your rent sits against that threshold. Drag it to try other rents.
-- **Charts:** net worth over time, monthly costs, where the money goes, and how sensitive the result is to price growth and investment returns.
+- **Other horizons:** the threshold and the gap after 5, 10, 20 and 30 years, since how long you stay matters more than the loan term.
+- **Charts:** net worth over time, monthly costs, where the money goes, and how sensitive the result is to price growth, investment returns, rent, rent growth, long-run interest rates and upkeep.
 
 Across the charts, blue represents the buyer and teal represents the renter. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
 

@@ -1,4 +1,4 @@
-import { equivalentRent, finalGap, sensitivity } from './solve';
+import { assumptionSwings, equivalentRent, finalGap, horizonComparison, sensitivity } from './solve';
 import { simulate } from './simulate';
 import { baseInputs, flatWorld } from './fixtures';
 import type { Inputs } from './types';
@@ -45,6 +45,15 @@ describe('equivalentRent', () => {
     if (r.kind === 'value') expect(Math.abs(finalGap({ ...i, rent: r.rent }))).toBeLessThan(1);
   });
 
+  it('reports noThreshold when buying wins at zero rent but a high rent favours the renter', () => {
+    // Shrinking rents and investments leave the renter's large, idle deposit as the thing that grows
+    // with rent, so the gap falls as rent rises.
+    const i = { ...baseInputs, propertyGrowth: 0, investReturn: -0.2, rentGrowth: -0.2, depositMonths: 12 };
+    expect(finalGap({ ...i, rent: 0 })).toBeGreaterThan(0);
+    expect(finalGap({ ...i, rent: 100_000 })).toBeLessThan(0);
+    expect(equivalentRent(i)).toEqual({ kind: 'noThreshold' });
+  });
+
   it('does not depend on the rent entered', () => {
     expect(equivalentRent({ ...baseInputs, rent: 100 })).toEqual(equivalentRent({ ...baseInputs, rent: 9_000 }));
   });
@@ -85,3 +94,38 @@ describe('sensitivity', () => {
     expect(g[2][1]).toBeGreaterThan(g[0][1]);
   });
 });
+
+describe('assumptionSwings', () => {
+  it('moves one assumption at a time and keeps the rest at the base case', () => {
+    const swings = assumptionSwings(baseInputs);
+    const rent = swings.find((s) => s.key === 'rent')!;
+    expect(rent.down.value).toBeCloseTo(baseInputs.rent * 0.9, 9);
+    expect(rent.up.gap).toBeCloseTo(finalGap({ ...baseInputs, rent: baseInputs.rent * 1.1 }), 6);
+    // A higher rent helps the buyer; higher upkeep and loan rates hurt them.
+    expect(rent.up.gap).toBeGreaterThan(rent.down.gap);
+    const upkeep = swings.find((s) => s.key === 'maintenancePct')!;
+    expect(upkeep.up.gap).toBeLessThan(upkeep.down.gap);
+    const ircc = swings.find((s) => s.key === 'irccLongRun')!;
+    expect(ircc.up.gap).toBeLessThan(ircc.down.gap);
+  });
+
+  it('never takes the long-run IRCC below zero', () => {
+    const ircc = assumptionSwings({ ...baseInputs, irccLongRun: 0.005 }).find((s) => s.key === 'irccLongRun')!;
+    expect(ircc.down.value).toBe(0);
+  });
+});
+
+describe('horizonComparison', () => {
+  it('adds the chosen horizon to the standard ones, in order, without duplicates', () => {
+    expect(horizonComparison({ ...baseInputs, horizonYears: 15 }).map((h) => h.years)).toEqual([5, 10, 15, 20, 30]);
+    expect(horizonComparison({ ...baseInputs, horizonYears: 30 }).map((h) => h.years)).toEqual([5, 10, 20, 30]);
+  });
+
+  it('matches a simulation run at each horizon', () => {
+    const h = horizonComparison(baseInputs).find((x) => x.years === 10)!;
+    expect(h.gap).toBeCloseTo(finalGap({ ...baseInputs, horizonYears: 10 }), 6);
+    expect(h.eq).toEqual(equivalentRent({ ...baseInputs, horizonYears: 10 }));
+    expect(h.deflator).toBeCloseTo(1.04 ** 10, 9);
+  });
+});
+

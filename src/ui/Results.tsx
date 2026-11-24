@@ -1,11 +1,12 @@
 import { memo, useId, useMemo, useState } from 'react';
-import { equivalentRent, sensitivity, simulate, type Inputs, type Result } from '../engine';
+import { assumptionSwings, equivalentRent, horizonComparison, sensitivity, simulate, type Inputs, type Result } from '../engine';
 import { ro } from '../i18n/ro';
 import { BreakdownChart, MonthlyCostsChart, NetWorthChart, type View } from './charts';
 import { formatDuration, formatMoney } from './format';
 import { Headline } from './Headline';
 import { RentScale } from './RentScale';
-import { SensitivityTable } from './SensitivityTable';
+import { HorizonTable } from './HorizonTable';
+import { SensitivityTable, SwingsTable } from './SensitivityTable';
 
 type Tab = keyof typeof ro.tabs;
 
@@ -52,6 +53,8 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
   const rentFreeKey = JSON.stringify({ ...inputs, rent: 0 });
   const eq = useMemo(() => equivalentRent(inputs), [rentFreeKey]);
   const grid = useMemo(() => (tab === 'sensitivity' ? sensitivity(inputs) : null), [inputs, tab]);
+  const swings = useMemo(() => (tab === 'sensitivity' ? assumptionSwings(inputs) : null), [inputs, tab]);
+  const horizons = useMemo(() => horizonComparison(inputs), [inputs]);
   const tabs = Object.keys(ro.tabs) as Tab[];
   // These views add up or compare nominal sums, so the inflation switch has nothing to adjust there.
   const nominalOnly = tab === 'breakdown' || tab === 'sensitivity';
@@ -82,6 +85,13 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
         </label>
         <EndSummary result={result} view={view} />
       </div>
+      <HorizonTable
+        rows={horizons}
+        chosenYears={result.rows[result.rows.length - 1].month / 12}
+        real={view.real}
+        currency={view.currency}
+        eurRon={view.eurRon}
+      />
 
       <div className="chart-block">
         <div className="chart-toolbar">
@@ -121,6 +131,9 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
           {tab === 'breakdown' && <BreakdownChart result={result} view={view} />}
           {tab === 'sensitivity' && grid && (
             <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} currency={view.currency} eurRon={view.eurRon} />
+          )}
+          {tab === 'sensitivity' && grid && swings && (
+            <SwingsTable swings={swings} base={grid[1][1]} currency={view.currency} eurRon={view.eurRon} />
           )}
           {nominalOnly && <p className="note">{ro.nominalNote}</p>}
         </div>

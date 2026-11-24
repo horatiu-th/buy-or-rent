@@ -43,8 +43,8 @@ describe('RentScale', () => {
     expect(kind === 'alwaysBuy' ? renting : buying).toBeNull();
   });
 
-  it('shows no winner or threshold when the inputs cannot be computed', () => {
-    const { container } = setup({ kind: 'invalid' }, 2000);
+  it.each(['invalid', 'noThreshold'] as const)('shows no winner or threshold for %s', (kind) => {
+    const { container } = setup({ kind }, 2000);
     expect(container.querySelector('.rent-scale')).not.toHaveClass('buyer-wins');
     expect(container.querySelector('.rent-scale')).not.toHaveClass('renter-wins');
     expect(screen.queryByText(/câștigă/)).not.toBeInTheDocument();

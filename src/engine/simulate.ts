@@ -45,14 +45,20 @@ export function breakEven(rows: MonthRow[]): number | null {
   return lastBehind === end ? null : lastBehind + 1;
 }
 
+/** Whether the renter moves at the start of this month (1-based): the first month of every n-th year after the first. */
+export function isMoveMonth(month: number, moveEveryYears: number): boolean {
+  if (moveEveryYears <= 0 || month <= 1) return false;
+  return (month - 1) % (moveEveryYears * 12) === 0;
+}
+
 export function simulate(raw: Inputs): Result {
   const i = sanitizeInputs(raw);
   const months = Math.round(i.horizonYears * 12);
   const loanAmount = i.price * (1 - i.downPaymentPct);
   const downPayment = i.price - loanAmount;
   const acq = acquisitionCosts(i);
-  const upfront = downPayment + acq;
-  const deposit = i.rent * i.depositMonths;
+  const upfront = downPayment + acq + i.fitOutCost;
+  let deposit = i.rent * i.depositMonths;
   const rentAgencyFee = i.rent * i.rentAgencyPct;
 
   const schedule = amortize({
@@ -70,11 +76,11 @@ export function simulate(raw: Inputs): Result {
   contribute(startGap > 0 ? renterPf : buyerPf, Math.abs(startGap));
 
   const buyer: BuyerTotals = {
-    downPayment, acquisitionCosts: acq, interest: 0, principal: 0, propertyTax: 0,
+    downPayment, acquisitionCosts: acq, fitOut: i.fitOutCost, interest: 0, principal: 0, propertyTax: 0,
     insurance: 0, maintenance: 0, saleCosts: 0, saleAgencyFee: 0, saleTax: 0, investmentTax: 0, cashOut: upfront + buyerPf.basis,
   };
   const renter: RenterTotals = {
-    agencyFee: rentAgencyFee, rent: 0, insurance: 0, investmentTax: 0,
+    agencyFee: rentAgencyFee, moving: 0, rent: 0, insurance: 0, investmentTax: 0,
     cashOut: deposit + rentAgencyFee + renterPf.basis,
   };
 
@@ -101,6 +107,8 @@ export function simulate(raw: Inputs): Result {
     const loanMonth = schedule[m - 1];
     const balanceBefore = balance;
     value *= 1 + gProp;
+    // Amounts set in today's lei (local tax, moving) rise with inflation once a year.
+    const indexed = Math.pow(1 + i.inflation, Math.floor((m - 1) / 12));
 
     let payment = 0;
     if (loanMonth) {
@@ -109,10 +117,10 @@ export function simulate(raw: Inputs): Result {
       buyer.principal += loanMonth.principal;
       balance = loanMonth.balance;
     }
-    // Local taxes are set per m² and indexed yearly with inflation, so they don't follow the market value.
-    const propertyTax = (i.propertyTaxAnnual * Math.pow(1 + i.inflation, Math.floor((m - 1) / 12))) / 12;
-    const insurance = i.homeInsuranceAnnual / 12 + (value * i.homeInsurancePct) / 12 + (balanceBefore * i.lifeInsurancePct) / 12;
+    // Local taxes are set per m² and indexed with inflation, so they don't follow the market value.
+    const propertyTax = (i.propertyTaxAnnual * indexed) / 12;
     const maintenance = (value * i.maintenancePct) / 12;
+    const insurance = i.homeInsuranceAnnual / 12 + (value * i.homeInsurancePct) / 12 + (balanceBefore * i.lifeInsurancePct) / 12;
     const buyerCost = payment + propertyTax + insurance + maintenance;
     buyer.propertyTax += propertyTax;
     buyer.insurance += insurance;
@@ -120,9 +128,20 @@ export function simulate(raw: Inputs): Result {
 
     const rent = i.rent * Math.pow(1 + i.rentGrowth, Math.floor((m - 1) / 12));
     const renterInsurance = i.renterInsuranceAnnual / 12;
-    const renterCost = rent + renterInsurance;
+    let renterCost = rent + renterInsurance;
     renter.rent += rent;
     renter.insurance += renterInsurance;
+    if (isMoveMonth(m, i.moveEveryYears)) {
+      // A new lease: another agency fee, the move itself, and a deposit reset to the current rent.
+      // The old deposit comes back, so only the difference leaves the renter's pocket.
+      const agencyFee = rent * i.rentAgencyPct;
+      const moving = i.moveCost * indexed;
+      const newDeposit = rent * i.depositMonths;
+      renterCost += agencyFee + moving + (newDeposit - deposit);
+      deposit = newDeposit;
+      renter.agencyFee += agencyFee;
+      renter.moving += moving;
+    }
 
     buyerPf.value *= 1 + gInv;
     renterPf.value *= 1 + gInv;
