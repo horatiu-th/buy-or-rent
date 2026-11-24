@@ -1,8 +1,10 @@
 import { useCallback, useDeferredValue, useMemo } from 'react';
-import { loadDefaults, resolveCityId, resolveInputs } from './data/defaults';
+import { loadDefaults, resolveCityId, resolveInputs, sourceFor } from './data/defaults';
 import type { Inputs } from './engine';
 import { ro } from './i18n/ro';
 import { CityPicker } from './ui/CityPicker';
+import { FIELDS } from './ui/fields';
+import { InputField } from './ui/InputField';
 import { InputsPanel } from './ui/InputsPanel';
 import { Results } from './ui/Results';
 import { Segmented } from './ui/Segmented';
@@ -11,6 +13,9 @@ import { useScenario } from './state/useScenario';
 
 const data = loadDefaults();
 const SOURCES_URL = 'https://github.com/horatiu-th/buy-or-rent/blob/main/data/SOURCES.md';
+
+// Horizon and inflation frame the whole comparison, so they sit with the city and size, not with either side.
+const SCENARIO_FIELDS = FIELDS.filter((f) => f.topic === 'general');
 
 const CURRENCIES = [
   { value: 'RON', label: 'lei' },
@@ -53,7 +58,22 @@ export default function App() {
         </div>
       </header>
 
-      <CityPicker data={data} cityId={cityId} sqm={sqm} onChange={update} />
+      <CityPicker data={data} cityId={cityId} sqm={sqm} onChange={update}>
+        {SCENARIO_FIELDS.map((def) => (
+          <div key={def.key} className="scenario-item scenario-field">
+            <InputField
+              def={def}
+              value={inputs[def.key]}
+              isOverridden={def.key in overrides}
+              source={sourceFor(data, cityId, def.key)}
+              currency={currency}
+              eurRon={eurRon}
+              onChange={(v) => setField(def.key, v as never)}
+              onReset={() => resetField(def.key)}
+            />
+          </div>
+        ))}
+      </CityPicker>
 
       <main className="layout">
         <aside className="inputs-column">

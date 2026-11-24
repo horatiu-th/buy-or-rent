@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import type { DataFile } from '../data/schema';
 import { ro } from '../i18n/ro';
 import { clampSqm, SQM_MIN } from '../state/scenario';
@@ -9,9 +9,11 @@ interface Props {
   cityId: string;
   sqm: number;
   onChange: (patch: { cityId?: string; sqm?: number }) => void;
+  /** Further scenario-wide settings shown on the same row. */
+  children?: ReactNode;
 }
 
-export function CityPicker({ data, cityId, sqm, onChange }: Props) {
+export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
   const cityId_ = useId();
   const sqmId = useId();
 
@@ -42,6 +44,7 @@ export function CityPicker({ data, cityId, sqm, onChange }: Props) {
           <span className="suffix" aria-hidden="true">m²</span>
         </div>
       </div>
+      {children}
     </div>
   );
 }

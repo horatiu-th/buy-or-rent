@@ -144,7 +144,6 @@ export const ro = {
   groups: {
     buying: 'Cumpărare',
     renting: 'Închiriere',
-    general: 'General',
   },
   topics: {
     home: 'Locuința',

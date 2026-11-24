@@ -28,7 +28,6 @@ interface GroupLayout {
 }
 
 const LAYOUT: GroupLayout[] = [
-  { id: 'general', topics: ['general'] },
   { id: 'buying', topics: ['home', 'loan'], more: ['purchaseCosts', 'ownershipCosts', 'sale'] },
   { id: 'renting', topics: ['renting'] },
 ];

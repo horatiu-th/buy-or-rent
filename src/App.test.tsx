@@ -144,7 +144,7 @@ it('moves the rent with the rent scale slider', () => {
 
 it('groups rent and investment settings under renting', () => {
   render(<App />);
-  for (const name of ['Cumpărare', 'Închiriere', 'General']) {
+  for (const name of ['Cumpărare', 'Închiriere']) {
     expect(screen.getByRole('region', { name })).toBeInTheDocument();
   }
   expect(within(screen.getByRole('region', { name: 'Închiriere' })).getByLabelText('Chirie lunară')).toBeInTheDocument();
@@ -267,3 +267,12 @@ it('adds the other assumptions to the sensitivity tab', async () => {
   expect(screen.getByRole('table', { name: /o singură altă ipoteză/ })).toBeInTheDocument();
 })
 ;
+
+it('shows the horizon and inflation next to the city and size, not in the inputs panel', () => {
+  const { container } = render(<App />);
+  const strip = container.querySelector('.scenario') as HTMLElement;
+  for (const label of ['Orizont de analiză', 'Inflație']) {
+    expect(within(strip).getByLabelText(label)).toBeInTheDocument();
+  }
+  expect(screen.queryByRole('region', { name: 'General' })).not.toBeInTheDocument();
+});

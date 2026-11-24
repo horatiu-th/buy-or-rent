@@ -78,7 +78,7 @@ Changing city, type or size drops edited price, rent and property tax, since the
 | File | Purpose |
 |---|---|
 | `fields.ts` | One definition per input: unit (`money`, `pct`, `years`, `months`, `bool`), topic, and min/max/step |
-| `InputsPanel.tsx` | Arranges fields into collapsible groups: General, Cumpărare and Închiriere. Închiriere lists rent and investment fields together under a single heading. Buying costs and sale settings fold under a further toggle. Collapsed groups count the edits inside them. |
+| `InputsPanel.tsx` | Arranges fields into collapsible groups: Cumpărare and Închiriere. The general fields (horizon, inflation) sit in the scenario strip next to the city and size instead, rendered by `App.tsx`. Închiriere lists rent and investment fields together under a single heading. Buying costs and sale settings fold under a further toggle. Collapsed groups count the edits inside them. |
 | `InputField.tsx` | One input: a text draft while typing, conversion for % and €, a ↺ reset when edited, and an info popover with the explanation and the source |
 | `CityPicker.tsx` | The city, property type and size row |
 | `Segmented.tsx` | Radio group drawn as a segmented control |
