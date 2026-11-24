@@ -1,8 +1,10 @@
 import { lazy, memo, Suspense, useId, useMemo, useState } from 'react';
-import { assumptionSwings, equivalentRent, horizonComparison, sensitivity, simulate, type Inputs, type Result } from '../engine';
+import {
+  assumptionSwings, horizonGaps, horizonThresholds, lastRow, sensitivity, SENSITIVITY_BASE, simulate,
+  type HorizonResult, type Inputs, type MonthRow,
+} from '../engine';
 import { t } from '../i18n';
-import type { View } from './charts';
-import { formatMoney } from './money';
+import { formatMoney, inView, type View } from './money';
 import { Headline } from './Headline';
 import { RentScale } from './RentScale';
 import { HorizonTable } from './HorizonTable';
@@ -16,6 +18,7 @@ const MonthlyCostsChart = lazy(() => loadCharts().then((m) => ({ default: m.Mont
 const BreakdownChart = lazy(() => loadCharts().then((m) => ({ default: m.BreakdownChart })));
 
 type Tab = keyof typeof t.tabs;
+const TABS = Object.keys(t.tabs) as Tab[];
 
 interface Props {
   inputs: Inputs;
@@ -27,10 +30,8 @@ interface Props {
 }
 
 /** End-of-horizon figures for both sides, with the switch between today's money and nominal values. */
-function EndSummary({ result, view, onToggleReal }: { result: Result; view: View; onToggleReal: (v: boolean) => void }) {
-  const last = result.rows[result.rows.length - 1];
-  const fmt = (nominal: number) =>
-    formatMoney(view.real ? nominal / last.deflator : nominal, view.money);
+function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; onToggleReal: (v: boolean) => void }) {
+  const fmt = (nominal: number) => formatMoney(inView(nominal, last.deflator, view), view.money);
   const items = [
     { cls: 'buyer', label: t.buyer, value: fmt(last.buyerNetWorth) },
     { cls: 'renter', label: t.renterInvesting, value: fmt(last.renterNetWorth) },
@@ -62,14 +63,23 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
   const [tab, setTab] = useState<Tab>('netWorth');
   const panelId = useId();
   const result = useMemo(() => simulate(inputs), [inputs]);
-  // The break-even rent doesn't depend on the rent, and it is the costliest figure here (a search
-  // over many simulations), so it is recomputed only when something other than the rent changes.
+  const last = lastRow(result.rows);
+  const chosenYears = last.month / 12;
+  // Break-even rents don't depend on the rent, and they are the costliest figures here (a search over
+  // many simulations per horizon), so they are keyed on the other inputs only: dragging the rent slider
+  // reruns only the cheap gaps.
   const rentFreeKey = JSON.stringify({ ...inputs, rent: 0 });
-  const eq = useMemo(() => equivalentRent(inputs), [rentFreeKey]);
-  const grid = useMemo(() => (tab === 'sensitivity' ? sensitivity(inputs) : null), [inputs, tab]);
-  const swings = useMemo(() => (tab === 'sensitivity' ? assumptionSwings(inputs) : null), [inputs, tab]);
-  const horizons = useMemo(() => horizonComparison(inputs), [inputs]);
-  const tabs = Object.keys(t.tabs) as Tab[];
+  const thresholds = useMemo(() => horizonThresholds(JSON.parse(rentFreeKey) as Inputs), [rentFreeKey]);
+  const gaps = useMemo(() => horizonGaps(inputs), [inputs]);
+  const horizons: HorizonResult[] = useMemo(
+    () => gaps.map((g, k) => ({ ...g, eq: thresholds[k].eq })),
+    [gaps, thresholds],
+  );
+  const eq = horizons.find((h) => h.years === chosenYears)!.eq;
+  const sens = useMemo(
+    () => (tab === 'sensitivity' ? { grid: sensitivity(inputs), swings: assumptionSwings(inputs) } : null),
+    [inputs, tab],
+  );
   // These views add up or compare nominal sums, so the inflation switch has nothing to adjust there.
   const nominalOnly = tab === 'breakdown' || tab === 'sensitivity';
 
@@ -77,7 +87,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
     <div className="results">
       <Headline
         eq={eq}
-        horizonMonths={result.rows[result.rows.length - 1].month}
+        horizonMonths={last.month}
         breakEvenMonth={result.breakEvenMonth}
         buyerEverAhead={result.buyerEverAhead}
         sale={inputs}
@@ -90,10 +100,10 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
         money={view.money}
         onRentChange={onRentChange}
       />
-      <EndSummary result={result} view={view} onToggleReal={onToggleReal} />
+      <EndSummary last={last} view={view} onToggleReal={onToggleReal} />
       <HorizonTable
         rows={horizons}
-        chosenYears={result.rows[result.rows.length - 1].month / 12}
+        chosenYears={chosenYears}
         real={view.real}
         money={view.money}
       />
@@ -101,7 +111,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
       <div className="chart-block">
         <div className="chart-toolbar">
           <div role="tablist" aria-label={t.tabsLabel}>
-            {tabs.map((id) => (
+            {TABS.map((id) => (
               <button
                 key={id}
                 id={`${panelId}-${id}`}
@@ -111,16 +121,16 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
                 tabIndex={tab === id ? 0 : -1}
                 onClick={() => setTab(id)}
                 onKeyDown={(e) => {
-                  const i = tabs.indexOf(id);
+                  const i = TABS.indexOf(id);
                   const target =
-                    e.key === 'ArrowRight' ? (i + 1) % tabs.length
-                    : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length
+                    e.key === 'ArrowRight' ? (i + 1) % TABS.length
+                    : e.key === 'ArrowLeft' ? (i - 1 + TABS.length) % TABS.length
                     : e.key === 'Home' ? 0
-                    : e.key === 'End' ? tabs.length - 1
+                    : e.key === 'End' ? TABS.length - 1
                     : null;
                   if (target === null) return;
                   e.preventDefault();
-                  const next = tabs[target];
+                  const next = TABS[target];
                   setTab(next);
                   document.getElementById(`${panelId}-${next}`)?.focus();
                 }}
@@ -137,11 +147,11 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
             {tab === 'monthly' && <MonthlyCostsChart result={result} view={view} />}
             {tab === 'breakdown' && <BreakdownChart result={result} view={view} />}
           </Suspense>
-          {tab === 'sensitivity' && grid && (
-            <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} money={view.money} />
-          )}
-          {tab === 'sensitivity' && grid && swings && (
-            <SwingsTable swings={swings} base={grid[1][1]} money={view.money} />
+          {sens && (
+            <>
+              <SensitivityTable grid={sens.grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} money={view.money} />
+              <SwingsTable swings={sens.swings} base={sens.grid[SENSITIVITY_BASE][SENSITIVITY_BASE]} money={view.money} />
+            </>
           )}
           {nominalOnly && <p className="note">{t.nominalNote}</p>}
         </div>

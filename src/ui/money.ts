@@ -41,6 +41,13 @@ export function moneyFor(currency: Currency, data: DataFile): Money {
 export const toUnits = (lei: number, money: Money) => lei / money.perUnit;
 export const fromUnits = (units: number, money: Money) => units * money.perUnit;
 
+/** How results are shown: in which currency, and whether in today's money or nominal. */
+export interface View { money: Money; real: boolean }
+
+/** A nominal amount in lei as the view shows it: deflated to today's money when asked, still in lei. */
+export const inView = (nominal: number, deflator: number, view: Pick<View, 'real'>) =>
+  view.real ? nominal / deflator : nominal;
+
 const intFmt = new Intl.NumberFormat(t.numberLocale, { maximumFractionDigits: 0 });
 
 /** Whole units of the chosen currency, e.g. "1.234 lei" or "250 €". */

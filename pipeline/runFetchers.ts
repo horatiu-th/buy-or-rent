@@ -1,4 +1,5 @@
-import type { DataPath, SourcedValue } from '../src/data/schema';
+import type { CityValueKey, DataPath, SourcedValue } from '../src/data/schema';
+import { errorMessage } from './io';
 import { daysBetween, isIsoDate, todayIso } from './dates';
 import type { AutoDataFile, Fetcher } from './types';
 import { check } from './validate';
@@ -23,15 +24,16 @@ export interface ReportLine {
 
 export const PROBLEM_OUTCOMES: readonly Outcome[] = ['held', 'rejected', 'failed', 'missing'];
 
-function getAt(obj: unknown, path: string): SourcedValue | undefined {
-  return path.split('.').reduce<any>((o, k) => (o == null ? undefined : o[k]), obj);
+// A DataPath is either "values.<key>" or "cities.<id>.<key>"; the template type guarantees the shape.
+function getAt(data: AutoDataFile, path: DataPath): SourcedValue | undefined {
+  const [section, a, b] = path.split('.');
+  return section === 'values' ? data.values?.[a] : data.cities?.[a]?.[b as CityValueKey];
 }
 
-function setAt(obj: any, path: string, v: SourcedValue) {
-  const keys = path.split('.');
-  let o = obj;
-  for (const k of keys.slice(0, -1)) o = o[k] ??= {};
-  o[keys[keys.length - 1]] = v;
+function setAt(data: AutoDataFile, path: DataPath, v: SourcedValue) {
+  const [section, a, b] = path.split('.');
+  if (section === 'values') (data.values ??= {})[a] = v;
+  else ((data.cities ??= {})[a] ??= {})[b as CityValueKey] = v;
 }
 
 function clearPending(data: AutoDataFile, path: DataPath) {
@@ -48,8 +50,11 @@ function clearPending(data: AutoDataFile, path: DataPath) {
 export async function runFetchers(fetchers: Fetcher[], previous: AutoDataFile, today = todayIso()) {
   const data: AutoDataFile = structuredClone(previous);
   const report: ReportLine[] = [];
+  // Sources are independent, so they are fetched together; results are applied in order below.
+  const fetched = await Promise.allSettled(fetchers.map(async (f) => f.fetch()));
 
-  for (const f of fetchers) {
+  for (const [k, f] of fetchers.entries()) {
+    const result = fetched[k];
     const prev = getAt(data, f.path);
     let line: Omit<ReportLine, 'path' | 'stale'>;
 
@@ -59,8 +64,10 @@ export async function runFetchers(fetchers: Fetcher[], previous: AutoDataFile, t
       return { outcome, value, asOf, reason };
     };
 
-    try {
-      const { value, asOf } = await f.fetch();
+    if (result.status === 'rejected') {
+      line = { outcome: prev ? 'failed' : 'missing', reason: errorMessage(result.reason) };
+    } else {
+      const { value, asOf } = result.value;
       const range = check(value, f.range);
       const jump = check(value, f.range, prev?.value, f.maxJump);
       const candidate = data.pending?.[f.path];
@@ -77,8 +84,6 @@ export async function runFetchers(fetchers: Fetcher[], previous: AutoDataFile, t
         data.pending = { ...data.pending, [f.path]: { value, asOf, reason: jump.reason } };
         line = { outcome: 'held', value, asOf, reason: `${jump.reason}; held until a later publication confirms it` };
       }
-    } catch (e) {
-      line = { outcome: prev ? 'failed' : 'missing', reason: e instanceof Error ? e.message : String(e) };
     }
 
     const current = getAt(data, f.path);

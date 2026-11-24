@@ -1,5 +1,6 @@
 import { isIsoDate } from '../dates';
 import { fetchText } from '../http';
+import { VALUE_RANGES } from '../ranges';
 import type { Fetcher } from '../types';
 
 export function parseBnrFx(xml: string) {
@@ -21,7 +22,7 @@ export const bnrFx: Fetcher = {
   unit: 'lei/€',
   source: 'BNR, curs de referință',
   sourceUrl: URL,
-  range: { min: 4.5, max: 6.5 },
+  range: VALUE_RANGES.eurRon,
   // Between two weekly runs, a step this large is more likely a feed error than a market move,
   // so it is held until a later publication confirms it.
   maxJump: 0.05,

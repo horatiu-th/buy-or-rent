@@ -1,3 +1,4 @@
+import { loanAmount } from './costs';
 import type { Inputs } from './types';
 
 export const MIN_HORIZON_YEARS = 1;
@@ -22,7 +23,7 @@ const GROWTH_RATES = ['propertyGrowth', 'rentGrowth', 'investReturn', 'inflation
 // The simulation steps in whole months and the schedule in whole years of fixed and total term.
 const WHOLE_NUMBERS = ['horizonYears', 'loanTermYears', 'fixedYears', 'depositMonths', 'moveEveryYears'] as const satisfies readonly (keyof Inputs)[];
 
-const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
+export const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
 
 /**
  * Brings inputs into the range the simulation is defined for, so a bad field or shared link can't
@@ -45,7 +46,7 @@ export function sanitizeInputs(i: Inputs): Inputs {
   s.downPaymentPct = clamp(s.downPaymentPct, 0, 1);
   s.horizonYears = clamp(s.horizonYears, MIN_HORIZON_YEARS, MAX_HORIZON_YEARS);
   // A zero-month schedule would leave the loan unpaid and interest-free; without a loan the term is unused.
-  const hasLoan = s.price * (1 - s.downPaymentPct) > 0;
+  const hasLoan = loanAmount(s) > 0;
   s.loanTermYears = clamp(s.loanTermYears, hasLoan ? MIN_LOAN_TERM_YEARS : 0, MAX_LOAN_TERM_YEARS);
   return s;
 }

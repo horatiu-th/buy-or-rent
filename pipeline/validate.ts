@@ -1,4 +1,4 @@
-import { STATUSES } from '../src/data/schema';
+import { isStatus, STATUSES } from '../src/data/schema';
 import { isIsoDate } from './dates';
 
 export interface Range { min: number; max: number }
@@ -36,6 +36,6 @@ export function sourcedValueProblems(v: unknown, range: Range): string[] {
   if (o.validUntil !== undefined && !isIsoDate(o.validUntil)) {
     problems.push(`validUntil must be a YYYY-MM-DD date, got ${JSON.stringify(o.validUntil)}`);
   }
-  if (!STATUSES.includes(o.status as never)) problems.push(`status must be one of ${STATUSES.join(', ')}, got ${JSON.stringify(o.status)}`);
+  if (!isStatus(o.status)) problems.push(`status must be one of ${STATUSES.join(', ')}, got ${JSON.stringify(o.status)}`);
   return problems;
 }

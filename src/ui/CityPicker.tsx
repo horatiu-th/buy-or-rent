@@ -1,27 +1,27 @@
 import { useId, type ReactNode } from 'react';
 import type { DataFile } from '../data/schema';
 import { t } from '../i18n';
-import { clampSqm, SQM_MIN } from '../state/scenario';
+import { clampSqm, SQM_MIN, type Scenario } from '../state/scenario';
 import { NumberInput } from './NumberInput';
 
 interface Props {
   data: DataFile;
   cityId: string;
   sqm: number;
-  onChange: (patch: { cityId?: string; sqm?: number }) => void;
+  onChange: (patch: Partial<Pick<Scenario, 'cityId' | 'sqm'>>) => void;
   /** Further scenario-wide settings shown on the same row. */
   children?: ReactNode;
 }
 
 export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
-  const cityId_ = useId();
+  const selectId = useId();
   const sqmId = useId();
 
   return (
     <div className="scenario">
       <div className="scenario-item scenario-city">
-        <label htmlFor={cityId_}>{t.city}</label>
-        <select id={cityId_} value={cityId} onChange={(e) => onChange({ cityId: e.target.value })}>
+        <label htmlFor={selectId}>{t.city}</label>
+        <select id={selectId} value={cityId} onChange={(e) => onChange({ cityId: e.target.value })}>
           {Object.entries(data.cities).map(([id, c]) => (
             <option key={id} value={id}>{c.name}</option>
           ))}
@@ -34,12 +34,9 @@ export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
             id={sqmId}
             kind="decimal"
             step={1}
+            min={SQM_MIN}
             value={sqm}
-            onValue={(n, phase) => {
-              // "7" on the way to "70" is below the minimum; it only counts once the field is left.
-              if (phase === 'typing' && n < SQM_MIN) return;
-              onChange({ sqm: clampSqm(n) });
-            }}
+            onValue={(n) => onChange({ sqm: clampSqm(n) })}
           />
           <span className="suffix" aria-hidden="true">m²</span>
         </div>

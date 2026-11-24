@@ -1,5 +1,5 @@
 import { amortize } from './mortgage';
-import { acquisitionCosts, saleCostBreakdown, saleCosts } from './costs';
+import { acquisitionCosts, loanAmount, saleCostBreakdown, saleCosts } from './costs';
 import { sanitizeInputs } from './sanitize';
 import type { BuyerTotals, Inputs, MonthRow, RenterTotals, Result } from './types';
 
@@ -37,11 +37,14 @@ export function irccAt(month: number, i: Pick<Inputs, 'ircc' | 'irccLongRun'>): 
   return i.ircc + (i.irccLongRun - i.ircc) * progress;
 }
 
+/** The month at the end of the horizon. Every result has at least month 0. */
+export const lastRow = (rows: readonly MonthRow[]): MonthRow => rows[rows.length - 1];
+
 export function breakEven(rows: MonthRow[]): number | null {
   // Counted from the last month the buyer is behind, so an early, temporary lead doesn't count.
   let lastBehind = -1;
   for (const r of rows) if (!buyerAhead(r)) lastBehind = r.month;
-  const end = rows[rows.length - 1].month;
+  const end = lastRow(rows).month;
   return lastBehind === end ? null : lastBehind + 1;
 }
 
@@ -54,15 +57,15 @@ export function isMoveMonth(month: number, moveEveryYears: number): boolean {
 export function simulate(raw: Inputs): Result {
   const i = sanitizeInputs(raw);
   const months = Math.round(i.horizonYears * 12);
-  const loanAmount = i.price * (1 - i.downPaymentPct);
-  const downPayment = i.price - loanAmount;
+  const loan = loanAmount(i);
+  const downPayment = i.price - loan;
   const acq = acquisitionCosts(i);
   const upfront = downPayment + acq + i.fitOutCost;
   let deposit = i.rent * i.depositMonths;
   const rentAgencyFee = i.rent * i.rentAgencyPct;
 
   const schedule = amortize({
-    principal: loanAmount,
+    principal: loan,
     termMonths: Math.round(i.loanTermYears * 12),
     fixedRate: i.fixedRate,
     fixedMonths: Math.round(i.fixedYears * 12),
@@ -88,7 +91,7 @@ export function simulate(raw: Inputs): Result {
   const gInv = monthlyRate(i.investReturn);
   const gInf = monthlyRate(i.inflation);
   let value = i.price;
-  let balance = loanAmount;
+  let balance = loan;
 
   const snapshot = (month: number, buyerCost: number, renterCost: number): MonthRow => ({
     month,

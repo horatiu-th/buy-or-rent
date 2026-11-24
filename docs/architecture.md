@@ -16,7 +16,7 @@ URL query string ◄──► Scenario (city, m², currency, view, edited values
                                                    Inputs
                                                       │  useDeferredValue
                                                       ▼
-  simulate() · equivalentRent() · horizonComparison() · sensitivity() · assumptionSwings()
+  simulate() · equivalentRent() · horizonGaps() · horizonThresholds() · sensitivity() · assumptionSwings()
                                                       ▼
         Headline · RentScale · EndSummary · HorizonTable · charts · tables
 ```

@@ -25,7 +25,8 @@ export interface LoanMonth {
 
 export function amortize(p: LoanParams): LoanMonth[] {
   const schedule: LoanMonth[] = [];
-  const variableAt = typeof p.variableRate === 'number' ? () => p.variableRate as number : p.variableRate;
+  const vr = p.variableRate;
+  const variableAt = typeof vr === 'number' ? () => vr : vr;
   let balance = p.principal;
   let rate = NaN;
   let payment = 0;

@@ -12,6 +12,4 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
 }
 
-export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+export { todayIso } from '../src/data/dates';

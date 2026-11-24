@@ -1,6 +1,6 @@
 import {
-  CITY_VALUE_KEYS, DEFAULT_CITY_ID, REQUIRED_CITY_KEYS, REQUIRED_VALUE_KEYS,
-  type CityData, type DataFile, type PartialDataFile, type SourcedValue, type ValueKey,
+  CITY_VALUE_KEYS, DEFAULT_CITY_ID, isValueKey, REQUIRED_CITY_KEYS, REQUIRED_VALUE_KEYS,
+  type CityData, type DataFile, type PartialDataFile, type SourcedValue,
 } from '../src/data/schema';
 import { todayIso } from './dates';
 import { CITY_RANGES, VALUE_RANGES } from './ranges';
@@ -9,7 +9,6 @@ import { sourcedValueProblems } from './validate';
 export interface MergeResult { data: DataFile; warnings: string[] }
 
 const CITY_FIELDS = new Set<string>(['name', ...CITY_VALUE_KEYS]);
-const isValueKey = (k: string): k is ValueKey => (REQUIRED_VALUE_KEYS as readonly string[]).includes(k);
 
 /**
  * Combines fetched and hand-maintained data, overrides winning. Throws one error listing every
@@ -62,5 +61,6 @@ export function mergeData(auto: PartialDataFile, overrides: PartialDataFile, tod
   else if (!cityIds.has(DEFAULT_CITY_ID)) errors.push(`Default city "${DEFAULT_CITY_ID}" (DEFAULT_CITY_ID) is missing`);
 
   if (errors.length) throw new Error(`Invalid data:\n  ${errors.join('\n  ')}`);
-  return { data: { values, cities }, warnings };
+  // Every required key was checked above and unknown keys were rejected, so the record is complete.
+  return { data: { values: values as DataFile['values'], cities }, warnings };
 }

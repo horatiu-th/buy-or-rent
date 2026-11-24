@@ -1,9 +1,10 @@
+import type { ValueKey } from './schema';
 import {
-  buildInputs, sourceFor, loadDefaults, resolveCityId, resolveInputs, rentForSize, rentSqmFor, RENT_REFERENCE_SQM,
+  buildInputs, sourceFor, DEFAULTS, resolveCityId, resolveInputs, rentForSize, rentSqmFor, RENT_REFERENCE_SQM,
 } from './defaults';
 import { DEFAULT_CITY_ID } from './schema';
 
-const data = loadDefaults();
+const data = DEFAULTS;
 
 describe('resolveCityId', () => {
   it('keeps a known id', () => expect(resolveCityId('cluj', data)).toBe('cluj'));
@@ -28,7 +29,7 @@ describe('buildInputs', () => {
 
   it('sets growth, return and long-run IRCC from inflation plus their real parts', () => {
     const i = buildInputs(data, 'cluj', 50, 0.05);
-    const real = (k: string) => data.values[k].value;
+    const real = (k: ValueKey) => data.values[k].value;
     expect(i.propertyGrowth).toBeCloseTo(1.05 * (1 + real('propertyRealGrowth')) - 1, 6);
     expect(i.rentGrowth).toBeCloseTo(1.05 * (1 + real('rentRealGrowth')) - 1, 6);
     expect(i.investReturn).toBeCloseTo(1.05 * (1 + real('investRealReturn')) - 1, 6);

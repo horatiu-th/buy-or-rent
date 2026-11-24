@@ -1,13 +1,8 @@
-import { assumptionSwings, equivalentRent, finalGap, horizonComparison, sensitivity } from './solve';
-import { simulate } from './simulate';
+import { assumptionSwings, equivalentRent, finalGap, horizonGaps, horizonThresholds, sensitivity } from './solve';
 import { baseInputs, flatWorld } from './fixtures';
 import type { Inputs } from './types';
 
-const finalBuyerAhead = (i: Inputs) => {
-  const rows = simulate(i).rows;
-  const end = rows[rows.length - 1];
-  return end.buyerNetWorth >= end.renterNetWorth;
-};
+const finalBuyerAhead = (i: Inputs) => finalGap(i) >= 0;
 
 describe('equivalentRent', () => {
   it('finds the rent at which both sides end equal', () => {
@@ -115,17 +110,18 @@ describe('assumptionSwings', () => {
   });
 });
 
-describe('horizonComparison', () => {
-  it('adds the chosen horizon to the standard ones, in order, without duplicates', () => {
-    expect(horizonComparison({ ...baseInputs, horizonYears: 15 }).map((h) => h.years)).toEqual([5, 10, 15, 20, 30]);
-    expect(horizonComparison({ ...baseInputs, horizonYears: 30 }).map((h) => h.years)).toEqual([5, 10, 20, 30]);
+describe('horizonGaps and horizonThresholds', () => {
+  it('add the chosen horizon to the standard ones, in order, without duplicates', () => {
+    expect(horizonGaps({ ...baseInputs, horizonYears: 15 }).map((h) => h.years)).toEqual([5, 10, 15, 20, 30]);
+    expect(horizonThresholds({ ...baseInputs, horizonYears: 30 }).map((h) => h.years)).toEqual([5, 10, 20, 30]);
   });
 
-  it('matches a simulation run at each horizon', () => {
-    const h = horizonComparison(baseInputs).find((x) => x.years === 10)!;
-    expect(h.gap).toBeCloseTo(finalGap({ ...baseInputs, horizonYears: 10 }), 6);
-    expect(h.eq).toEqual(equivalentRent({ ...baseInputs, horizonYears: 10 }));
-    expect(h.deflator).toBeCloseTo(1.04 ** 10, 9);
+  it('match a simulation run at each horizon', () => {
+    const g = horizonGaps(baseInputs).find((x) => x.years === 10)!;
+    expect(g.gap).toBeCloseTo(finalGap({ ...baseInputs, horizonYears: 10 }), 6);
+    expect(g.deflator).toBeCloseTo(1.04 ** 10, 9);
+    const th = horizonThresholds(baseInputs).find((x) => x.years === 10)!;
+    expect(th.eq).toEqual(equivalentRent({ ...baseInputs, horizonYears: 10 }));
   });
 });
 

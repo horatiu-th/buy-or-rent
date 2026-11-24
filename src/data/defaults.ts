@@ -1,16 +1,15 @@
 import raw from './defaults.json';
-import { DEFAULT_CITY_ID, type DataFile, type SourcedValue } from './schema';
+import { DEFAULT_CITY_ID, isValueKey, type DataFile, type SourcedValue, type ValueKey } from './schema';
 import type { Inputs } from '../engine';
 
-export function loadDefaults(): DataFile {
-  return raw as DataFile;
-}
+/** The bundled data. The merge step guarantees its shape; JSON imports type `status` as a plain string. */
+export const DEFAULTS = raw as DataFile;
 
 /**
  * The city id the defaults are actually built from: the id itself if known, otherwise the default
  * city. Display the result, not the raw id, so the label always matches the numbers.
  */
-export function resolveCityId(cityId: string, data: DataFile = loadDefaults()): string {
+export function resolveCityId(cityId: string, data: DataFile = DEFAULTS): string {
   // hasOwn, not `in`: ids come from URLs, and "toString" is "in" every object.
   return Object.hasOwn(data.cities, cityId) ? cityId : DEFAULT_CITY_ID;
 }
@@ -40,6 +39,8 @@ export function rentSqmFor(data: DataFile, cityId: string): number {
   return (city.rentSqmEur.value * city.priceSqmEur.value) / city.rentPriceSqmEur.value;
 }
 
+const valueOf = (data: DataFile, k: ValueKey) => data.values[k].value;
+
 /** A nominal annual rate from inflation and a real rate, rounded so float noise stays out of fields and links. */
 const nominal = (inflation: number, real: number) => +((1 + inflation) * (1 + real) - 1).toFixed(6);
 
@@ -48,7 +49,7 @@ const nominal = (inflation: number, real: number) => +((1 + inflation) * (1 + re
  * so a changed inflation moves them together, instead of leaving them set for a different price level.
  */
 export function inflationLinked(data: DataFile, inflation: number) {
-  const v = (k: string) => data.values[k].value;
+  const v = (k: ValueKey) => valueOf(data, k);
   return {
     propertyGrowth: nominal(inflation, v('propertyRealGrowth')),
     rentGrowth: nominal(inflation, v('rentRealGrowth')),
@@ -60,11 +61,7 @@ export function inflationLinked(data: DataFile, inflation: number) {
 export function buildInputs(
   data: DataFile, cityId: string, sqm: number, inflation = data.values.inflation.value,
 ): Inputs {
-  const v = (k: string) => {
-    const x = data.values[k];
-    if (!x) throw new Error(`Missing default: ${k}`);
-    return x.value;
-  };
+  const v = (k: ValueKey) => valueOf(data, k);
   const city = cityOf(data, cityId);
   const eur = v('eurRon');
   return {
@@ -114,7 +111,7 @@ export function resolveInputs(
   return { ...buildInputs(data, cityId, sqm, overrides.inflation), ...overrides };
 }
 
-const REAL_PART: Partial<Record<keyof Inputs, string>> = {
+const REAL_PART: Partial<Record<keyof Inputs, ValueKey>> = {
   propertyGrowth: 'propertyRealGrowth',
   rentGrowth: 'rentRealGrowth',
   investReturn: 'investRealReturn',
@@ -129,5 +126,5 @@ export function sourceFor(data: DataFile, cityId: string, key: keyof Inputs): So
   if (key === 'propertyTaxAnnual') return city.propertyTaxSqm ?? data.values.propertyTaxSqm;
   const real = REAL_PART[key];
   if (real) return data.values[real];
-  return data.values[key];
+  return isValueKey(key) ? data.values[key] : undefined;
 }

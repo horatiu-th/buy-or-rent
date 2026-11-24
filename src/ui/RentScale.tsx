@@ -1,6 +1,7 @@
-import { useId, useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { EquivalentRent } from '../engine';
 import { t } from '../i18n';
+import { fieldDef } from './fields';
 import { formatMoney, type Money } from './money';
 
 interface Props {
@@ -11,7 +12,8 @@ interface Props {
   onRentChange: (lei: number) => void;
 }
 
-const STEP = 50;
+/** The slider moves in the same steps as the rent field's arrow keys. */
+const STEP = fieldDef('rent').step;
 
 /** Rounds up to a tidy scale end so the axis doesn't end on an odd number. */
 function niceCeil(x: number) {
@@ -26,7 +28,6 @@ function niceCeil(x: number) {
  * never rescales the bar under the pointer.
  */
 export function RentScale({ eq, rent, price, money, onRentChange }: Props) {
-  const id = useId();
   const [heldMax, setHeldMax] = useState<number | null>(null);
   const baseMax = niceCeil(eq.kind === 'value' ? eq.rent * 2 : price * 0.01);
   const max = Math.max(heldMax ?? 0, rent > baseMax ? niceCeil(rent) : baseMax);
@@ -56,9 +57,8 @@ export function RentScale({ eq, rent, price, money, onRentChange }: Props) {
         </span>
       </div>
       <div className="rent-scale-track">
-        {eq.kind === 'value' && <span className="rent-scale-threshold" aria-hidden="true" />}
+        {split && <span className="rent-scale-threshold" aria-hidden="true" />}
         <input
-          id={id}
           type="range"
           min={0}
           max={max}

@@ -1,20 +1,10 @@
 import { useState } from 'react';
-import type { Inputs } from '../engine';
-import type { DataFile } from '../data/schema';
-import { sourceFor } from '../data/defaults';
 import { t } from '../i18n';
 import { FIELDS, type FieldDef, type Topic } from './fields';
-import { InputField } from './InputField';
-import type { Money } from './money';
+import { InputField, type FieldBinding } from './InputField';
 
 interface Props {
-  data: DataFile;
-  cityId: string;
-  inputs: Inputs;
-  overrides: Partial<Inputs>;
-  money: Money;
-  setField: <K extends keyof Inputs>(key: K, value: Inputs[K]) => void;
-  resetField: (key: keyof Inputs) => void;
+  fields: FieldBinding;
 }
 
 type GroupId = keyof typeof t.groups;
@@ -38,60 +28,56 @@ const PRESETS = [
 ] as const;
 
 const fieldsOf = (topic: Topic) => FIELDS.filter((f) => f.topic === topic);
-const topicTitle = (topic: Topic) => (topic in t.topics ? t.topics[topic as keyof typeof t.topics] : undefined);
+/** Only topics that share a group are titled; a group with one topic is named by the group itself. */
+const TOPIC_TITLES: Partial<Record<Topic, string>> = t.topics;
 
-export function InputsPanel({ data, cityId, inputs, overrides, money, setField, resetField }: Props) {
+export function InputsPanel({ fields }: Props) {
+  const [collapsed, setCollapsed] = useState<Partial<Record<GroupId, boolean>>>({});
+  const toggle = (id: GroupId) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
+  const editsIn = (topics: Topic[]) => topics.flatMap(fieldsOf).filter((f) => fields.isOverridden(f.key)).length;
+  const variableOnly = fields.value('fixedYears') === 0;
+
   // Presets only change the fixed period; the rate itself stays whatever the user or the defaults say.
   const presets = (
     <div key="presets" className="presets" role="group" aria-label={t.presets.label}>
       {PRESETS.map((p) => (
-        <button key={p.years} type="button" aria-pressed={inputs.fixedYears === p.years} onClick={() => setField('fixedYears', p.years)}>
+        <button key={p.years} type="button" aria-pressed={fields.value('fixedYears') === p.years} onClick={() => fields.set('fixedYears', p.years)}>
           {p.label}
         </button>
       ))}
     </div>
   );
 
-  const renderDefs = (defs: FieldDef[]) =>
-    defs.flatMap((def) => [
-      ...(def.key === 'fixedRate' ? [presets] : []),
-      <InputField
-        key={def.key}
-        def={def}
-        value={inputs[def.key]}
-        isOverridden={def.key in overrides}
-        source={sourceFor(data, cityId, def.key)}
-        money={money}
-        onChange={(v) => setField(def.key, v as never)}
-        onReset={() => resetField(def.key)}
-        // With no fixed period the fixed rate never applies; disabled rather than hidden to avoid layout jumps.
-        disabled={def.key === 'fixedRate' && inputs.fixedYears === 0}
-      />,
-    ]);
+  const renderField = (def: FieldDef) => [
+    def.key === 'fixedRate' && presets,
+    <InputField
+      key={def.key}
+      def={def}
+      fields={fields}
+      // With no fixed period the fixed rate never applies; disabled rather than hidden to avoid layout jumps.
+      disabled={def.key === 'fixedRate' && variableOnly}
+    />,
+  ];
 
-  const renderTopic = (topic: Topic, named: boolean) => {
-    const title = named ? topicTitle(topic) : undefined;
+  const renderTopic = (topic: Topic) => {
+    const title = TOPIC_TITLES[topic];
     return (
       <div key={topic} className="topic">
         {title && <h4>{title}</h4>}
-        {renderDefs(fieldsOf(topic))}
+        {fieldsOf(topic).flatMap(renderField)}
       </div>
     );
   };
 
-  const [collapsed, setCollapsed] = useState<Partial<Record<GroupId, boolean>>>({});
-  const toggle = (id: GroupId) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
-  const editsIn = (topics: Topic[]) => topics.flatMap(fieldsOf).filter((f) => f.key in overrides).length;
-
   return (
     <div className="inputs">
       {LAYOUT.map((group) => {
-        const named = group.topics.length > 1 || Boolean(group.more);
         const isOpen = !collapsed[group.id];
         const bodyId = `group-${group.id}-body`;
+        const more = group.more ?? [];
         // Edits inside folded parts would otherwise be invisible, so the folded headers count them.
-        const groupEdits = editsIn([...group.topics, ...(group.more ?? [])]);
-        const hiddenEdits = editsIn(group.more ?? []);
+        const groupEdits = editsIn([...group.topics, ...more]);
+        const hiddenEdits = editsIn(more);
         return (
           <section key={group.id} className={`input-group group-${group.id}${isOpen ? ' is-open' : ''}`} aria-labelledby={`group-${group.id}-title`}>
             <h3 className="group-head">
@@ -108,15 +94,15 @@ export function InputsPanel({ data, cityId, inputs, overrides, money, setField, 
               </button>
             </h3>
             <div id={bodyId} className="group-body" hidden={!isOpen}>
-              {group.topics.map((t) => renderTopic(t, named))}
-              {group.more && (
+              {group.topics.map(renderTopic)}
+              {more.length > 0 && (
                 <details className="more">
                   <summary>
                     <span>{t.buyingMore}</span>
                     {hiddenEdits > 0 && <span className="edit-count">{t.editedCount(hiddenEdits)}</span>}
                     <span className="chevron" aria-hidden="true" />
                   </summary>
-                  {group.more.map((t) => renderTopic(t, true))}
+                  {more.map(renderTopic)}
                 </details>
               )}
             </div>

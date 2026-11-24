@@ -1,7 +1,12 @@
 import { MAX_HORIZON_YEARS, MAX_LOAN_TERM_YEARS, MIN_HORIZON_YEARS, MIN_LOAN_TERM_YEARS } from '../engine';
-import { FIELDS, normalizeField } from './fields';
+import { baseInputs } from '../engine/fixtures';
+import { FIELDS, fieldDef as def, isNumberField, normalizeField } from './fields';
 
-const def = (key: string) => FIELDS.find((f) => f.key === key)!;
+describe('FIELDS', () => {
+  it('has exactly one field for every input', () => {
+    expect(FIELDS.map((f) => f.key).sort()).toEqual(Object.keys(baseInputs).sort());
+  });
+});
 
 describe('normalizeField', () => {
   it('clamps to the field limits', () => {
@@ -12,7 +17,7 @@ describe('normalizeField', () => {
   });
 
   it('caps every amount so a huge finite value never reaches the simulation', () => {
-    for (const f of FIELDS.filter((x) => x.unit === 'money')) {
+    for (const f of FIELDS.filter(isNumberField).filter((x) => x.unit === 'money')) {
       expect(f.max, f.key).toBeDefined();
       expect(normalizeField(f, 1e300), f.key).toBe(f.max);
     }

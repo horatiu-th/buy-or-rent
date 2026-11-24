@@ -24,7 +24,7 @@ export const MORTGAGE_NOTARY_MIN = 150;
 
 export function mortgageNotaryFee(loan: number): number {
   if (loan <= 0) return 0;
-  const b = [...MORTGAGE_NOTARY_BRACKETS].reverse().find((x) => loan > x.from)!;
+  const b = MORTGAGE_NOTARY_BRACKETS.findLast((x) => loan > x.from)!;
   return Math.max(MORTGAGE_NOTARY_MIN, b.base + (loan - b.from) * b.pct);
 }
 
@@ -33,9 +33,11 @@ export function mortgageSetupCosts(loan: number): number {
   return loan * MORTGAGE_REGISTRY_PCT + mortgageNotaryFee(loan) * (1 + VAT);
 }
 
+export const loanAmount = (i: Pick<Inputs, 'price' | 'downPaymentPct'>) => i.price * (1 - i.downPaymentPct);
+
 /** One-off costs of buying, other than the down payment and any fit-out. Bank fees exist only with a loan. */
 export function acquisitionCosts(i: Inputs): number {
-  const loan = i.price * (1 - i.downPaymentPct);
+  const loan = loanAmount(i);
   const bank = loan > 0 ? i.bankFees : 0;
   return i.price * (i.notaryPct + i.registryPct + i.buyerAgencyPct) + bank + mortgageSetupCosts(loan);
 }

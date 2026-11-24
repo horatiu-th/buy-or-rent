@@ -30,7 +30,7 @@ export function TopBar({ currency, onCurrencyChange, theme, onThemeChange, onRes
         <p>{t.subtitle}</p>
       </div>
       <div className="topbar-actions">
-        <Segmented<Currency> legend={t.currency} hideLegend value={currency} options={CURRENCY_OPTIONS} onChange={onCurrencyChange} />
+        <Segmented legend={t.currency} hideLegend value={currency} options={CURRENCY_OPTIONS} onChange={onCurrencyChange} />
         <ThemePicker choice={theme} onChange={onThemeChange} />
         <button type="button" className="ghost-button" onClick={onResetAll}>
           <ResetIcon />

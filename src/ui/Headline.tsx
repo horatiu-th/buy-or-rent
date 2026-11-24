@@ -23,11 +23,14 @@ export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sa
     );
   }
   const after = t.duration(horizonMonths);
-  const main =
-    eq.kind === 'value' ? t.headlineValue(after, formatMoney(eq.rent, money))
-    : eq.kind === 'alwaysBuy' ? t.headlineAlwaysBuy(after)
-    : eq.kind === 'noThreshold' ? t.headlineNoThreshold(after)
-    : t.headlineAlwaysRent(after);
+  const main = (() => {
+    switch (eq.kind) {
+      case 'value': return t.headlineValue(after, formatMoney(eq.rent, money));
+      case 'alwaysBuy': return t.headlineAlwaysBuy(after);
+      case 'alwaysRent': return t.headlineAlwaysRent(after);
+      case 'noThreshold': return t.headlineNoThreshold(after);
+    }
+  })();
   const verdict =
     breakEvenMonth === 0 ? t.verdictBuyFromStart
     : breakEvenMonth !== null ? t.verdictBuy(t.duration(breakEvenMonth))

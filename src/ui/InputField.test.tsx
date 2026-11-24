@@ -1,28 +1,38 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { SourcedValue } from '../data/schema';
-import { FIELDS } from './fields';
+import type { Inputs } from '../engine';
+import { fieldDef as def, type FieldDef } from './fields';
 import { InputField } from './InputField';
+import type { Money } from './money';
 import { t } from '../i18n';
 import { LEI, euro } from '../test/money';
-
-const def = (key: string) => FIELDS.find((f) => f.key === key)!;
 
 const source = (over: Partial<SourcedValue>): SourcedValue => ({
   value: 1, unit: 'lei', source: 'Sursa X', asOf: '2026-01-01', status: 'ok', ...over,
 });
 
-function renderField(props: Partial<Parameters<typeof InputField>[0]> = {}) {
+interface FieldSetup {
+  def?: FieldDef;
+  value?: number;
+  money?: Money;
+  source?: SourcedValue;
+}
+
+/** Renders one field over a single stored value; returns the mock that receives every write. */
+function renderField({ def: d = def('rent'), value = 2000, money = LEI, source }: FieldSetup = {}) {
   const onChange = vi.fn();
   render(
     <InputField
-      def={def('rent')}
-      value={2000}
-      isOverridden={false}
-      money={LEI}
-      onChange={onChange}
-      onReset={() => {}}
-      {...props}
+      def={d}
+      fields={{
+        money,
+        value: <K extends keyof Inputs>() => value as Inputs[K],
+        isOverridden: () => false,
+        source: () => source,
+        set: (_key, v) => onChange(v),
+        reset: () => {},
+      }}
     />,
   );
   return onChange;

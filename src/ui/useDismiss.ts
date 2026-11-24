@@ -15,24 +15,20 @@ export function useDismiss(
 ) {
   useEffect(() => {
     if (!open) return;
-    const outside = (target: EventTarget | null) => !rootRef.current?.contains(target as Node);
-    const onPointer = (e: PointerEvent) => {
-      if (outside(e.target)) close();
-    };
-    const onFocus = (e: FocusEvent) => {
-      if (outside(e.target)) close();
+    const onOutside = (e: Event) => {
+      if (!(e.target instanceof Node && rootRef.current?.contains(e.target))) close();
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       close();
       returnFocusRef?.current?.focus();
     };
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('focusin', onFocus);
+    document.addEventListener('pointerdown', onOutside);
+    document.addEventListener('focusin', onOutside);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('focusin', onFocus);
+      document.removeEventListener('pointerdown', onOutside);
+      document.removeEventListener('focusin', onOutside);
       document.removeEventListener('keydown', onKey);
     };
   }, [open, rootRef, close, returnFocusRef]);

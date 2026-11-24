@@ -2,8 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { simulate, type Result } from '../engine';
 import { baseInputs } from '../engine/fixtures';
 import {
-  axisShort, BreakdownChart, breakEvenX, chartRows, MonthlyCostsChart, NetWorthChart, niceTicks, yearTicks, type View,
+  axisShort, BreakdownChart, breakEvenX, chartRows, MonthlyCostsChart, NetWorthChart, niceTicks, yearTicks,
 } from './charts';
+import type { View } from './money';
 import { LEI, euro } from '../test/money';
 
 const view: View = { money: LEI, real: false };

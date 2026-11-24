@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import { loadDefaults } from './data/defaults';
+import { DEFAULTS } from './data/defaults';
 import { t } from './i18n';
 
 // Recharts' ResponsiveContainer needs ResizeObserver, which jsdom lacks.
@@ -46,7 +46,7 @@ it('stores euro edits as whole lei in the URL', async () => {
   const price = screen.getByLabelText('Preț locuință');
   await userEvent.clear(price);
   await userEvent.type(price, '1234');
-  const eurRon = loadDefaults().values.eurRon.value;
+  const eurRon = DEFAULTS.values.eurRon.value;
   expect(new URLSearchParams(window.location.search).get('price')).toBe(String(Math.round(1234 * eurRon)));
 });
 
@@ -179,7 +179,7 @@ it('collapses a group and counts the edits inside it', async () => {
 
 it('shows the exchange rate in use and when BNR published it', () => {
   render(<App />);
-  const { value, asOf } = loadDefaults().values.eurRon;
+  const { value, asOf } = DEFAULTS.values.eurRon;
   const date = asOf.split('-').reverse().join('.');
   expect(screen.getByText(new RegExp(`Curs BNR: ${value.toLocaleString('ro-RO', { maximumFractionDigits: 4 })} lei/€, din ${date}`))).toBeInTheDocument();
 });

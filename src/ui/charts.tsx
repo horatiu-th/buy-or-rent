@@ -1,14 +1,12 @@
-import { useSyncExternalStore, type ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { Result } from '../engine';
 import { t } from '../i18n';
-import { formatMoney, fromUnits, toUnits, type Money } from './money';
-
-/** How results are shown: in which currency, and whether in today's money or nominal. */
-export interface View { money: Money; real: boolean }
+import { formatMoney, fromUnits, inView, toUnits, type View } from './money';
+import { useMediaQuery } from './useMediaQuery';
 
 const BUYER = 'var(--buyer)';
 const RENTER = 'var(--renter)';
@@ -16,33 +14,18 @@ const GRID = 'var(--line)';
 const TICK = { fill: 'var(--muted)', fontSize: 12 };
 const AXIS = { stroke: 'var(--line)', tickLine: false } as const;
 
-const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
-
-function subscribeMotion(onChange: () => void) {
-  if (typeof window.matchMedia !== 'function') return () => {};
-  const mq = window.matchMedia(REDUCED_MOTION);
-  mq.addEventListener('change', onChange);
-  return () => mq.removeEventListener('change', onChange);
-}
+const Y_AXIS = { width: 84, tick: TICK, axisLine: false, tickLine: false } as const;
+const LINE_CURSOR = { stroke: 'var(--muted)', strokeDasharray: '3 3' };
 
 /** Recharts animates in JS, so the CSS reduced-motion rule doesn't reach it; the series opt out here instead. */
-function useAnimate(): boolean {
-  return useSyncExternalStore(
-    subscribeMotion,
-    () => typeof window.matchMedia !== 'function' || !window.matchMedia(REDUCED_MOTION).matches,
-    () => true,
-  );
-}
+const useAnimate = () => !useMediaQuery('(prefers-reduced-motion: reduce)');
 
 /**
  * One point per simulated month, x in years. Monthly points keep the final month of any horizon
  * and put steps (the fixed rate ending, a sale-tax drop) exactly where they happen.
  */
 export function chartRows(result: Result, view: View) {
-  const conv = (v: number, deflator: number) => {
-    const real = view.real ? v / deflator : v;
-    return toUnits(real, view.money);
-  };
+  const conv = (v: number, deflator: number) => toUnits(inView(v, deflator, view), view.money);
   return result.rows.map((r) => ({
     month: r.month,
     year: r.month / 12,
@@ -56,7 +39,7 @@ export function chartRows(result: Result, view: View) {
 /** Where the break-even marker goes, in years; none when there is no crossing to mark. */
 export function breakEvenX(result: Pick<Result, 'breakEvenMonth'>): number | null {
   const m = result.breakEvenMonth;
-  return m === null || m === 0 ? null : m / 12;
+  return m ? m / 12 : null;
 }
 
 /** Whole-year ticks at an even step, at most eight of them, never past the horizon. */
@@ -100,16 +83,18 @@ function moneyAxis(values: number[], view: View) {
   return { ticks, domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], tickFormatter: axisShort(ticks, view.money.symbol) };
 }
 
-interface TipProps {
+type ChartRow = ReturnType<typeof chartRows>[number];
+
+interface TipProps<Point> {
   description?: string;
   active?: boolean;
-  payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string; dataKey?: unknown; payload?: unknown }>;
+  payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string; dataKey?: unknown; payload?: Point }>;
   label?: unknown;
   fmt: (v: number) => string;
-  title?: (label: unknown, point: unknown) => string;
+  title?: (label: unknown, point: Point | undefined) => string;
 }
 
-function ChartTip({ active, payload, label, fmt, title, description }: TipProps) {
+function ChartTip<Point>({ active, payload, label, fmt, title, description }: TipProps<Point>) {
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tip">
@@ -126,12 +111,11 @@ function ChartTip({ active, payload, label, fmt, title, description }: TipProps)
   );
 }
 
-const monthOf = (point: unknown) => (point as { month: number }).month;
-const afterTitle = (_: unknown, point: unknown) => {
-  const m = monthOf(point);
+const afterTitle = (_: unknown, point: ChartRow | undefined) => {
+  const m = point?.month ?? 0;
   return m === 0 ? t.chartStart : t.afterTime(t.duration(m));
 };
-const monthTitle = (_: unknown, point: unknown) => t.monthN(monthOf(point));
+const monthTitle = (_: unknown, point: ChartRow | undefined) => t.monthN(point?.month ?? 0);
 
 /**
  * Recharts makes the chart focusable for keyboard exploration but gives it no name, and the lines
@@ -156,8 +140,8 @@ function ChartLegend({ renter }: { renter: string }) {
   );
 }
 
-function yearAxis(rows: { year: number }[]) {
-  const end = rows[rows.length - 1]?.year ?? 0;
+function yearAxis(rows: readonly { year: number }[]) {
+  const end = rows.at(-1)?.year ?? 0;
   return (
     <XAxis
       type="number"
@@ -171,7 +155,10 @@ function yearAxis(rows: { year: number }[]) {
   );
 }
 
-export function NetWorthChart({ result, view }: { result: Result; view: View }) {
+interface ChartProps { result: Result; view: View }
+
+// Memoized: the results panel re-renders on every rent keystroke before the deferred inputs catch up.
+export const NetWorthChart = memo(function NetWorthChart({ result, view }: ChartProps) {
   const animate = useAnimate();
   const data = chartRows(result, view);
   const fmt = shownMoney(view);
@@ -180,7 +167,7 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
   const last = data[data.length - 1];
   const summary = [
     t.charts.netWorthSummary(t.duration(last.month), fmt(last.buyer), fmt(last.renter)),
-    marker !== null && result.breakEvenMonth !== null ? t.charts.breakEvenSummary(t.duration(result.breakEvenMonth)) : '',
+    result.breakEvenMonth ? t.charts.breakEvenSummary(t.duration(result.breakEvenMonth)) : '',
   ].filter(Boolean).join(' ');
   return (
     <ChartFigure name={t.charts.netWorth} summary={summary}>
@@ -189,8 +176,8 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
         <LineChart data={data} title={t.charts.netWorth} margin={{ top: 32, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
-          <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
-          <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={afterTitle} />} cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }} />
+          <YAxis {...y} {...Y_AXIS} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={afterTitle} />} cursor={LINE_CURSOR} />
           {marker !== null && (
             <ReferenceLine
               x={marker}
@@ -205,9 +192,9 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
       </ResponsiveContainer>
     </ChartFigure>
   );
-}
+});
 
-export function MonthlyCostsChart({ result, view }: { result: Result; view: View }) {
+export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view }: ChartProps) {
   const animate = useAnimate();
   // Month 0 is the purchase itself, not a monthly cost.
   const data = chartRows(result, view).filter((d) => d.month > 0);
@@ -227,17 +214,17 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
         <AreaChart data={data} title={t.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
-          <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
-          <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={monthTitle} />} cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }} />
+          <YAxis {...y} {...Y_AXIS} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={monthTitle} />} cursor={LINE_CURSOR} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={t.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={t.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
       </ResponsiveContainer>
     </ChartFigure>
   );
-}
+});
 
-export function BreakdownChart({ result, view }: { result: Result; view: View }) {
+export const BreakdownChart = memo(function BreakdownChart({ result, view }: ChartProps) {
   const animate = useAnimate();
   // Totals are nominal sums; showing them in today's lei would need per-month deflation, so this chart stays nominal.
   const conv = (v: number) => toUnits(v, view.money);
@@ -284,4 +271,4 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
       </ResponsiveContainer>
     </ChartFigure>
   );
-}
+});

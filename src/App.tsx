@@ -1,10 +1,10 @@
 import { useCallback, useDeferredValue, useMemo } from 'react';
-import { loadDefaults, resolveCityId, resolveInputs, sourceFor } from './data/defaults';
+import { DEFAULTS as data, resolveCityId, resolveInputs, sourceFor } from './data/defaults';
 import type { Inputs } from './engine';
 import { t } from './i18n';
 import { CityPicker } from './ui/CityPicker';
 import { FIELDS } from './ui/fields';
-import { InputField } from './ui/InputField';
+import { InputField, type FieldBinding } from './ui/InputField';
 import { InputsPanel } from './ui/InputsPanel';
 import { Results } from './ui/Results';
 import { moneyFor } from './ui/money';
@@ -12,7 +12,6 @@ import { useScenario } from './state/useScenario';
 import { useTheme } from './ui/theme';
 import { TopBar } from './ui/TopBar';
 
-const data = loadDefaults();
 const SOURCES_URL = 'https://github.com/horatiu-th/buy-or-rent/blob/main/data/SOURCES.md';
 
 // Horizon and inflation frame the whole comparison, so they sit with the city and size, not with either side.
@@ -35,6 +34,14 @@ export default function App() {
   const view = useMemo(() => ({ money, real }), [money, real]);
   const onToggleReal = useCallback((r: boolean) => update({ real: r }), [update]);
   const onRentChange = useCallback((lei: number) => setField('rent', lei), [setField]);
+  const fields: FieldBinding = {
+    money,
+    value: (key) => inputs[key],
+    isOverridden: (key) => key in overrides,
+    source: (key) => sourceFor(data, cityId, key),
+    set: setField,
+    reset: resetField,
+  };
 
   return (
     <div className="page">
@@ -49,30 +56,14 @@ export default function App() {
       <CityPicker data={data} cityId={cityId} sqm={sqm} onChange={update}>
         {SCENARIO_FIELDS.map((def) => (
           <div key={def.key} className="scenario-item scenario-field">
-            <InputField
-              def={def}
-              value={inputs[def.key]}
-              isOverridden={def.key in overrides}
-              source={sourceFor(data, cityId, def.key)}
-              money={money}
-              onChange={(v) => setField(def.key, v as never)}
-              onReset={() => resetField(def.key)}
-            />
+            <InputField def={def} fields={fields} />
           </div>
         ))}
       </CityPicker>
 
       <main className="layout">
         <aside className="inputs-column">
-          <InputsPanel
-            data={data}
-            cityId={cityId}
-            inputs={inputs}
-            overrides={overrides}
-            money={money}
-            setField={setField}
-            resetField={resetField}
-          />
+          <InputsPanel fields={fields} />
         </aside>
         <section className="results-column" aria-label={t.resultsLabel}>
           <Results

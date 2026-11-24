@@ -1,26 +1,40 @@
 import {
-  MAX_HORIZON_YEARS, MAX_LOAN_TERM_YEARS, MIN_HORIZON_YEARS, MIN_LOAN_TERM_YEARS, type Inputs,
+  clamp, MAX_HORIZON_YEARS, MAX_LOAN_TERM_YEARS, MIN_HORIZON_YEARS, MIN_LOAN_TERM_YEARS, type Inputs,
 } from '../engine';
 
-export type Unit = 'money' | 'pct' | 'years' | 'months' | 'bool';
+export type NumberUnit = 'money' | 'pct' | 'years' | 'months';
+export type Unit = NumberUnit | 'bool';
+
+type KeysOfType<T> = { [K in keyof Inputs]: Inputs[K] extends T ? K : never }[keyof Inputs];
+export type BoolKey = KeysOfType<boolean>;
+export type NumberKey = KeysOfType<number>;
 
 /** Where a field sits in the panel. Buying has enough fields that it splits into smaller topics. */
 export type Topic =
   | 'home' | 'loan' | 'purchaseCosts' | 'ownershipCosts' | 'sale'
   | 'renting' | 'general';
 
-export interface FieldDef {
-  key: keyof Inputs;
-  unit: Unit;
+export interface BoolFieldDef {
+  key: BoolKey;
+  unit: 'bool';
+  topic: Topic;
+}
+
+export interface NumberFieldDef {
+  key: NumberKey;
+  unit: NumberUnit;
   topic: Topic;
   min?: number;
   max?: number;
   step?: number;
 }
 
+/** A field's unit decides its value type, so a switch can never be bound to a number input or vice versa. */
+export type FieldDef = BoolFieldDef | NumberFieldDef;
+
 // The simulation accepts any finite number, so amounts get generous ceilings here: far above any real
 // home in Romania, low enough that the sums can't overflow.
-export const FIELDS: FieldDef[] = [
+export const FIELDS: readonly FieldDef[] = [
   { key: 'price', unit: 'money', topic: 'home', min: 0, max: 100_000_000, step: 1000 },
   { key: 'downPaymentPct', unit: 'pct', topic: 'home', min: 0, max: 1, step: 0.01 },
   { key: 'propertyGrowth', unit: 'pct', topic: 'home', min: -0.2, max: 0.3, step: 0.005 },
@@ -65,6 +79,18 @@ export const FIELDS: FieldDef[] = [
   { key: 'inflation', unit: 'pct', topic: 'general', min: -0.1, max: 0.5, step: 0.005 },
 ];
 
+const FIELD_BY_KEY = new Map<string, FieldDef>(FIELDS.map((f) => [f.key, f]));
+
+/** The field for an input key. Every input has one; a string from a link may match none. */
+export function fieldDef(key: BoolKey): BoolFieldDef;
+export function fieldDef(key: NumberKey): NumberFieldDef;
+export function fieldDef(key: string): FieldDef | undefined;
+export function fieldDef(key: string): FieldDef | undefined {
+  return FIELD_BY_KEY.get(key);
+}
+
+export const isNumberField = (def: FieldDef): def is NumberFieldDef => def.unit !== 'bool';
+
 /** Periods measured in years or months are counts; the inputs step by one and the labels read as whole numbers. */
 export const isWholeField = (def: FieldDef) => def.unit === 'years' || def.unit === 'months';
 
@@ -72,9 +98,7 @@ export const isWholeField = (def: FieldDef) => def.unit === 'years' || def.unit 
  * The one place a number becomes a valid field value, used both for typed input and for values
  * read from a link, so the field, the URL and the simulation always agree.
  */
-export function normalizeField(def: FieldDef, n: number): number {
-  let v = n;
-  if (def.min !== undefined) v = Math.max(def.min, v);
-  if (def.max !== undefined) v = Math.min(def.max, v);
+export function normalizeField(def: NumberFieldDef, n: number): number {
+  const v = clamp(n, def.min ?? -Infinity, def.max ?? Infinity);
   return isWholeField(def) ? Math.round(v) : v;
 }

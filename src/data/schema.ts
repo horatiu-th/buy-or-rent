@@ -1,5 +1,6 @@
 export const STATUSES = ['ok', 'stale', 'manual'] as const;
 export type Status = (typeof STATUSES)[number];
+export const isStatus = (v: unknown): v is Status => (STATUSES as readonly unknown[]).includes(v);
 
 export interface SourcedValue {
   value: number;
@@ -22,10 +23,11 @@ export interface CityData {
 }
 
 export interface DataFile {
-  values: Record<string, SourcedValue>;
+  values: Record<ValueKey, SourcedValue>;
   cities: Record<string, CityData>;
 }
 
+/** A data file as read from disk, before the merge checks it: any key may be missing or unknown. */
 export interface PartialDataFile {
   values?: Record<string, SourcedValue>;
   cities?: Record<string, Partial<CityData>>;
@@ -42,6 +44,8 @@ export const REQUIRED_VALUE_KEYS = [
   'fitOutCost', 'moveEveryYears', 'moveCost',
 ] as const;
 export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
+
+export const isValueKey = (k: string): k is ValueKey => (REQUIRED_VALUE_KEYS as readonly string[]).includes(k);
 
 export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEur', 'rentSqmEur', 'rentPriceSqmEur'] as const;
 

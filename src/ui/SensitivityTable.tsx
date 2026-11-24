@@ -1,13 +1,13 @@
 import { useId } from 'react';
-import { SENSITIVITY_STEPS, type Swing, type SwingKey } from '../engine';
+import { SENSITIVITY_BASE, SENSITIVITY_STEPS, type Swing, type SwingKey } from '../engine';
 import { t } from '../i18n';
+import { fieldDef } from './fields';
 import { formatMoney, type Money } from './money';
 import { GapCell, GapKey } from './GapCell';
 
 interface Props { grid: number[][]; baseGrowth: number; baseReturn: number; money: Money }
 
 const pct = (x: number) => `${(x * 100).toLocaleString(t.numberLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
-const BASE = SENSITIVITY_STEPS.indexOf(0);
 
 export function SensitivityTable({ grid, baseGrowth, baseReturn, money }: Props) {
   const captionId = useId();
@@ -27,7 +27,7 @@ export function SensitivityTable({ grid, baseGrowth, baseReturn, money }: Props)
             <tr key={i}>
               <th scope="row">{pct(baseGrowth + SENSITIVITY_STEPS[i])}</th>
               {row.map((gap, j) => (
-                <GapCell key={j} gap={gap} money={money} isBase={i === BASE && j === BASE} />
+                <GapCell key={j} gap={gap} money={money} isBase={i === SENSITIVITY_BASE && j === SENSITIVITY_BASE} />
               ))}
             </tr>
           ))}
@@ -39,7 +39,7 @@ export function SensitivityTable({ grid, baseGrowth, baseReturn, money }: Props)
 
 interface SwingsProps { swings: Swing[]; base: number; money: Money }
 
-const isPctSwing = (key: SwingKey) => key !== 'rent';
+const isPctSwing = (key: SwingKey) => fieldDef(key).unit === 'pct';
 
 /** One assumption at a time moved down and up, for the inputs the grid above leaves fixed. */
 export function SwingsTable({ swings, base, money }: SwingsProps) {

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Inputs } from '../engine';
-import { loadDefaults } from '../data/defaults';
-import { applyScenarioPatch, decodeScenario, encodeScenario, DEFAULT_SCENARIO, type Scenario } from './scenario';
+import { DEFAULTS } from '../data/defaults';
+import {
+  applyScenarioPatch, decodeScenario, encodeScenario, DEFAULT_SCENARIO, type Scenario, type ScenarioPatch,
+} from './scenario';
 
-const CITY_IDS = Object.keys(loadDefaults().cities);
+const CITY_IDS = Object.keys(DEFAULTS.cities);
 
 export function useScenario() {
   const [scenario, setScenario] = useState<Scenario>(() =>
@@ -16,7 +18,7 @@ export function useScenario() {
     window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
   }, [scenario]);
 
-  const update = useCallback((patch: Partial<Omit<Scenario, 'overrides'>>) => {
+  const update = useCallback((patch: ScenarioPatch) => {
     setScenario((s) => applyScenarioPatch(s, patch));
   }, []);
 
@@ -35,3 +37,6 @@ export function useScenario() {
 
   return { scenario, update, setField, resetField, resetAll };
 }
+
+export type SetField = ReturnType<typeof useScenario>['setField'];
+export type ResetField = ReturnType<typeof useScenario>['resetField'];
