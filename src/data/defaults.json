@@ -161,15 +161,8 @@
     "buyerAgencyPct": {
       "value": 0.0242,
       "unit": "%",
-      "source": "Comision uzual cumpărător 2% + TVA 21% (locuințe vechi)",
+      "source": "Comision uzual cumpărător 2% + TVA 21%; 0 la cumpărarea direct de la dezvoltator sau proprietar",
       "sourceUrl": "https://financiarul.ro/constructii/comisioanele-imobiliare-ajung-la-4-plus-tva-de-21-ce-costuri-trebuie/",
-      "asOf": "2026-11-23",
-      "status": "manual"
-    },
-    "buyerAgencyPctNew": {
-      "value": 0,
-      "unit": "%",
-      "source": "Estimare: cumpărare direct de la dezvoltator, fără comision",
       "asOf": "2026-11-23",
       "status": "manual"
     },
@@ -280,20 +273,12 @@
   "cities": {
     "bucuresti": {
       "name": "București",
-      "priceSqmEurNew": {
-        "value": 2636,
+      "priceSqmEur": {
+        "value": 2312,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, București, blocuri finalizate în ultimii 5 ani, început de vară 2026 (via HotNews)",
-        "sourceUrl": "https://hotnews.ro/?p=2289192",
-        "asOf": "2026-06-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2259,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, București, blocuri vechi, început de vară 2026 (via HotNews)",
-        "sourceUrl": "https://hotnews.ro/?p=2289192",
-        "asOf": "2026-06-30",
+        "source": "imobiliare.ro, preț cerut median, București, septembrie 2026 (toate apartamentele)",
+        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
+        "asOf": "2026-09-30",
         "status": "manual"
       },
       "rentSqmEur": {
@@ -323,18 +308,10 @@
     },
     "cluj": {
       "name": "Cluj-Napoca",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 3316,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Cluj-Napoca, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 3316,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Cluj-Napoca, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Cluj-Napoca, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -358,18 +335,10 @@
     },
     "timisoara": {
       "name": "Timișoara",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 1984,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Timișoara, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 1984,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Timișoara, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Timișoara, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -393,18 +362,10 @@
     },
     "iasi": {
       "name": "Iași",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 2000,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Iași, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2000,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Iași, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Iași, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -436,20 +397,12 @@
     },
     "brasov": {
       "name": "Brașov",
-      "priceSqmEurNew": {
-        "value": 2724,
+      "priceSqmEur": {
+        "value": 2309,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Brașov, blocuri finalizate în ultimii 5 ani, început de vară 2026 (via HotNews)",
-        "sourceUrl": "https://hotnews.ro/?p=2289192",
-        "asOf": "2026-06-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2246,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Brașov, blocuri vechi, început de vară 2026 (via HotNews)",
-        "sourceUrl": "https://hotnews.ro/?p=2289192",
-        "asOf": "2026-06-30",
+        "source": "imobiliare.ro, preț cerut median, Brașov, septembrie 2026 (toate apartamentele)",
+        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
+        "asOf": "2026-09-30",
         "status": "manual"
       },
       "rentSqmEur": {
@@ -471,18 +424,10 @@
     },
     "constanta": {
       "name": "Constanța",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 2020,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Constanța, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2020,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Constanța, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Constanța, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -506,18 +451,10 @@
     },
     "oradea": {
       "name": "Oradea",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 1885,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Oradea, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 1885,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Oradea, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Oradea, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -541,18 +478,10 @@
     },
     "sibiu": {
       "name": "Sibiu",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 2034,
         "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Sibiu, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
-        "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2034,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, preț cerut median, Sibiu, septembrie 2026 (toate apartamentele; nu e publicată separat pentru noi și vechi)",
+        "source": "imobiliare.ro, preț cerut median, Sibiu, septembrie 2026 (toate apartamentele)",
         "sourceUrl": "https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/",
         "asOf": "2026-09-30",
         "status": "manual"
@@ -576,18 +505,10 @@
     },
     "ro": {
       "name": "Alt oraș (medie națională)",
-      "priceSqmEurNew": {
+      "priceSqmEur": {
         "value": 2019,
         "unit": "€/m²",
-        "source": "imobiliare.ro, medie națională septembrie 2026",
-        "sourceUrl": "https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/",
-        "asOf": "2026-09-30",
-        "status": "manual"
-      },
-      "priceSqmEurExisting": {
-        "value": 2019,
-        "unit": "€/m²",
-        "source": "imobiliare.ro, medie națională septembrie 2026",
+        "source": "imobiliare.ro, medie națională, toate apartamentele, septembrie 2026",
         "sourceUrl": "https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/",
         "asOf": "2026-09-30",
         "status": "manual"

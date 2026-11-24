@@ -14,8 +14,7 @@ export interface SourcedValue {
 
 export interface CityData {
   name: string;
-  priceSqmEurNew: SourcedValue;
-  priceSqmEurExisting: SourcedValue;
+  priceSqmEur: SourcedValue;
   rentSqmEur: SourcedValue;
   /** Sale €/m² from the same index as the rent, so rent ÷ this is a yield measured on one set of listings. */
   rentPriceSqmEur: SourcedValue;
@@ -39,16 +38,16 @@ export const REQUIRED_VALUE_KEYS = [
   'lifeInsurancePct', 'maintenancePct', 'propertyRealGrowth', 'rentRealGrowth', 'renterInsuranceAnnual',
   'depositMonths', 'investRealReturn', 'investTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
-  'buyerAgencyPct', 'buyerAgencyPctNew', 'irccLongRunSpread', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
+  'buyerAgencyPct', 'irccLongRunSpread', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
   'fitOutCost', 'moveEveryYears', 'moveCost',
 ] as const;
 export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
 
-export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'rentPriceSqmEur'] as const;
+export const REQUIRED_CITY_KEYS = ['name', 'priceSqmEur', 'rentSqmEur', 'rentPriceSqmEur'] as const;
 
 /** The city fields that hold a SourcedValue, required or optional. */
 export const CITY_VALUE_KEYS = [
-  'priceSqmEurNew', 'priceSqmEurExisting', 'rentSqmEur', 'rentPriceSqmEur', 'propertyTaxSqm',
+  'priceSqmEur', 'rentSqmEur', 'rentPriceSqmEur', 'propertyTaxSqm',
 ] as const;
 export type CityValueKey = (typeof CITY_VALUE_KEYS)[number];
 

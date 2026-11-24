@@ -6,7 +6,7 @@ A buy-vs-rent calculator for Romania. It answers one question: **at what rent do
 
 ## What it does
 
-You pick a city, a property type and a size. The calculator fills in typical prices, rents, loan rates, fees and taxes from public sources, and then simulates, month by month, two households:
+You pick a city and a size. The calculator fills in typical prices, rents, loan rates, fees and taxes from public sources, and then simulates, month by month, two households:
 
 - **Cumpărător** (buyer): pays the down payment and fees, takes a mortgage, owns the home.
 - **Chiriaș care investește** (renter who invests): rents a similar home and invests every leu the buyer spent and they didn't.

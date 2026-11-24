@@ -19,13 +19,13 @@ const CURRENCIES = [
 
 export default function App() {
   const { scenario, update, setField, resetField, resetAll } = useScenario();
-  const { propertyType, sqm, overrides, currency, real } = scenario;
+  const { sqm, overrides, currency, real } = scenario;
   // One resolved id for the select, the defaults and the sources, so they can never disagree.
   const cityId = resolveCityId(scenario.cityId, data);
   // Narrow deps so toggling currency or real values doesn't rebuild inputs and rerun the simulation.
   const inputs: Inputs = useMemo(
-    () => resolveInputs(data, cityId, propertyType, sqm, overrides),
-    [cityId, propertyType, sqm, overrides],
+    () => resolveInputs(data, cityId, sqm, overrides),
+    [cityId, sqm, overrides],
   );
   // Keeps typing responsive: results re-render at lower priority than the input that changed.
   const deferredInputs = useDeferredValue(inputs);
@@ -53,14 +53,13 @@ export default function App() {
         </div>
       </header>
 
-      <CityPicker data={data} cityId={cityId} propertyType={propertyType} sqm={sqm} onChange={update} />
+      <CityPicker data={data} cityId={cityId} sqm={sqm} onChange={update} />
 
       <main className="layout">
         <aside className="inputs-column">
           <InputsPanel
             data={data}
             cityId={cityId}
-            propertyType={propertyType}
             inputs={inputs}
             overrides={overrides}
             currency={currency}

@@ -38,9 +38,9 @@ Every value is a `SourcedValue`:
 | `validUntil` | Optional. The last day the value is known to apply, `YYYY-MM-DD`, for values with a scheduled change (IRCC). After that date the merge prints a warning. |
 | `status` | `manual` (hand-maintained), `ok` (fetched, and recent), or `stale` (fetched, but `asOf` is older than the fetcher's maximum age) |
 
-Values sit under `values` (global) or under `cities.<id>`: `name`, `priceSqmEurNew`, `priceSqmEurExisting`, `rentSqmEur`, `rentPriceSqmEur` (the sale €/m² from the same index as the rent), and optionally `propertyTaxSqm`, which replaces the global value (lei per m² per year) for that city.
+Values sit under `values` (global) or under `cities.<id>`: `name`, `priceSqmEur` (all apartments, old and new), `rentSqmEur`, `rentPriceSqmEur` (the sale €/m² from the same index as the rent), and optionally `propertyTaxSqm`, which replaces the global value (lei per m² per year) for that city.
 
-Most global keys are `Inputs` field names. The exceptions are values the inputs are computed from: `eurRon`, `negotiationPct`, `buyerAgencyPctNew`, `propertyTaxSqm`, and the real parts of the inflation-linked rates: `propertyRealGrowth`, `rentRealGrowth`, `investRealReturn` and `irccLongRunSpread`.
+Most global keys are `Inputs` field names. The exceptions are values the inputs are computed from: `eurRon`, `negotiationPct`, `propertyTaxSqm`, and the real parts of the inflation-linked rates: `propertyRealGrowth`, `rentRealGrowth`, `investRealReturn` and `irccLongRunSpread`.
 
 The city `bucuresti` (`DEFAULT_CITY_ID` in `src/data/schema.ts`) must exist: an unknown city id, for example from an old shared link, falls back to it (`resolveCityId()` in `src/data/defaults.ts`).
 
@@ -57,11 +57,11 @@ It prints a warning, without stopping, when a key is in both data files or a `va
 ## How prices and rents are derived
 
 
-For the chosen city, property type and size:
+For the chosen city and size:
 
 ```
-price = €/m² (new or existing) × m² × EUR/RON rate × (1 − negotiationPct)
-rent  = (rentSqmEur ÷ rentPriceSqmEur) × €/m² (new or existing) × 55 × (m² / 55)^0.72 × EUR/RON rate
+price = priceSqmEur × m² × EUR/RON rate × (1 − negotiationPct)
+rent  = (rentSqmEur ÷ rentPriceSqmEur) × priceSqmEur × 55 × (m² / 55)^0.72 × EUR/RON rate
 property tax (lei/year) = property tax lei/m² (city, else global) × m²
 property growth, rent growth, investment return = (1 + inflation) × (1 + real part) − 1
 long-run IRCC = inflation + irccLongRunSpread
@@ -70,15 +70,15 @@ long-run IRCC = inflation + irccLongRunSpread
 Both are rounded to whole lei. Users can override either.
 
 - **Price:** the indexes report asking prices. `negotiationPct` takes off the typical gap between the last asking price and the price actually paid.
-- **Rent:** the rent index (apartamente.org) also publishes the median asking sale price for the same listings. Their ratio is a monthly yield measured on one set of listings, so differences between sources in area definitions (built vs usable), coverage and date cancel out. That yield is applied to the price being used. New and existing homes therefore share a city's yield: no index publishes rents by building age, and the few published comparisons (new-build rents 15–25% above a similar old flat in the same area) are close to the price gap.
+- **Rent:** the rent index (apartamente.org) also publishes the median asking sale price for the same listings. Their ratio is a monthly yield measured on one set of listings, so differences between sources in area definitions (built vs usable), coverage and date cancel out. That yield is applied to the price being used.
 - **Rent and size:** rent per m² falls as homes get larger. The city figures are averages over flats of about 55 m², so the curve (`rentForSize()` in `src/data/defaults.ts`) matches them at 55 m² and charges less per m² above that size and more below it. The 0.72 exponent fits apartamente.org's room-by-room medians (studio, 2 and 3 rooms) in Cluj, Timișoara, Brașov and Iași.
 - **Area** is usable area without balconies, which is what the price indexes use.
 
-Other inputs that depend on the property type: `buyerAgencyPct` comes from `buyerAgencyPct` for existing homes and from `buyerAgencyPctNew` for new builds, which are usually bought from the developer without an agent.
+**One price per city, old and new together.** The calculator has no new/existing switch. imobiliare.ro's reports, as quoted in the press, give a split by building age for only a few cities, often for one side only and at a different date from its all-flat median, and no index publishes rents by building age. One all-flat median per city keeps every city on the same source, date and method. Users pricing a specific home enter its price and rent. The buyer agency fee defaults to 2.42% (2% + VAT); it is 0 when buying directly from a developer or owner.
 
 ### VAT on new builds (unverified assumption)
 
-The engine treats `price` as the full amount the buyer pays, VAT included. New-build prices come from imobiliare.ro's asking-price index, which does not say whether the prices it covers include VAT; some listings state "TVA inclus", and Storia's buyer guide tells readers to check whether an offer's price includes VAT. If a large share of new-build listings is net of VAT, the real cost would be up to 21% higher (the standard rate; the transitional 9% rate ended with deliveries by 2026-09-30). Many developers quote prices without VAT, and none of the indexes says how it treats VAT, so the numbers are unchanged and the price field's help text tells users to check. See `data/SOURCES.md`.
+The engine treats `price` as the full amount the buyer pays, VAT included. The city prices come from imobiliare.ro's asking-price index, which covers new builds too but does not say whether the prices it covers include VAT; some listings state "TVA inclus", and Storia's buyer guide tells readers to check whether an offer's price includes VAT. If a large share of new-build listings is net of VAT, the real cost of a new flat would be up to 21% higher (the standard rate; the transitional 9% rate ended with deliveries by 2026-09-30). Many developers quote prices without VAT, and none of the indexes says how it treats VAT, so the numbers are unchanged and the price field's help text tells users to check. See `data/SOURCES.md`.
 
 ## Automatic updates
 

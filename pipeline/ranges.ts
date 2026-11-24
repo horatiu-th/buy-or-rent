@@ -31,7 +31,6 @@ export const VALUE_RANGES: Record<ValueKey, Range> = {
   horizonYears: { min: 1, max: 50 },
   inflation: { min: -0.05, max: 0.3 },
   buyerAgencyPct: { min: 0, max: 0.1 },
-  buyerAgencyPctNew: { min: 0, max: 0.1 },
   irccLongRunSpread: { min: -0.05, max: 0.1 },
   homeInsurancePct: { min: 0, max: 0.01 },
   rentAgencyPct: { min: 0, max: 3 },
@@ -42,8 +41,7 @@ export const VALUE_RANGES: Record<ValueKey, Range> = {
 };
 
 export const CITY_RANGES: Record<CityValueKey, Range> = {
-  priceSqmEurNew: { min: 300, max: 10000 },
-  priceSqmEurExisting: { min: 300, max: 10000 },
+  priceSqmEur: { min: 300, max: 10000 },
   rentSqmEur: { min: 1, max: 50 },
   rentPriceSqmEur: { min: 300, max: 10000 },
   propertyTaxSqm: { min: 0, max: 100 },

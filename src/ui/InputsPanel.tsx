@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Inputs } from '../engine';
 import type { DataFile } from '../data/schema';
-import { sourceFor, type PropertyType } from '../data/defaults';
+import { sourceFor } from '../data/defaults';
 import { ro } from '../i18n/ro';
 import { FIELDS, type FieldDef, type Topic } from './fields';
 import { InputField } from './InputField';
@@ -10,7 +10,6 @@ import type { Currency } from './format';
 interface Props {
   data: DataFile;
   cityId: string;
-  propertyType: PropertyType;
   inputs: Inputs;
   overrides: Partial<Inputs>;
   currency: Currency;
@@ -42,7 +41,7 @@ const PRESETS = [
 const fieldsOf = (topic: Topic) => FIELDS.filter((f) => f.topic === topic);
 const topicTitle = (topic: Topic) => (topic in ro.topics ? ro.topics[topic as keyof typeof ro.topics] : undefined);
 
-export function InputsPanel({ data, cityId, propertyType, inputs, overrides, currency, setField, resetField }: Props) {
+export function InputsPanel({ data, cityId, inputs, overrides, currency, setField, resetField }: Props) {
   const eurRon = data.values.eurRon.value;
   // Presets only change the fixed period; the rate itself stays whatever the user or the defaults say.
   const presets = (
@@ -63,7 +62,7 @@ export function InputsPanel({ data, cityId, propertyType, inputs, overrides, cur
         def={def}
         value={inputs[def.key]}
         isOverridden={def.key in overrides}
-        source={sourceFor(data, cityId, propertyType, def.key)}
+        source={sourceFor(data, cityId, def.key)}
         currency={currency}
         eurRon={eurRon}
         onChange={(v) => setField(def.key, v as never)}

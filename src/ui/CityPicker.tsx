@@ -1,25 +1,17 @@
 import { useId } from 'react';
 import type { DataFile } from '../data/schema';
-import type { PropertyType } from '../data/defaults';
 import { ro } from '../i18n/ro';
 import { clampSqm, SQM_MIN } from '../state/scenario';
 import { NumberInput } from './NumberInput';
-import { Segmented } from './Segmented';
 
 interface Props {
   data: DataFile;
   cityId: string;
-  propertyType: PropertyType;
   sqm: number;
-  onChange: (patch: { cityId?: string; propertyType?: PropertyType; sqm?: number }) => void;
+  onChange: (patch: { cityId?: string; sqm?: number }) => void;
 }
 
-const TYPES = [
-  { value: 'new', label: ro.newBuild },
-  { value: 'existing', label: ro.existing },
-] as const;
-
-export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props) {
+export function CityPicker({ data, cityId, sqm, onChange }: Props) {
   const cityId_ = useId();
   const sqmId = useId();
 
@@ -32,14 +24,6 @@ export function CityPicker({ data, cityId, propertyType, sqm, onChange }: Props)
             <option key={id} value={id}>{c.name}</option>
           ))}
         </select>
-      </div>
-      <div className="scenario-item">
-        <Segmented
-          legend={ro.propertyType}
-          value={propertyType}
-          options={TYPES}
-          onChange={(v) => onChange({ propertyType: v })}
-        />
       </div>
       <div className="scenario-item scenario-sqm">
         <label htmlFor={sqmId}>{ro.sqm}</label>

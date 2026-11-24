@@ -65,7 +65,7 @@ All money is in lei; all rates are decimals (`0.055` = 5.5%). Currency conversio
 | Parameter | Meaning |
 |---|---|
 | `oras` | City id (`bucuresti`, `cluj`, …, `ro` for the national average). Unknown ids are ignored. |
-| `tip` | `new` or `existing` |
+| `tip` | No longer used; ignored in older links |
 | `mp` | Size in m², clamped to 10–500 |
 | `moneda` | `EUR` (lei is the default) |
 | `real` | `0` for nominal values (today's money is the default) |
@@ -135,7 +135,7 @@ TypeScript will point out most places you miss.
 
 ### Add a city
 
-Add an entry under `cities` in `data/overrides.json` with `name`, `priceSqmEurNew`, `priceSqmEurExisting`, `rentSqmEur` and `rentPriceSqmEur` (the sale €/m² from the same index as the rent), document the source in `data/SOURCES.md`, then run `npm run data:merge`. The city picker lists every city in the data automatically.
+Add an entry under `cities` in `data/overrides.json` with `name`, `priceSqmEur`, `rentSqmEur` and `rentPriceSqmEur` (the sale €/m² from the same index as the rent), document the source in `data/SOURCES.md`, then run `npm run data:merge`. The city picker lists every city in the data automatically.
 
 ### Change interface text
 

@@ -100,9 +100,9 @@ it('lets the area be cleared and retyped', async () => {
   expect(window.location.search).toContain('mp=70');
 });
 
-it('groups the property type radios', () => {
+it('groups the currency radios', () => {
   render(<App />);
-  const [a, b] = screen.getAllByRole('radio');
+  const [a, b] = within(screen.getByRole('group', { name: ro.currency })).getAllByRole('radio');
   expect(a.getAttribute('name')).toBeTruthy();
   expect(a.getAttribute('name')).toBe(b.getAttribute('name'));
 });

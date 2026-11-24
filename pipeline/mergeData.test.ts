@@ -7,7 +7,7 @@ const sv = (value: number, extra: Partial<SourcedValue> = {}): SourcedValue =>
   ({ value, unit: 'x', source: 'x', asOf: '2026-01-01', status: 'manual', ...extra });
 const mid = (k: (typeof REQUIRED_VALUE_KEYS)[number]) => (VALUE_RANGES[k].min + VALUE_RANGES[k].max) / 2;
 const allValues = Object.fromEntries(REQUIRED_VALUE_KEYS.map((k) => [k, sv(mid(k))]));
-const city = { name: 'City', priceSqmEurNew: sv(3000), priceSqmEurExisting: sv(2800), rentSqmEur: sv(15), rentPriceSqmEur: sv(2900) };
+const city = { name: 'City', priceSqmEur: sv(3000), rentSqmEur: sv(15), rentPriceSqmEur: sv(2900) };
 const base = { values: allValues, cities: { [DEFAULT_CITY_ID]: city } };
 
 const merge = (auto: object, overrides: object = {}) => mergeData(auto as never, overrides as never, TODAY);
@@ -22,7 +22,7 @@ describe('mergeData', () => {
   it('merges cities field by field', () => {
     const { data } = merge(base, { cities: { [DEFAULT_CITY_ID]: { rentSqmEur: sv(16) } } });
     expect(data.cities[DEFAULT_CITY_ID].rentSqmEur.value).toBe(16);
-    expect(data.cities[DEFAULT_CITY_ID].priceSqmEurNew.value).toBe(3000);
+    expect(data.cities[DEFAULT_CITY_ID].priceSqmEur.value).toBe(3000);
   });
 
   it('throws when a required value is missing', () => {

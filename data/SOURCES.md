@@ -1,6 +1,6 @@
 # Default values: sources and reasoning
 
-Checked on 2026-11-23 (full audit of every default on that date) and revised on 2026-11-24 after a second audit; the revision is summarised under [Changes after the second audit](#changes-after-the-second-audit). Values live in `data/overrides.json` (hand-maintained) and `data/auto.json` (written by the pipeline; overrides win). Rates are decimals in the JSON (`0.055` = 5.5%).
+Checked on 2026-11-23 (full audit of every default on that date) and revised on 2026-11-24 after a second audit; the revision is summarised under [Changes after the second audit](#changes-after-the-second-audit). On 2026-11-25 the new/existing split was dropped in favour of one all-apartment price per city; see [One price per city](#one-price-per-city). Values live in `data/overrides.json` (hand-maintained) and `data/auto.json` (written by the pipeline; overrides win). Rates are decimals in the JSON (`0.055` = 5.5%).
 
 Every default is a starting point for the user, not a forecast. Values marked **estimate** have no single authoritative source; the reasoning is below.
 
@@ -19,8 +19,7 @@ Every default is a starting point for the user, not a forecast. Values marked **
 | `lifeInsurancePct` | 0.31%/year | BCR Casa Mea: 0.026% per month of the balance | Other lenders 0.026–0.035%/month (financer.ro). |
 | `notaryPct` | 1.2% | Minimum notary fees, Ord. 177/C/2024 (via [notari.pro](https://notari.pro/calculator-taxe-notariale)), incl. 21% VAT | The scale is progressive: about 1.49% at 300k lei, 1.33% at 500k, 1.15% at 800k (with VAT). 1.2% fits typical 450k–1M lei apartments. Notaries may charge above the minimum. |
 | `registryPct` | 0.15% | [ANCPI Order 16/2019](https://sj.ancpi.ro/tarife-servicii/) | Individuals; minimum 60 lei. |
-| `buyerAgencyPct` | 2.42% | Typical buyer commission 2% + 21% VAT ([Financiarul](https://financiarul.ro/constructii/comisioanele-imobiliare-ajung-la-4-plus-tva-de-21-ce-costuri-trebuie/)) | Existing homes. Commissions run 2–3% + VAT per side; about 1.5% is negotiable above €250k. Set it to 0 for a direct purchase. |
-| `buyerAgencyPctNew` | 0% | **Estimate.** New builds are usually bought from the developer, without an agent | |
+| `buyerAgencyPct` | 2.42% | Typical buyer commission 2% + 21% VAT ([Financiarul](https://financiarul.ro/constructii/comisioanele-imobiliare-ajung-la-4-plus-tva-de-21-ce-costuri-trebuie/)) | Applies to every purchase by default. Commissions run 2–3% + VAT per side; about 1.5% is negotiable above €250k. Set it to 0 for a direct purchase. |
 | `fitOutCost` | 0 lei | No data on the share of rentals that are furnished | Rental listings often say "mobilat și utilat", but no portal publishes the share. Furnishing a 2-room flat in 2026: 20,000–30,000 lei basic, 35,000–55,000 medium, 60,000–90,000+ high, appliances 3,000–8,000 lei extra ([Club Antreprenor, 2026-04-14](https://www.clubantreprenor.ro/2026/04/14/cat-costa-sa-mobilezi-un-apartament-cu-2-camere-in-2026-buget-real-piesa-cu-piesa/)); 35,000–45,000 lei for a decent complete fit-out ([Ziarul Profit, 2026-04-10](https://www.ziarulprofit.ro/cat-te-costa-de-fapt-sa-te-muti-intr-un-apartament-cu-2-camere-in-2026-sumele-care-iti-golesc-contul-bancar/)). Set it when the rented comparable is furnished and the home you'd buy isn't. |
 | `negotiationPct` | 3.75% | imobiliare.ro negotiation margin (last asking price vs declared transaction price), Q4 2025: Bucharest 3.6%, Cluj 4.5%, Brașov 3.9%, Timișoara 3.7%, Constanța 3.6%, Iași 3.6% (Știri pe surse, 2026-02-10); Q2 2025: 2.5–4.8% ([Economedia](https://economedia.ro/analiza-imobiliara-apartamentele-s-au-vandut-mai-rapid-in-trimestrul-ii-dar-preturile-s-au-negociat-mai-mult.html)) | The only measured source; no 2026 quarter found. It compares the last asking price with the sale price of the same flat, so it misses listings that never sell; that extra gap can't be measured from public data. Transaction prices (Eurostat HPI, +12.1% y/y in Q2 2026 in lei) rose at least as fast as asking prices (+5.7–6% in euros), so the gap isn't widening. |
 | `bankFees` | 1,800 lei | BCR and ING: 900 lei analysis + 590–803 lei valuation + 100 lei fixed mortgage registration + RNPM 88.40 lei ([ING](https://ing.ro/persoane-fizice/credite/ipotecar), BCR sheet) | Charged only with a loan. Some banks charge 0 for analysis. The engine adds two loan-based fees on top (`mortgageSetupCosts()`): ANCPI registration of 0.1% of the loan, and the notary's minimum fee for the mortgage contract plus 21% VAT. That fee is the progressive scale for guarantee contracts in Order 177/C/2024, annex 2, point V (art. 15(2)(a)), on the amount secured: 0.85% up to 50,000 lei (min. 150), 425 + 0.5% above 50,000, 750 + 0.46% above 100,000, 1,209 + 0.19% above 200,000, 1,778 + 0.1% above 500,000 lei (text read from [the order as published in MO 70/2024](https://legeaz.net/monitorul-oficial-70-2024/ordin-mj-177-c-2024)). The flat 750 / 1,500 lei amounts used before are annex 1, points 24–25: later contracts securing the same debt, and Prima Casă or other state social programmes ([economica.net](https://www.economica.net/?p=721622) quotes 1,500 lei for Prima Casă). A 543,664 lei loan comes to about 1,822 lei + VAT for the notary. |
@@ -63,23 +62,21 @@ Every default is a starting point for the user, not a forecast. Values marked **
 
 ## Cities (€/m², asking prices)
 
-| City | New | Existing | Rent index: rent / month | Rent index: sale price | Gross yield (rent index) |
-|---|---|---|---|---|---|
-| București | 2,636 | 2,259 | 11.0 | 2,229 | 5.92% |
-| Cluj-Napoca | 3,316 | 3,316 | 10.3 | 3,177 | 3.89% |
-| Timișoara | 1,984 | 1,984 | 8.2 | 1,984 | 4.96% |
-| Iași | 2,000 | 2,000 | 8.6 | 1,911 | 5.40% |
-| Brașov | 2,724 | 2,246 | 9.4 | 2,265 | 4.98% |
-| Constanța | 2,020 | 2,020 | 9.3 | 1,967 | 5.67% |
-| Oradea | 1,885 | 1,885 | 7.0 | 1,873 | 4.48% |
-| Sibiu | 2,034 | 2,034 | 7.7 | 2,037 | 4.54% |
-| National | 2,019 | 2,019 | 7.7 | 2,010.5 | 4.60% |
+| City | Price (all apartments) | Rent index: rent / month | Rent index: sale price | Gross yield (rent index) |
+|---|---|---|---|---|
+| București | 2,312 | 11.0 | 2,229 | 5.92% |
+| Cluj-Napoca | 3,316 | 10.3 | 3,177 | 3.89% |
+| Timișoara | 1,984 | 8.2 | 1,984 | 4.96% |
+| Iași | 2,000 | 8.6 | 1,911 | 5.40% |
+| Brașov | 2,309 | 9.4 | 2,265 | 4.98% |
+| Constanța | 2,020 | 9.3 | 1,967 | 5.67% |
+| Oradea | 1,885 | 7.0 | 1,873 | 4.48% |
+| Sibiu | 2,034 | 7.7 | 2,037 | 4.54% |
+| National | 2,019 | 7.7 | 2,010.5 | 4.60% |
 
-The rent the calculator uses is the yield from the rent index applied to the price in the first two columns (`rentSqmFor()`), so price and rent describe the same market even though the price comes from another source. The yield is the same for new and existing homes in a city; no index publishes rents by building age, and the published comparisons (new-build rents 15–25% above a similar old flat in the same area, agency estimates) are close to the 17–21% price gap in București and Brașov.
+The rent the calculator uses is the yield from the rent index applied to the price in the first column (`rentSqmFor()`), so price and rent describe the same market even though the price comes from another source.
 
-- Sale prices: **imobiliare.ro** throughout, so every city uses one source and one method (median asking price per m² of usable area, top and bottom 2.5% trimmed).
-  - București and Brașov: the new/existing split from imobiliare.ro, early summer 2026 (via [HotNews, 2026-07-01](https://hotnews.ro/?p=2289192)). "New" means blocks finished in the last five years. These are the only cities with an exact published split.
-  - Every other city: the all-apartment median for September 2026 (via [Revista Biz](https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/) and [AGERPRES](https://agerpres.ro/english/2026/10/29/apartment-prices-in-romania-register-5pct-increase-on-average-in-2026-analysis--1608028)), used for both types. No newer split by city was found; imobiliare.ro's own site couldn't be read.
+- Sale prices: **imobiliare.ro** throughout, so every city uses one source and one method (median asking price per m² of usable area, top and bottom 2.5% trimmed): the all-apartment median for September 2026, old and new together (via [Revista Biz, 2026-10-13](https://www.revistabiz.ro/bucurestiul-devanseaza-brasovul-in-topul-preturilor-la-apartamente-clujul-ramane-cel-mai-scump/) and [AGERPRES](https://agerpres.ro/english/2026/10/29/apartment-prices-in-romania-register-5pct-increase-on-average-in-2026-analysis--1608028)). These figures are quoted by the press; imobiliare.ro's own report pages couldn't be read.
 - Rent and the rent-index sale price: [apartamente.org index, November 2026](https://apartamente.org/raport-piata/2026-11), measured 2026-11-23. Median asking rent and median asking sale price, each deduplicated across portals (one asking price per distinct apartment). Both are re-checked against the index on 2026-11-24. **Provisional:** the figures were read on 2026-11-23 (their `asOf`), while the November edition was still being recalculated until 2026-12-01. Re-check them after that date; the final figures may differ.
 - National sale price: imobiliare.ro index, September 2026 (via [Financiarul](https://financiarul.ro/economie/apartamentele-din-romania-au-fost-scoase-la-vanzare-cu-4-5-mai-scump-decat-acum-un-an/)), not split by new/existing, so used for both.
 - National rent: apartamente.org's national median rent, 7.7 €/m², which it computes as the median of the cities it tracks. The paired sale price, 2,010.5 €/m², is the median of the eight cities' sale medians (computed here the same way, since the index doesn't publish one).
@@ -89,7 +86,7 @@ How the price sources compare (all are asking prices; no public source gives tra
 | Source | Method | Verdict |
 |---|---|---|
 | imobiliare.ro | Median, trimmed, usable area stated explicitly, all cities | Used. Most consistent. |
-| Storia | Average, one portal; usable area typed by sellers and not checked; doesn't disclose deduplication, the definition of "new", or VAT | Existing flats 0–5% above imobiliare.ro. New builds far below it in București (1,982 vs 2,636) and Brașov (2,331 vs 2,724), likely from a wider "new" definition, prices without VAT and balconies counted in the area. Not used. |
+| Storia | Average, one portal; usable area typed by sellers and not checked; doesn't disclose deduplication, the definition of "new", or VAT | Existing flats 0–5% above imobiliare.ro. New builds far below imobiliare.ro's new-build figures in București (1,982 vs 2,636) and Brașov (2,331 vs 2,724), likely from a wider "new" definition, prices without VAT and balconies counted in the area. Not used. |
 | apartamente.org | Median, 16 portals, duplicates removed, public corrections log; mixes built and usable area | Prices within 1–4% of imobiliare.ro. Used for rents. |
 | INS / Eurostat HPI | Notarised transactions, hedonic | Index only, no €/m²; only București vs the rest. Useful to roll levels forward. |
 | Deloitte Property Index | Derived from imobiliare.ro, a year old | Not independent. |
@@ -126,7 +123,7 @@ The calculator treats every price as the total the buyer pays, VAT included. Whe
 - Standard VAT on new homes is 21%. The transitional 9% rate ended with deliveries by 2026-09-30 (Law 161/2026, as reported by [StartupCafe](https://startupcafe.ro/termenul-pentru-tva-de-9-la-locuinte-prelungit-oficial-descarca-legea-161-2026-ce-aduce-nou-si-cine-poate-cere-restituirea-diferentei-de-tva-104534) on 2026-08-04 and cabinetexpert.ro on 2026-08-25; not checked against the law's text), so every new contract now carries 21%.
 - Buyer guides say many developers advertise prices without VAT. Neither Storia, imobiliare.ro nor apartamente.org says how its index treats VAT. SVN, which tracks developer prices in one submarket, quotes them without VAT.
 
-If a large share of new-build listings is net of VAT, new-build prices here are too low by up to 21%. The values are kept as published; the price field's help text tells users to check whether an offer includes VAT. Existing homes sold by individuals are generally outside VAT, so their prices should be unaffected.
+The city prices include new builds. If a large share of new-build listings is net of VAT, the cost of a new flat is understated by up to 21%, and the all-apartment median by less, depending on the share of new builds among the listings. The values are kept as published; the price field's help text tells users to check whether an offer includes VAT. Existing homes sold by individuals are generally outside VAT, so their prices should be unaffected.
 
 ## Automated collection
 
@@ -151,4 +148,12 @@ On 2026-11-24 three independent reviews of the model and its defaults were run, 
 | Fit-out and renter moves added as inputs, default 0 | No data on furnished share or tenancy length | 0 |
 
 The buyer's lead fell from 570k to 422k lei; the break-even rent rose from 2,282 to 2,586 lei a month. Two points raised in the audits didn't survive checking: the 7% return was not clearly too low once Vanguard's lower forecasts are included, and the existing-home price is only about 2% below imobiliare.ro's all-flat price in București, so pairing it with an all-flat rent was a small mismatch, not a large one.
+
+## One price per city
+
+On 2026-11-25 the new/existing switch was removed and every city now uses one price: imobiliare.ro's all-apartment median for September 2026.
+
+Why: the published split by building age is patchy. HotNews (2026-07-01, imobiliare.ro data, early summer 2026) gives both sides only for București (new 2,636 / old 2,259) and Brașov (2,724 / 2,246); for Constanța only new (2,071), for Timișoara, Cluj-Napoca and Iași only old (1,918; 3,300, placed after the Cluj paragraph; 1,978). Revista Biz (2026-10-13) gives Timișoara new "over 2,200" and old 1,940, and only approximate or no figures elsewhere. No index publishes rents by building age, so the switch only scaled price and rent together and changed the default agency fee. Mixing an early-summer split in two cities with September medians elsewhere also put cities on different dates.
+
+Effect on the default (București, 55 m²): the price rises from 2,259 to 2,312 €/m² (about €119,600 to €122,400 after negotiation) and the rent from about €613 to €628 a month; Brașov from 2,246 to 2,309 €/m². The `buyerAgencyPctNew` default (0%) is gone; buying from a developer means setting the agency fee to 0.
 

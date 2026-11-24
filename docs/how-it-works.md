@@ -139,7 +139,7 @@ These are deliberate simplifications:
 - **Moves are off by default.** No published data says how long Romanian tenants stay, so `moveEveryYears` defaults to 0 and `moveCost` to 0; set them to include repeat agency fees, deposit resets and moving costs.
 - **No fit-out by default.** No data says what share of rentals are furnished, so `fitOutCost` defaults to 0. Renovation needed right after buying isn't separate from the price either.
 - **Sale tax on the sale price only.** The tax base is the higher of the price and the notaries' market-study value for the area; the model uses the simulated price, which in the large cities is usually above that minimum.
-- **New and existing homes share a city's rent yield.** No index publishes rents by building age, so the rent for a new or existing flat is the city's rent-to-price ratio times that flat's price (`rentSqmFor()`).
+- **One average home per city.** Price and rent are the city's all-apartment medians, old and new together; there is no new/existing switch. A new flat usually costs and rents for more than the average: enter its own price and rent.
 - **No Noua Casă preset.** The programme's 2027 terms weren't known when the defaults were set; users can enter a 5% down payment and IRCC + 2% themselves.
 
 ## Tests

@@ -1,9 +1,13 @@
 import { applyScenarioPatch, clampSqm, decodeScenario, encodeScenario, DEFAULT_SCENARIO } from './scenario';
 
 describe('scenario URL encoding', () => {
-  it('round-trips city, type, size and overrides', () => {
-    const s = { ...DEFAULT_SCENARIO, cityId: 'iasi', propertyType: 'existing' as const, sqm: 65, overrides: { rent: 2000, includeSaleCosts: false } };
+  it('round-trips city, size and overrides', () => {
+    const s = { ...DEFAULT_SCENARIO, cityId: 'iasi', sqm: 65, overrides: { rent: 2000, includeSaleCosts: false } };
     expect(decodeScenario(encodeScenario(s))).toEqual(s);
+  });
+
+  it('ignores the property type from older links', () => {
+    expect(decodeScenario(new URLSearchParams('tip=new&oras=iasi'))).toEqual({ ...DEFAULT_SCENARIO, cityId: 'iasi' });
   });
 
   it('omits default values from the URL', () => {
@@ -80,7 +84,6 @@ describe('changing the place', () => {
 
   it.each([
     ['city', { cityId: 'iasi' }],
-    ['property type', { propertyType: 'new' as const }],
     ['area', { sqm: 80 }],
   ])('drops price and rent edits when the %s changes, keeping the rest', (_, patch) => {
     expect(applyScenarioPatch(edited, patch).overrides).toEqual({ fixedRate: 0.06 });

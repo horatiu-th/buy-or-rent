@@ -1,12 +1,10 @@
 import type { Inputs } from '../engine';
-import type { PropertyType } from '../data/defaults';
 import { DEFAULT_CITY_ID } from '../data/schema';
 import type { Currency } from '../ui/format';
 import { FIELDS, normalizeField } from '../ui/fields';
 
 export interface Scenario {
   cityId: string;
-  propertyType: PropertyType;
   sqm: number;
   currency: Currency;
   real: boolean;
@@ -15,7 +13,6 @@ export interface Scenario {
 
 export const DEFAULT_SCENARIO: Scenario = {
   cityId: DEFAULT_CITY_ID,
-  propertyType: 'existing',
   sqm: 55,
   currency: 'RON',
   // Today's money by default: nominal sums decades out look large and hide inflation's effect on cash.
@@ -30,17 +27,17 @@ const FIELD_DEFS = new Map(FIELDS.map((f) => [f.key, f]));
 
 export const clampSqm = (n: number) => Math.min(SQM_MAX, Math.max(SQM_MIN, n));
 
-/** Fields whose defaults scale with the home itself: its city, type and area. */
+/** Fields whose defaults scale with the home itself: its city and area. */
 const PLACE_DERIVED = ['price', 'rent', 'propertyTaxAnnual'] as const satisfies readonly (keyof Inputs)[];
 
 /**
- * Applies a change to the city, type, area or view. A new place means a different home, so an
+ * Applies a change to the city, area or view. A new place means a different home, so an
  * edited price or rent is dropped and the new place's own values show; other edits (loan terms,
  * growth rates) are about the financing and the market rather than this home, so they stay.
  */
 export function applyScenarioPatch(s: Scenario, patch: Partial<Omit<Scenario, 'overrides'>>): Scenario {
   const next = { ...s, ...patch };
-  const placeChanged = next.cityId !== s.cityId || next.propertyType !== s.propertyType || next.sqm !== s.sqm;
+  const placeChanged = next.cityId !== s.cityId || next.sqm !== s.sqm;
   if (!placeChanged || !PLACE_DERIVED.some((k) => k in s.overrides)) return next;
   const overrides = { ...s.overrides };
   for (const k of PLACE_DERIVED) delete overrides[k];
@@ -51,7 +48,6 @@ export function encodeScenario(s: Scenario): URLSearchParams {
   const p = new URLSearchParams();
   const d = DEFAULT_SCENARIO;
   if (s.cityId !== d.cityId) p.set('oras', s.cityId);
-  if (s.propertyType !== d.propertyType) p.set('tip', s.propertyType);
   if (s.sqm !== d.sqm) p.set('mp', String(s.sqm));
   if (s.currency !== d.currency) p.set('moneda', s.currency);
   if (s.real !== d.real) p.set('real', s.real ? '1' : '0');
@@ -87,7 +83,6 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
   const city = p.get('oras');
   return {
     cityId: city !== null && (!validCityIds || validCityIds.includes(city)) ? city : d.cityId,
-    propertyType: p.get('tip') === 'new' ? 'new' : p.get('tip') === 'existing' ? 'existing' : d.propertyType,
     sqm,
     currency: p.get('moneda') === 'EUR' ? 'EUR' : d.currency,
     real: p.get('real') === '1' ? true : p.get('real') === '0' ? false : d.real,
