@@ -1,55 +1,54 @@
 import { useId } from 'react';
 import type { HorizonResult } from '../engine';
-import { ro } from '../i18n/ro';
-import { countOf, formatMoney, type Currency } from './format';
+import { t } from '../i18n';
+import { formatMoney, type Money } from './money';
+import { GapCell, GapKey } from './GapCell';
 
 interface Props {
   rows: HorizonResult[];
   chosenYears: number;
   real: boolean;
-  currency: Currency;
-  eurRon: number;
+  money: Money;
 }
 
-const t = ro.horizons;
+const h = t.horizons;
 
 /** The verdict at several holding periods, so the chosen horizon isn't the only answer on the page. */
-export function HorizonTable({ rows, chosenYears, real, currency, eurRon }: Props) {
+export function HorizonTable({ rows, chosenYears, real, money }: Props) {
   const captionId = useId();
-  const fmt = (lei: number) => formatMoney(lei, currency, eurRon);
+  const fmt = (lei: number) => formatMoney(lei, money);
+  const shown = (r: HorizonResult) => (real ? r.gap / r.deflator : r.gap);
   return (
     <div className="table-scroll horizons" role="region" aria-labelledby={captionId} tabIndex={0}>
       <table className="sensitivity">
         <caption id={captionId} className="sensitivity-intro">
-          <strong>{t.title}.</strong> {t.help}
+          <strong>{h.title}.</strong> {h.help}
+          <GapKey />
         </caption>
         <thead>
           <tr>
-            <th scope="col">{t.after}</th>
-            <th scope="col">{t.threshold}</th>
-            <th scope="col">{t.gap(real)}</th>
+            <th scope="col">{h.after}</th>
+            <th scope="col">{h.threshold}</th>
+            <th scope="col">{h.gap(real)}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => {
-            const gap = real ? r.gap / r.deflator : r.gap;
+            const gap = shown(r);
             const isChosen = r.years === chosenYears;
             const threshold =
               r.eq.kind === 'value' ? fmt(r.eq.rent)
-              : r.eq.kind === 'alwaysBuy' ? t.alwaysBuy
-              : r.eq.kind === 'alwaysRent' ? t.alwaysRent
-              : t.none;
+              : r.eq.kind === 'alwaysBuy' ? h.alwaysBuy
+              : r.eq.kind === 'alwaysRent' ? h.alwaysRent
+              : h.none;
             return (
               <tr key={r.years} className={isChosen ? 'is-base' : undefined}>
                 <th scope="row">
-                  {countOf(r.years, 'an', 'ani')}
-                  {isChosen && <span className="horizon-yours"> ({t.yours})</span>}
+                  {t.count(r.years, 'year')}
+                  {isChosen && <span className="horizon-yours"> ({h.yours})</span>}
                 </th>
                 <td>{threshold}</td>
-                <td className={gap >= 0 ? 'buy-wins' : 'rent-wins'}>
-                  {gap > 0 && '+'}{fmt(gap)}
-                  <span className="visually-hidden"> ({gap >= 0 ? ro.sensitivityBuyWins : ro.sensitivityRentWins})</span>
-                </td>
+                <GapCell gap={gap} money={money} />
               </tr>
             );
           })}

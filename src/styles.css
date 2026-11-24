@@ -1,6 +1,9 @@
-/* Palette: cool paper and slate ink, blueprint blue for buying, teal for renting.
-   Series colours keep >= 3:1 contrast on their surfaces and stay distinct for colour-blind readers. */
-:root {
+/* Themes. Each sets the same tokens; [data-theme] goes on <html> before first paint (index.html)
+   and is kept in sync by useTheme. Selectors are not tied to :root, so a theme swatch can carry its
+   own data-theme and preview it inside any page theme.
+   Every theme keeps text at >= 4.5:1 and series lines and control borders at >= 3:1 on its surfaces,
+   and pairs a buying and a renting colour that stay distinct for colour-blind readers. */
+:root, [data-theme='light'] {
   --paper: #f5f7f9;
   --surface: #ffffff;
   --ink: #17202b;
@@ -16,7 +19,111 @@
   /* Borders that identify a control need 3:1 against the surface; --line is decoration only. */
   --control-line: #7d8794;
   --focus: #2457c5;
+  /* The selected option of a segmented control, lifted above its track. */
+  --raised: #ffffff;
+  color-scheme: light;
+}
 
+[data-theme='dark'] {
+  --paper: #12171d;
+  --surface: #1a2129;
+  --ink: #e8ecf1;
+  --muted: #9aa6b4;
+  --line: #2a333e;
+  --field: #222b35;
+  --buyer: #6e9bf0;
+  --buyer-soft: #1e2f4d;
+  --renter: #63cbb3;
+  --renter-soft: #19372f;
+  --renter-text: #81d7bf;
+  --stale-text: #e0a63a;
+  --control-line: #68737f;
+  --focus: #6e9bf0;
+  --raised: #313c49;
+  color-scheme: dark;
+}
+
+/* Warm paper; indigo against rust, a pair that survives every common colour-vision deficiency. */
+[data-theme='sand'] {
+  --paper: #f4efe6;
+  --surface: #fffdf8;
+  --ink: #2a2118;
+  --muted: #6b5d4f;
+  --line: #e4dacb;
+  --field: #efe7da;
+  --buyer: #2f4bb3;
+  --buyer-soft: #dfe4f6;
+  --renter: #b4531a;
+  --renter-soft: #f5e1d3;
+  --renter-text: #9a4513;
+  --stale-text: #8a5a00;
+  --control-line: #8c7d6c;
+  --focus: #2f4bb3;
+  --raised: #fffdf8;
+  color-scheme: light;
+}
+
+/* Deep navy; periwinkle against amber. */
+[data-theme='midnight'] {
+  --paper: #0b1020;
+  --surface: #121a2e;
+  --ink: #e6ebf5;
+  --muted: #98a3bd;
+  --line: #222c44;
+  --field: #1a2440;
+  --buyer: #8ea8ff;
+  --buyer-soft: #1f2b55;
+  --renter: #f2a65a;
+  --renter-soft: #3a2a1a;
+  --renter-text: #f5b877;
+  --stale-text: #e0a63a;
+  --control-line: #5d6a88;
+  --focus: #8ea8ff;
+  --raised: #2a3658;
+  color-scheme: dark;
+}
+
+/* Neutral grey; violet against yellow. */
+[data-theme='graphite'] {
+  --paper: #161618;
+  --surface: #1f1f22;
+  --ink: #ededef;
+  --muted: #a1a1a8;
+  --line: #2e2e33;
+  --field: #29292d;
+  --buyer: #b39dfa;
+  --buyer-soft: #2f2847;
+  --renter: #f2c94c;
+  --renter-soft: #3a3320;
+  --renter-text: #f2cf63;
+  --stale-text: #e0a63a;
+  --control-line: #6c6c74;
+  --focus: #b39dfa;
+  --raised: #3a3a40;
+  color-scheme: dark;
+}
+
+/* For low vision or bright light: black on white, darker rules and borders. */
+[data-theme='contrast'] {
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --ink: #000000;
+  --muted: #333a44;
+  --line: #6b7280;
+  --field: #eef1f5;
+  --buyer: #0035b8;
+  --buyer-soft: #dbe5ff;
+  --renter: #00694a;
+  --renter-soft: #d5f0e6;
+  --renter-text: #00593f;
+  --stale-text: #7a4d00;
+  --control-line: #1f2937;
+  --focus: #0035b8;
+  --raised: #ffffff;
+  color-scheme: light;
+}
+
+:root {
   --font: 'Schibsted Grotesk Variable', system-ui, sans-serif;
   --step--1: 0.8125rem; /* 13px */
   --step-0: 0.9375rem; /* 15px */
@@ -24,33 +131,12 @@
   --step-2: 1.375rem; /* 22px */
   --step-3: 2.125rem; /* 34px */
 
-  color-scheme: light;
   font-family: var(--font);
   font-size: 100%;
   line-height: 1.5;
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #12171d;
-    --surface: #1a2129;
-    --ink: #e8ecf1;
-    --muted: #9aa6b4;
-    --line: #2a333e;
-    --field: #222b35;
-    --buyer: #6e9bf0;
-    --buyer-soft: #1e2f4d;
-    --renter: #63cbb3;
-    --renter-soft: #19372f;
-    --renter-text: #81d7bf;
-    --stale-text: #e0a63a;
-    --control-line: #68737f;
-    --focus: #6e9bf0;
-    color-scheme: dark;
-  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -70,18 +156,24 @@ button { cursor: pointer; }
 .page { max-width: 76rem; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
 .topbar {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: 1rem 2rem; padding: 1.75rem 0 1.25rem;
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 1rem 2rem; padding: 2.25rem 0 1.25rem;
 }
-.brand h1 { font-size: var(--step-2); font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; }
-.brand p { color: var(--muted); max-width: 36rem; margin-top: 0.2rem; }
-.topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+.brand h1 { font-size: 1.75rem; font-weight: 750; letter-spacing: -0.025em; line-height: 1.1; }
+.brand p { color: var(--muted); max-width: 36rem; margin-top: 0.4rem; }
+/* Every toolbar control shares one height, so the row reads as a set. */
+.topbar-actions { --control-h: 2.25rem; display: flex; align-items: center; gap: 0.5rem; }
+.topbar-actions .segmented-track { height: var(--control-h); }
+.topbar-actions .segmented-option span { display: grid; place-items: center; height: 100%; min-width: 2.5rem; padding: 0 0.7rem; }
 
-.quiet-button {
-  white-space: nowrap; background: none; border: none; padding: 0.4rem 0.25rem; color: var(--muted);
-  text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px;
+.icon-button, .ghost-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  height: var(--control-h, 2.25rem); border: 1px solid var(--line); border-radius: 9px;
+  background: none; color: var(--muted); white-space: nowrap; transition: color 120ms, border-color 120ms;
 }
-.quiet-button:hover { color: var(--ink); text-decoration-color: currentColor; }
+.icon-button { width: var(--control-h, 2.25rem); padding: 0; }
+.ghost-button { padding: 0 0.8rem; font-size: var(--step--1); font-weight: 500; }
+.icon-button:hover, .ghost-button:hover { color: var(--ink); border-color: var(--control-line); }
 
 /* Segmented control (radio group) */
 .segmented { border: none; margin: 0; padding: 0; min-width: 0; }
@@ -96,29 +188,35 @@ button { cursor: pointer; }
   font-weight: 500; white-space: nowrap; transition: background-color 120ms, color 120ms;
 }
 .segmented-option input:checked + span {
-  background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(23 32 43 / 0.12);
+  background: var(--raised); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.16);
 }
 .segmented-option input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 1px; }
 
-/* Scenario strip: where and what */
+/* Scenario panel: where, how big and over how long. These frame both sides of the comparison. */
 .scenario {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem 2rem;
-  padding: 1.25rem 0 1.5rem; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  --control-h: 2.75rem;
+  display: grid; grid-template-columns: minmax(12rem, 1.5fr) repeat(3, minmax(9rem, 1fr));
+  gap: 1rem 1.25rem; align-items: end;
+  padding: 1rem 1.25rem 1.15rem; border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
 }
-.scenario-item > label { display: block; margin-bottom: 0.35rem; font-size: var(--step--1); color: var(--muted); }
+/* Labels share one line height whether or not they carry a help icon, so the boxes line up. */
+.scenario-item > label, .scenario .field-head {
+  display: flex; align-items: center; gap: 0.3rem; min-height: 1.4rem; margin-bottom: 0.4rem;
+  font-size: var(--step--1); color: var(--muted); white-space: nowrap;
+}
+.scenario .field-head > label { font-size: inherit; color: inherit; margin-right: 0; overflow: hidden; text-overflow: ellipsis; }
+.scenario .field { display: block; padding: 0; }
 .scenario select {
-  appearance: none; min-width: 15rem; padding: 0.5rem 2.25rem 0.5rem 0.75rem; border: none;
-  border-radius: 8px; background-color: var(--field); font-size: var(--step-1); font-weight: 600;
+  appearance: none; width: 100%; height: var(--control-h); padding: 0 2.25rem 0 0.85rem;
+  border: 1px solid transparent; border-radius: 8px; background-color: var(--field);
+  font-size: var(--step-1); font-weight: 600; cursor: pointer;
   background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position: calc(100% - 1.05rem) 55%, calc(100% - 0.75rem) 55%;
   background-size: 0.3rem 0.3rem; background-repeat: no-repeat;
 }
-.scenario-sqm .number-box { width: 7.5rem; }
-/* Fields shared with the inputs panel take the strip's label-above layout. */
-.scenario .field { display: block; padding: 0; }
-.scenario .field-head { margin-bottom: 0.35rem; }
-.scenario .field-head > label { font-size: var(--step--1); color: var(--muted); }
-.scenario .field .number-box { width: 7.5rem; }
+.scenario select:hover { border-color: var(--control-line); }
+.scenario .number-box { width: 100%; height: var(--control-h); }
+.scenario .number-box input { font-size: var(--step-1); font-weight: 600; }
 
 /* Number input with the unit inside the box */
 .number-box {
@@ -201,11 +299,15 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   display: grid; grid-template-columns: minmax(0, 1fr) 7.75rem; align-items: center;
   column-gap: 0.75rem; padding: 0.3rem 0;
 }
-.field-head { display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
-.field-head > label { color: var(--ink); }
+.field-head { min-width: 0; }
+/* Inline flow, so on a label that wraps the help icon follows the last word instead of the far edge. */
+.field-head > label { color: var(--ink); margin-right: 0.3rem; }
+.field-head .help-anchor { vertical-align: -0.05em; }
 .field.is-disabled .field-head > label { color: var(--muted); }
 .field.is-disabled .number-box { opacity: 0.5; }
 .help-anchor { position: relative; display: inline-flex; }
+.field-bool .field-head { display: flex; align-items: center; gap: 0.3rem; }
+.field-bool .field-head > label { margin-right: 0; }
 /* Opens above and to the right of the icon, so it never covers the input it explains. */
 .help-popover {
   position: absolute; left: calc(100% + 0.4rem); bottom: calc(100% + 0.4rem); z-index: 20;
@@ -214,7 +316,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); color: var(--ink); box-shadow: 0 8px 24px rgb(23 32 43 / 0.14);
   font-size: var(--step--1); font-weight: 400; font-style: normal; line-height: 1.45; text-align: left;
-  animation: popover-in 120ms ease-out;
+  white-space: normal; animation: popover-in 120ms ease-out;
 }
 .help-popover[hidden] { display: none; }
 .help-popover .source { display: block; color: var(--muted); }
@@ -328,9 +430,13 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   .rent-scale[data-outcome='value'] .rent-scale-side { visibility: hidden; }
 }
 
-/* End-of-horizon figures, which also serve as the chart legend */
+/* End-of-horizon figures for both sides */
 .end-summary { border-top: 1px solid var(--line); padding-top: 1.25rem; }
-.end-summary-title { font-size: var(--step--1); color: var(--muted); margin-bottom: 0.5rem; }
+.end-summary-head {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 0.5rem 1.5rem; margin-bottom: 0.75rem;
+}
+.end-summary-title { font-size: var(--step--1); color: var(--muted); }
 .end-summary dl { display: flex; flex-wrap: wrap; gap: 0.75rem 2.5rem; margin: 0; }
 .end-item dt { display: flex; align-items: center; gap: 0.45rem; font-size: var(--step--1); color: var(--muted); }
 .end-item dd { margin: 0.15rem 0 0; font-size: var(--step-2); font-weight: 650; letter-spacing: -0.01em; }
@@ -343,7 +449,7 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
   gap: 0.75rem 1.5rem; border-bottom: 1px solid var(--line); margin-bottom: 1rem;
 }
-[role='tablist'] { display: flex; gap: 1.25rem; overflow-x: auto; scrollbar-width: none; }
+[role='tablist'] { display: flex; gap: 1.25rem; min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 [role='tablist']::-webkit-scrollbar { display: none; }
 [role='tab'] {
   padding: 0.6rem 0; margin-bottom: -1px; border: none; border-bottom: 2px solid transparent;
@@ -351,12 +457,13 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 }
 [role='tab']:hover { color: var(--ink); }
 [role='tab'][aria-selected='true'] { color: var(--ink); border-bottom-color: var(--ink); }
-.summary-switch { margin-bottom: 0.75rem; font-size: var(--step--1); color: var(--muted); padding: 0.4rem 0; }
+.summary-switch { font-size: var(--step--1); color: var(--muted); }
 .chart-panel { min-height: 340px; }
 .chart-figure { margin: 0; }
 
-.monthly-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: var(--step--1); }
-.monthly-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-bottom: 0.25rem; font-size: var(--step--1); color: var(--muted); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.chart-legend .swatch { height: 3px; }
 
 .chart-tip {
   background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
@@ -369,18 +476,38 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 .swatch { flex: none; width: 0.9rem; height: 3px; border-radius: 2px; background: currentColor; }
 
 .table-scroll { overflow-x: auto; }
-.sensitivity-intro { color: var(--muted); max-width: 40rem; margin-bottom: 1rem; caption-side: top; text-align: left; }
+/* Capped at the viewport too: the caption scrolls with a table that is wider than a phone. */
+.sensitivity-intro { color: var(--muted); max-width: min(40rem, calc(100vw - 2rem)); margin-bottom: 1rem; caption-side: top; text-align: left; }
 .sensitivity { border-collapse: collapse; width: 100%; min-width: 28rem; font-size: var(--step-0); }
 .sensitivity th, .sensitivity td { padding: 0.65rem 0.75rem; text-align: right; border-bottom: 1px solid var(--line); }
+.sensitivity td { white-space: nowrap; }
 .sensitivity thead th { font-size: var(--step--1); font-weight: 500; color: var(--muted); }
 .sensitivity thead th:first-child { text-align: left; }
 .sensitivity tbody th { text-align: left; font-weight: 500; color: var(--muted); }
-/* Amounts stay in ink; a side bar marks the winner. */
-.sensitivity td.buy-wins { box-shadow: inset 3px 0 0 var(--buyer); }
-.sensitivity td.rent-wins { box-shadow: inset 3px 0 0 var(--renter); }
+/* Who wins, and by how much: an unsigned amount in the winner's colour, led by a marker whose shape
+   also says who wins (circle for buying, diamond for renting), so colour is never the only cue. */
+.gap-cell .swing-setting { display: block; line-height: 1.3; }
+.gap-amount { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 550; }
+.gap-cell.is-base .gap-amount { font-weight: 700; }
+.gap-key {
+  display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.6rem;
+  font-size: var(--step--1); font-weight: 500;
+}
+.gap-key > span { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.buy-wins .gap-amount, .gap-key .buy-wins { color: var(--buyer); }
+.rent-wins .gap-amount, .gap-key .rent-wins { color: var(--renter-text); }
+.tie .gap-amount { color: var(--muted); }
+.gap-amount::before, .gap-key > span::before {
+  content: ''; flex: none; width: 0.5rem; height: 0.5rem; background: currentColor;
+}
+.buy-wins .gap-amount::before, .gap-key .buy-wins::before { border-radius: 50%; }
+.rent-wins .gap-amount::before, .gap-key .rent-wins::before { transform: rotate(45deg) scale(0.9); }
+.tie .gap-amount::before { height: 2px; }
 .sensitivity td.is-base { font-weight: 650; }
 .sensitivity tr.is-base th, .sensitivity tr.is-base td { font-weight: 650; }
 .horizon-yours { font-weight: 400; color: var(--muted); }
+/* Three short columns fit a phone, so this table wraps its header instead of scrolling. */
+.horizons .sensitivity { min-width: 0; }
 .swing-setting { color: var(--muted); font-size: var(--step--1); }
 .swings { margin-top: 2rem; }
 
@@ -392,15 +519,62 @@ details.more[open] > summary { margin-bottom: 0.75rem; }
 
 .note { color: var(--muted); font-size: var(--step--1); max-width: 40rem; }
 
+@media (max-width: 900px) {
+  .scenario { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Too narrow for one-line labels; they wrap and the grid's bottom alignment keeps the boxes level. */
+  .scenario-item > label, .scenario .field-head { white-space: normal; }
+}
+
 @media (max-width: 560px) {
   .page { padding: 0 1rem 3rem; }
   .headline h2 { font-size: 1.625rem; }
-  .scenario select { min-width: 0; width: 100%; }
-  .scenario-item { flex: 1 1 8rem; }
-  .scenario-city { flex: 1 1 100%; }
-  .scenario-sqm .number-box, .scenario .field .number-box { width: 100%; }
+  .scenario-city { grid-column: 1 / -1; }
+  .scenario { padding: 0.9rem 1rem 1rem; }
+  .topbar { align-items: flex-start; }
+  .sensitivity th, .sensitivity td { padding: 0.6rem 0.5rem; }
+  /* Tabs scroll sideways here; the fade shows there is more past the edge. */
+  [role='tablist'] { mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent); padding-right: 2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+.chart-panel > .note { margin-top: 1rem; }
+
+/* Theme picker: a palette button and a short list of themes, each with a preview swatch. */
+.theme-picker { position: relative; }
+.theme-picker .icon-button[aria-expanded='true'] { color: var(--ink); border-color: var(--control-line); }
+.theme-menu {
+  position: absolute; right: 0; top: calc(100% + 0.4rem); z-index: 30;
+  display: flex; flex-direction: column; gap: 2px; min-width: 13rem; margin: 0; padding: 0.35rem;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18); animation: popover-in 120ms ease-out;
+}
+.theme-menu[hidden] { display: none; }
+.theme-option {
+  position: relative; display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.45rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: var(--step--1); white-space: nowrap;
+}
+.theme-option input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.theme-option:hover { background: var(--field); }
+.theme-option:has(input:checked) { background: var(--field); font-weight: 600; }
+.theme-option:has(input:checked)::after {
+  content: ''; margin-left: auto; width: 0.35rem; height: 0.6rem;
+  border: solid var(--ink); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px);
+}
+.theme-option:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; }
+.theme-swatch {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+  width: 2.1rem; height: 1.35rem; border-radius: 6px; overflow: hidden;
+  background: var(--paper); box-shadow: inset 0 0 0 1px var(--control-line);
+}
+.theme-swatch i { width: 0.55rem; height: 0.55rem; border-radius: 50%; }
+.theme-swatch .buy { background: var(--buyer); }
+.theme-swatch .rent { background: var(--renter); }
+.theme-swatch.is-split { gap: 0; }
+.theme-swatch.is-split > span { flex: 1; align-self: stretch; background: var(--paper); }
+/* On phones the toolbar sits at the left, so the menu opens rightwards to stay on screen. */
+@media (max-width: 560px) {
+  .theme-menu { right: auto; left: 0; }
 }

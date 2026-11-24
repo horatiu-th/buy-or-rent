@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import type { SourcedValue } from '../data/schema';
 import { FIELDS } from './fields';
 import { InputField } from './InputField';
-import { ro } from '../i18n/ro';
+import { t } from '../i18n';
+import { LEI, euro } from '../test/money';
 
 const def = (key: string) => FIELDS.find((f) => f.key === key)!;
 
@@ -18,8 +19,7 @@ function renderField(props: Partial<Parameters<typeof InputField>[0]> = {}) {
       def={def('rent')}
       value={2000}
       isOverridden={false}
-      currency="RON"
-      eurRon={5}
+      money={LEI}
       onChange={onChange}
       onReset={() => {}}
       {...props}
@@ -30,10 +30,10 @@ function renderField(props: Partial<Parameters<typeof InputField>[0]> = {}) {
 
 describe('InputField', () => {
   it.each([
-    ['downPaymentPct', 'RON', '%'], ['rent', 'EUR', '€'], ['rent', 'RON', 'lei'],
-    ['fixedYears', 'RON', 'ani'], ['depositMonths', 'RON', 'luni'],
-  ] as const)('exposes the unit for %s in %s', (key, currency, unit) => {
-    renderField({ def: def(key), value: 2, currency });
+    ['downPaymentPct', LEI, '%'], ['rent', euro(5), '€'], ['rent', LEI, 'lei'],
+    ['fixedYears', LEI, 'ani'], ['depositMonths', LEI, 'luni'],
+  ] as const)('exposes the unit for %s', (key, money, unit) => {
+    renderField({ def: def(key), value: 2, money });
     expect(screen.getByRole('textbox')).toHaveAccessibleDescription(unit);
   });
 
@@ -49,7 +49,7 @@ describe('InputField', () => {
   });
 
   it('converts euro money to whole lei', async () => {
-    const onChange = renderField({ def: def('price'), value: 510000, currency: 'EUR', eurRon: 5.0975 });
+    const onChange = renderField({ def: def('price'), value: 510000, money: euro(5.0975) });
     const input = screen.getByLabelText('Preț locuință');
     await userEvent.clear(input);
     await userEvent.type(input, '1234');
@@ -123,7 +123,7 @@ describe('InputField', () => {
   });
 
   it('steps euro amounts by a round number of euro', async () => {
-    const onChange = renderField({ def: def('price'), value: 510000, currency: 'EUR', eurRon: 5.1 });
+    const onChange = renderField({ def: def('price'), value: 510000, money: euro(5.1) });
     await userEvent.click(screen.getByLabelText('Preț locuință'));
     await userEvent.keyboard('{ArrowUp}');
     expect(onChange).toHaveBeenLastCalledWith(Math.round(100200 * 5.1));
@@ -134,12 +134,12 @@ describe('InputField', () => {
     const input = screen.getByLabelText('Chirie lunară');
     const toggle = screen.getByRole('button', { name: /Ajutor/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText(ro.fields.rent.help)).not.toBeVisible();
+    expect(screen.getByText(t.fields.rent.help)).not.toBeVisible();
     expect(input).toHaveAccessibleDescription(/Sursa X/);
 
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText(ro.fields.rent.help)).toBeVisible();
+    expect(screen.getByText(t.fields.rent.help)).toBeVisible();
     expect(input).toHaveAccessibleDescription(/Chiria pentru o locuință comparabilă\..*Sursa X/);
   });
 
@@ -149,7 +149,7 @@ describe('InputField', () => {
     await userEvent.click(toggle);
     const popover = screen.getByRole('note');
     expect(popover).toBeVisible();
-    expect(popover).toHaveTextContent(ro.fields.rent.help);
+    expect(popover).toHaveTextContent(t.fields.rent.help);
     expect(popover).toHaveTextContent('Sursa X');
     expect(toggle.parentElement).toContainElement(popover);
   });

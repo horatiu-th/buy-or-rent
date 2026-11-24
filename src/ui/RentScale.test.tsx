@@ -1,10 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EquivalentRent } from '../engine';
 import { RentScale } from './RentScale';
+import { LEI } from '../test/money';
 
 function setup(eq: EquivalentRent, rent: number) {
   const onRentChange = vi.fn();
-  const props = { eq, price: 500000, currency: 'RON' as const, eurRon: 5, onRentChange };
+  const props = { eq, price: 500000, money: LEI, onRentChange };
   const view = render(<RentScale {...props} rent={rent} />);
   const slider = () => screen.getByRole('slider', { name: 'Ajustează chiria' });
   return { slider, onRentChange, rerender: (r: number) => view.rerender(<RentScale {...props} rent={r} />), container: view.container };

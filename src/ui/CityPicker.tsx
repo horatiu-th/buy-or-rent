@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import type { DataFile } from '../data/schema';
-import { ro } from '../i18n/ro';
+import { t } from '../i18n';
 import { clampSqm, SQM_MIN } from '../state/scenario';
 import { NumberInput } from './NumberInput';
 
@@ -20,7 +20,7 @@ export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
   return (
     <div className="scenario">
       <div className="scenario-item scenario-city">
-        <label htmlFor={cityId_}>{ro.city}</label>
+        <label htmlFor={cityId_}>{t.city}</label>
         <select id={cityId_} value={cityId} onChange={(e) => onChange({ cityId: e.target.value })}>
           {Object.entries(data.cities).map(([id, c]) => (
             <option key={id} value={id}>{c.name}</option>
@@ -28,7 +28,7 @@ export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
         </select>
       </div>
       <div className="scenario-item scenario-sqm">
-        <label htmlFor={sqmId}>{ro.sqm}</label>
+        <label htmlFor={sqmId}>{t.sqm}</label>
         <div className="number-box">
           <NumberInput
             id={sqmId}

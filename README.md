@@ -18,9 +18,9 @@ It shows:
 - **Other horizons:** the threshold and the gap after 5, 10, 20 and 30 years, since how long you stay matters more than the loan term.
 - **Charts:** net worth over time, monthly costs, where the money goes, and how sensitive the result is to price growth, investment returns, rent, rent growth, long-run interest rates and upkeep.
 
-Across the charts, blue represents the buyer and teal represents the renter. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
+In the default theme, blue represents the buyer and teal represents the renter; other themes use their own pair. In tables, a circle marks a buying win and a diamond a renting win. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
 
-Every input can be changed, values are shown in today's money by default, and any scenario can be shared as a link.
+Every input can be changed, values are shown in today's money by default (in lei or €), and any scenario can be shared as a link. Six colour themes, including a high-contrast one, are in the palette menu.
 
 ## Quick start
 
@@ -48,8 +48,8 @@ src/
   engine/   Calculation engine: pure TypeScript, no UI
   data/     Default values (generated) and the code that turns them into inputs
   state/    Scenario state, kept in the URL
-  ui/       React components, charts and field definitions
-  i18n/     All interface text (Romanian)
+  ui/       React components, charts, field definitions, currencies (money.ts) and themes (theme.ts)
+  i18n/     All interface text and language rules; Romanian today, one file per language
 pipeline/   Scripts that fetch, validate and merge default data
 data/       Hand-maintained and fetched default values, plus their sources
 docs/       Documentation and the original design and plan
@@ -61,7 +61,7 @@ docs/       Documentation and the original design and plan
 | Guide | Read it to |
 |---|---|
 | [How the calculation works](docs/how-it-works.md) | Understand the model, its outputs and its limits |
-| [Architecture](docs/architecture.md) | Find your way around the code and change it |
+| [Architecture](docs/architecture.md) | Find your way around the code and change it, including adding a theme, currency or language |
 | [Data](docs/data.md) | Learn where defaults come from and how to update them |
 | [Operations](docs/operations.md) | Deploy, run the workflows and handle routine upkeep |
 | [Sources](data/SOURCES.md) | See the source and reasoning behind every default value |

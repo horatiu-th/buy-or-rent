@@ -1,6 +1,6 @@
 import type { Inputs } from '../engine';
 import { DEFAULT_CITY_ID } from '../data/schema';
-import type { Currency } from '../ui/format';
+import { BASE_CURRENCY, isCurrency, type Currency } from '../ui/money';
 import { FIELDS, normalizeField } from '../ui/fields';
 
 export interface Scenario {
@@ -14,7 +14,7 @@ export interface Scenario {
 export const DEFAULT_SCENARIO: Scenario = {
   cityId: DEFAULT_CITY_ID,
   sqm: 55,
-  currency: 'RON',
+  currency: BASE_CURRENCY,
   // Today's money by default: nominal sums decades out look large and hide inflation's effect on cash.
   real: true,
   overrides: {},
@@ -81,10 +81,11 @@ export function decodeScenario(p: URLSearchParams, validCityIds?: readonly strin
     }
   }
   const city = p.get('oras');
+  const currency = p.get('moneda');
   return {
     cityId: city !== null && (!validCityIds || validCityIds.includes(city)) ? city : d.cityId,
     sqm,
-    currency: p.get('moneda') === 'EUR' ? 'EUR' : d.currency,
+    currency: isCurrency(currency) ? currency : d.currency,
     real: p.get('real') === '1' ? true : p.get('real') === '0' ? false : d.real,
     overrides,
   };

@@ -1,14 +1,21 @@
-import { memo, useId, useMemo, useState } from 'react';
+import { lazy, memo, Suspense, useId, useMemo, useState } from 'react';
 import { assumptionSwings, equivalentRent, horizonComparison, sensitivity, simulate, type Inputs, type Result } from '../engine';
-import { ro } from '../i18n/ro';
-import { BreakdownChart, MonthlyCostsChart, NetWorthChart, type View } from './charts';
-import { formatDuration, formatMoney } from './format';
+import { t } from '../i18n';
+import type { View } from './charts';
+import { formatMoney } from './money';
 import { Headline } from './Headline';
 import { RentScale } from './RentScale';
 import { HorizonTable } from './HorizonTable';
 import { SensitivityTable, SwingsTable } from './SensitivityTable';
 
-type Tab = keyof typeof ro.tabs;
+// The charting library is most of the page's JavaScript, so the charts load as a separate chunk and the
+// headline, rent scale and tables appear without waiting for it. All three share that one chunk.
+const loadCharts = () => import('./charts');
+const NetWorthChart = lazy(() => loadCharts().then((m) => ({ default: m.NetWorthChart })));
+const MonthlyCostsChart = lazy(() => loadCharts().then((m) => ({ default: m.MonthlyCostsChart })));
+const BreakdownChart = lazy(() => loadCharts().then((m) => ({ default: m.BreakdownChart })));
+
+type Tab = keyof typeof t.tabs;
 
 interface Props {
   inputs: Inputs;
@@ -19,18 +26,25 @@ interface Props {
   onRentChange: (lei: number) => void;
 }
 
-/** End-of-horizon figures; the swatches double as the legend for the charts below. */
-function EndSummary({ result, view }: { result: Result; view: View }) {
+/** End-of-horizon figures for both sides, with the switch between today's money and nominal values. */
+function EndSummary({ result, view, onToggleReal }: { result: Result; view: View; onToggleReal: (v: boolean) => void }) {
   const last = result.rows[result.rows.length - 1];
   const fmt = (nominal: number) =>
-    formatMoney(view.real ? nominal / last.deflator : nominal, view.currency, view.eurRon);
+    formatMoney(view.real ? nominal / last.deflator : nominal, view.money);
   const items = [
-    { cls: 'buyer', label: ro.buyer, value: fmt(last.buyerNetWorth) },
-    { cls: 'renter', label: ro.renterInvesting, value: fmt(last.renterNetWorth) },
+    { cls: 'buyer', label: t.buyer, value: fmt(last.buyerNetWorth) },
+    { cls: 'renter', label: t.renterInvesting, value: fmt(last.renterNetWorth) },
   ];
   return (
     <div className="end-summary">
-      <p className="end-summary-title">{ro.atHorizon(formatDuration(last.month), view.real, view.currency)}</p>
+      {/* The switch sits with the figures it changes, not floating above them. */}
+      <div className="end-summary-head">
+        <p className="end-summary-title">{t.atHorizon(t.duration(last.month), view.real, view.money)}</p>
+        <label className="switch summary-switch">
+          <input type="checkbox" role="switch" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} />
+          <span>{t.realValues(view.money)}</span>
+        </label>
+      </div>
       <dl>
         {items.map((it) => (
           <div key={it.cls} className={`end-item ${it.cls}`}>
@@ -55,7 +69,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
   const grid = useMemo(() => (tab === 'sensitivity' ? sensitivity(inputs) : null), [inputs, tab]);
   const swings = useMemo(() => (tab === 'sensitivity' ? assumptionSwings(inputs) : null), [inputs, tab]);
   const horizons = useMemo(() => horizonComparison(inputs), [inputs]);
-  const tabs = Object.keys(ro.tabs) as Tab[];
+  const tabs = Object.keys(t.tabs) as Tab[];
   // These views add up or compare nominal sums, so the inflation switch has nothing to adjust there.
   const nominalOnly = tab === 'breakdown' || tab === 'sensitivity';
 
@@ -67,46 +81,37 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
         breakEvenMonth={result.breakEvenMonth}
         buyerEverAhead={result.buyerEverAhead}
         sale={inputs}
-        currency={view.currency}
-        eurRon={view.eurRon}
+        money={view.money}
       />
       <RentScale
         eq={eq}
         rent={liveRent}
         price={inputs.price}
-        currency={view.currency}
-        eurRon={view.eurRon}
+        money={view.money}
         onRentChange={onRentChange}
       />
-      <div>
-        <label className="switch summary-switch">
-          <input type="checkbox" role="switch" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} />
-          <span>{ro.realValues(view.currency)}</span>
-        </label>
-        <EndSummary result={result} view={view} />
-      </div>
+      <EndSummary result={result} view={view} onToggleReal={onToggleReal} />
       <HorizonTable
         rows={horizons}
         chosenYears={result.rows[result.rows.length - 1].month / 12}
         real={view.real}
-        currency={view.currency}
-        eurRon={view.eurRon}
+        money={view.money}
       />
 
       <div className="chart-block">
         <div className="chart-toolbar">
-          <div role="tablist" aria-label={ro.tabsLabel}>
-            {tabs.map((t) => (
+          <div role="tablist" aria-label={t.tabsLabel}>
+            {tabs.map((id) => (
               <button
-                key={t}
-                id={`${panelId}-${t}`}
+                key={id}
+                id={`${panelId}-${id}`}
                 role="tab"
-                aria-selected={tab === t}
+                aria-selected={tab === id}
                 aria-controls={panelId}
-                tabIndex={tab === t ? 0 : -1}
-                onClick={() => setTab(t)}
+                tabIndex={tab === id ? 0 : -1}
+                onClick={() => setTab(id)}
                 onKeyDown={(e) => {
-                  const i = tabs.indexOf(t);
+                  const i = tabs.indexOf(id);
                   const target =
                     e.key === 'ArrowRight' ? (i + 1) % tabs.length
                     : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length
@@ -120,25 +125,28 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
                   document.getElementById(`${panelId}-${next}`)?.focus();
                 }}
               >
-                {ro.tabs[t]}
+                {t.tabs[id]}
               </button>
             ))}
           </div>
         </div>
         <div role="tabpanel" id={panelId} aria-labelledby={`${panelId}-${tab}`} className="chart-panel">
-          {tab === 'netWorth' && <NetWorthChart result={result} view={view} />}
-          {tab === 'monthly' && <MonthlyCostsChart result={result} view={view} />}
-          {tab === 'breakdown' && <BreakdownChart result={result} view={view} />}
+          {/* The panel keeps its height while the chart chunk loads, so nothing below it jumps. */}
+          <Suspense fallback={null}>
+            {tab === 'netWorth' && <NetWorthChart result={result} view={view} />}
+            {tab === 'monthly' && <MonthlyCostsChart result={result} view={view} />}
+            {tab === 'breakdown' && <BreakdownChart result={result} view={view} />}
+          </Suspense>
           {tab === 'sensitivity' && grid && (
-            <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} currency={view.currency} eurRon={view.eurRon} />
+            <SensitivityTable grid={grid} baseGrowth={inputs.propertyGrowth} baseReturn={inputs.investReturn} money={view.money} />
           )}
           {tab === 'sensitivity' && grid && swings && (
-            <SwingsTable swings={swings} base={grid[1][1]} currency={view.currency} eurRon={view.eurRon} />
+            <SwingsTable swings={swings} base={grid[1][1]} money={view.money} />
           )}
-          {nominalOnly && <p className="note">{ro.nominalNote}</p>}
+          {nominalOnly && <p className="note">{t.nominalNote}</p>}
         </div>
       </div>
-      <p className="note">{ro.assumptions}</p>
+      <p className="note">{t.assumptions}</p>
     </div>
   );
 });

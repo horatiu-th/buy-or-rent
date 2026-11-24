@@ -4,10 +4,11 @@ import {
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { Result } from '../engine';
-import { ro } from '../i18n/ro';
-import { formatDuration, formatMoney, type Currency } from './format';
+import { t } from '../i18n';
+import { formatMoney, fromUnits, toUnits, type Money } from './money';
 
-export interface View { currency: Currency; eurRon: number; real: boolean }
+/** How results are shown: in which currency, and whether in today's money or nominal. */
+export interface View { money: Money; real: boolean }
 
 const BUYER = 'var(--buyer)';
 const RENTER = 'var(--renter)';
@@ -40,7 +41,7 @@ function useAnimate(): boolean {
 export function chartRows(result: Result, view: View) {
   const conv = (v: number, deflator: number) => {
     const real = view.real ? v / deflator : v;
-    return view.currency === 'EUR' ? real / view.eurRon : real;
+    return toUnits(real, view.money);
   };
   return result.rows.map((r) => ({
     month: r.month,
@@ -78,26 +79,25 @@ export function niceTicks(lo: number, hi: number): number[] {
   return ticks;
 }
 
-const shortFmt = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 3 });
+const shortFmt = new Intl.NumberFormat(t.numberLocale, { maximumFractionDigits: 3 });
 
 /**
  * Tick labels for a money axis. The unit is chosen once from the largest tick, so one axis never
  * mixes "900 mii" with "1 mil.". Ticks are round numbers, so up to three decimals print them exactly.
  */
-export function axisShort(ticks: readonly number[], currency: Currency) {
-  const symbol = currency === 'EUR' ? '€' : 'lei';
+export function axisShort(ticks: readonly number[], symbol: string) {
   const top = Math.max(...ticks.map(Math.abs));
-  const [div, unit] = top >= 1_000_000 ? [1_000_000, ' mil.'] : top >= 10_000 ? [1_000, ' mii'] : [1, ''];
+  const { thousand, million } = t.axisUnits;
+  const [div, unit] = top >= 1_000_000 ? [1_000_000, ` ${million}`] : top >= 10_000 ? [1_000, ` ${thousand}`] : [1, ''];
   return (v: number) => (v === 0 ? `0 ${symbol}` : `${shortFmt.format(v / div)}${unit} ${symbol}`);
 }
 
 /** Formats a value already converted to the display currency. */
-const shownMoney = (view: View) => (v: number) =>
-  formatMoney(view.currency === 'EUR' ? v * view.eurRon : v, view.currency, view.eurRon);
+const shownMoney = (view: View) => (v: number) => formatMoney(fromUnits(v, view.money), view.money);
 
 function moneyAxis(values: number[], view: View) {
   const ticks = niceTicks(Math.min(0, ...values), Math.max(0, ...values));
-  return { ticks, domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], tickFormatter: axisShort(ticks, view.currency) };
+  return { ticks, domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], tickFormatter: axisShort(ticks, view.money.symbol) };
 }
 
 interface TipProps {
@@ -129,9 +129,9 @@ function ChartTip({ active, payload, label, fmt, title, description }: TipProps)
 const monthOf = (point: unknown) => (point as { month: number }).month;
 const afterTitle = (_: unknown, point: unknown) => {
   const m = monthOf(point);
-  return m === 0 ? ro.chartStart : ro.afterTime(formatDuration(m));
+  return m === 0 ? t.chartStart : t.afterTime(t.duration(m));
 };
-const monthTitle = (_: unknown, point: unknown) => ro.monthN(monthOf(point));
+const monthTitle = (_: unknown, point: unknown) => t.monthN(monthOf(point));
 
 /**
  * Recharts makes the chart focusable for keyboard exploration but gives it no name, and the lines
@@ -143,6 +143,16 @@ function ChartFigure({ name, summary, children }: { name: string; summary: strin
       <p className="visually-hidden">{summary}</p>
       {children}
     </figure>
+  );
+}
+
+/** Every chart names its two series right above the plot, so no chart depends on a legend elsewhere on the page. */
+function ChartLegend({ renter }: { renter: string }) {
+  return (
+    <div className="chart-legend">
+      <span><i className="swatch" style={{ color: BUYER }} aria-hidden="true" />{t.buyer}</span>
+      <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{renter}</span>
+    </div>
   );
 }
 
@@ -169,13 +179,14 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
   const marker = breakEvenX(result);
   const last = data[data.length - 1];
   const summary = [
-    ro.charts.netWorthSummary(formatDuration(last.month), fmt(last.buyer), fmt(last.renter)),
-    marker !== null && result.breakEvenMonth !== null ? ro.charts.breakEvenSummary(formatDuration(result.breakEvenMonth)) : '',
+    t.charts.netWorthSummary(t.duration(last.month), fmt(last.buyer), fmt(last.renter)),
+    marker !== null && result.breakEvenMonth !== null ? t.charts.breakEvenSummary(t.duration(result.breakEvenMonth)) : '',
   ].filter(Boolean).join(' ');
   return (
-    <ChartFigure name={ro.charts.netWorth} summary={summary}>
+    <ChartFigure name={t.charts.netWorth} summary={summary}>
+      <ChartLegend renter={t.renterInvesting} />
       <ResponsiveContainer width="100%" height={340}>
-        <LineChart data={data} title={ro.charts.netWorth} margin={{ top: 32, right: 8, bottom: 0, left: 0 }}>
+        <LineChart data={data} title={t.charts.netWorth} margin={{ top: 32, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
@@ -185,11 +196,11 @@ export function NetWorthChart({ result, view }: { result: Result; view: View }) 
               x={marker}
               stroke="var(--muted)"
               strokeDasharray="3 3"
-              label={{ value: ro.breakEvenMark, position: 'top', offset: 14, fill: 'var(--muted)', fontSize: 12 }}
+              label={{ value: t.breakEvenMark, position: 'top', offset: 14, fill: 'var(--muted)', fontSize: 12 }}
             />
           )}
-          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={ro.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
-          <Line isAnimationActive={animate} type="linear" dataKey="buyer" name={ro.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={t.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="buyer" name={t.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
         </LineChart>
       </ResponsiveContainer>
     </ChartFigure>
@@ -205,24 +216,21 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
   const first = data[0];
   const last = data[data.length - 1];
   const summary = first && last
-    ? ro.charts.monthlySummary(fmt(first.buyerCost), fmt(first.renterCost), fmt(last.buyerCost), fmt(last.renterCost))
+    ? t.charts.monthlySummary(fmt(first.buyerCost), fmt(first.renterCost), fmt(last.buyerCost), fmt(last.renterCost))
     : '';
   // Costs hold for a whole month and jump when the fixed rate ends, so they are drawn as steps,
   // not smoothed curves that would invent a dip before the jump.
   return (
-    <ChartFigure name={ro.charts.monthly} summary={summary}>
-      <figcaption className="monthly-legend">
-        <span><i className="swatch" style={{ color: BUYER }} aria-hidden="true" />{ro.buyer}</span>
-        <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{ro.renter}</span>
-      </figcaption>
+    <ChartFigure name={t.charts.monthly} summary={summary}>
+      <ChartLegend renter={t.renter} />
       <ResponsiveContainer width="100%" height={340}>
-        <AreaChart data={data} title={ro.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
+        <AreaChart data={data} title={t.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} width={84} tick={TICK} axisLine={false} tickLine={false} />
           <Tooltip content={(p) => <ChartTip {...p} fmt={fmt} title={monthTitle} />} cursor={{ stroke: 'var(--muted)', strokeDasharray: '3 3' }} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={ro.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={ro.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={t.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={t.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
       </ResponsiveContainer>
     </ChartFigure>
@@ -232,35 +240,36 @@ export function MonthlyCostsChart({ result, view }: { result: Result; view: View
 export function BreakdownChart({ result, view }: { result: Result; view: View }) {
   const animate = useAnimate();
   // Totals are nominal sums; showing them in today's lei would need per-month deflation, so this chart stays nominal.
-  const conv = (v: number) => (view.currency === 'EUR' ? v / view.eurRon : v);
+  const conv = (v: number) => toUnits(v, view.money);
   const b = result.buyer;
   const r = result.renter;
-  const t = ro.breakdown;
+  const labels = t.breakdown;
   const data = [
-    { ...t.rent, buyer: 0, renter: conv(r.rent) },
-    { ...t.interest, buyer: conv(b.interest), renter: 0 },
-    { ...t.maintenance, buyer: conv(b.maintenance), renter: 0 },
-    { ...t.saleAgencyFee, buyer: conv(b.saleAgencyFee), renter: 0 },
-    { ...t.acquisitionCosts, buyer: conv(b.acquisitionCosts + b.fitOut), renter: conv(r.agencyFee + r.moving) },
-    { ...t.insurance, buyer: conv(b.insurance), renter: conv(r.insurance) },
-    { ...t.taxes, buyer: conv(b.propertyTax + b.investmentTax + b.saleTax), renter: conv(r.investmentTax) },
+    { ...labels.rent, buyer: 0, renter: conv(r.rent) },
+    { ...labels.interest, buyer: conv(b.interest), renter: 0 },
+    { ...labels.maintenance, buyer: conv(b.maintenance), renter: 0 },
+    { ...labels.saleAgencyFee, buyer: conv(b.saleAgencyFee), renter: 0 },
+    { ...labels.acquisitionCosts, buyer: conv(b.acquisitionCosts + b.fitOut), renter: conv(r.agencyFee + r.moving) },
+    { ...labels.insurance, buyer: conv(b.insurance), renter: conv(r.insurance) },
+    { ...labels.taxes, buyer: conv(b.propertyTax + b.investmentTax + b.saleTax), renter: conv(r.investmentTax) },
   ];
   const nominal = { ...view, real: false };
   const fmt = shownMoney(nominal);
   const x = moneyAxis(data.flatMap((d) => [d.buyer, d.renter]), nominal);
-  const summary = ro.charts.breakdownSummary(
+  const summary = t.charts.breakdownSummary(
     data
       .map((d) => {
-        const parts = [d.buyer > 0 && `${ro.buyer.toLowerCase()} ${fmt(d.buyer)}`, d.renter > 0 && `${ro.renter.toLowerCase()} ${fmt(d.renter)}`].filter(Boolean);
+        const parts = [d.buyer > 0 && `${t.buyer.toLowerCase()} ${fmt(d.buyer)}`, d.renter > 0 && `${t.renter.toLowerCase()} ${fmt(d.renter)}`].filter(Boolean);
         return parts.length ? `${d.label}: ${parts.join(', ')}. ${d.help}` : '';
       })
       .filter(Boolean)
       .join('; '),
   );
   return (
-    <ChartFigure name={ro.charts.breakdown} summary={summary}>
+    <ChartFigure name={t.charts.breakdown} summary={summary}>
+      <ChartLegend renter={t.renterInvesting} />
       <ResponsiveContainer width="100%" height={360}>
-        <BarChart data={data} title={ro.charts.breakdown} layout="vertical" barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <BarChart data={data} title={t.charts.breakdown} layout="vertical" barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} horizontal={false} />
           <XAxis type="number" {...x} tick={TICK} {...AXIS} />
           <YAxis type="category" dataKey="label" width={132} tick={TICK} axisLine={false} tickLine={false} />
@@ -269,8 +278,8 @@ export function BreakdownChart({ result, view }: { result: Result; view: View })
             content={(p) => <ChartTip {...p} fmt={fmt} title={String} description={data.find((row) => row.label === p.label)?.help} />}
             cursor={{ fill: 'var(--field)' }}
           />
-          <Bar isAnimationActive={animate} dataKey="buyer" name={ro.buyer} fill={BUYER} radius={[0, 3, 3, 0]} />
-          <Bar isAnimationActive={animate} dataKey="renter" name={ro.renterInvesting} fill={RENTER} radius={[0, 3, 3, 0]} />
+          <Bar isAnimationActive={animate} dataKey="buyer" name={t.buyer} fill={BUYER} radius={[0, 3, 3, 0]} />
+          <Bar isAnimationActive={animate} dataKey="renter" name={t.renterInvesting} fill={RENTER} radius={[0, 3, 3, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFigure>

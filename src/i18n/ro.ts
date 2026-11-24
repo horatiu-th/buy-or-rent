@@ -1,14 +1,58 @@
 import type { Inputs } from '../engine';
-import type { Currency } from '../ui/format';
+import type { Money } from '../ui/money';
 
 type FieldText = { label: string; help: string };
 
+type DurationUnit = 'year' | 'month';
+const UNIT_WORDS: Record<DurationUnit, [one: string, many: string]> = { year: ['an', 'ani'], month: ['lună', 'luni'] };
+
+/**
+ * The word that follows n: "1 an", "2 ani", "20 de ani". Romanian puts "de" between a number and its
+ * noun when the number's last two digits are 00 or 20–99 (so "101 ani" but "120 de ani").
+ */
+function unitWord(n: number, unit: DurationUnit): string {
+  const [one, many] = UNIT_WORDS[unit];
+  if (n === 1) return one;
+  const lastTwo = Math.abs(n) % 100;
+  const de = lastTwo >= 20 || (lastTwo === 0 && n !== 0);
+  return `${de ? 'de ' : ''}${many}`;
+}
+
+const count = (n: number, unit: DurationUnit) => `${n} ${unitWord(n, unit)}`;
+
+/** "2 ani și 3 luni", rounded to whole months. */
+function duration(months: number): string {
+  const total = Math.round(months);
+  // Defensive: callers pass positive durations, but an empty string would leave a sentence dangling.
+  if (!(total > 0)) return count(0, 'month');
+  const y = Math.floor(total / 12);
+  const m = total % 12;
+  return [y && count(y, 'year'), m && count(m, 'month')].filter(Boolean).join(' și ');
+}
+
 export const ro = {
+  /** BCP 47 tag for number formatting: decimal comma, dot for thousands. */
+  numberLocale: 'ro-RO',
+  unitWord,
+  count,
+  duration,
+  /** Short scale words for chart axes: "900 mii", "1,5 mil.". */
+  axisUnits: { thousand: 'mii', million: 'mil.' },
   title: 'Cumpăr sau închiriez?',
   subtitle: 'Cât valorează, peste ani, o locuință cumpărată față de una închiriată în România.',
   city: 'Oraș',
   sqm: 'Suprafață utilă (m², fără balcon)',
   resetAll: 'Resetează tot',
+  themes: {
+    label: 'Temă',
+    system: 'Ca sistemul',
+    light: 'Luminoasă',
+    dark: 'Întunecată',
+    sand: 'Nisip',
+    midnight: 'Miezul nopții',
+    graphite: 'Grafit',
+    contrast: 'Contrast ridicat',
+  },
   reset: 'Revino la valoarea implicită',
   help: 'Ajutor',
   presets: { label: 'Tip dobândă', fixed5: 'Fix 5 ani', variable: 'Variabilă' },
@@ -20,8 +64,8 @@ export const ro = {
     yourRent: 'Chiria ta',
     threshold: 'Prag',
   },
-  atHorizon: (after: string, real: boolean, currency: Currency) => {
-    const basis = currency === 'EUR' ? 'lei de azi, convertiți în €' : 'lei de azi';
+  atHorizon: (after: string, real: boolean, money: Money) => {
+    const basis = money.isBase ? 'lei de azi' : `lei de azi, convertiți în ${money.symbol}`;
     return `Avere netă după ${after} (${real ? basis : 'valori nominale'})`;
   },
   tabsLabel: 'Grafice',
@@ -33,10 +77,10 @@ export const ro = {
   breakEvenMark: 'Cumpărarea trece în față',
   // Values are divided by Romanian inflation; euro amounts are then converted at today's fixed rate,
   // so "euro of today" would wrongly suggest euro-area inflation.
-  realValues: (currency: Currency) =>
-    currency === 'EUR'
-      ? 'Ajustat cu inflația din România (lei de azi, convertiți în € la cursul de azi)'
-      : 'Ajustat cu inflația din România (lei de azi)',
+  realValues: (money: Money) =>
+    money.isBase
+      ? 'Ajustat cu inflația din România (lei de azi)'
+      : `Ajustat cu inflația din România (lei de azi, convertiți în ${money.symbol} la cursul de azi)`,
   nominalNote: 'Valori nominale: aici sumele nu sunt ajustate cu inflația.',
   source: 'sursa',
   stale: 'date vechi',
@@ -112,14 +156,15 @@ export const ro = {
     },
   },
   sensitivityHelp:
-    'Diferența de avere netă la final (cumpărător − chiriașul care investește) dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale. Un plus înseamnă că cumpărarea câștigă, un minus că închirierea câștigă; în centru sunt valorile tale.',
+    'Diferența de avere netă la final dintre cumpărător și chiriașul care investește, dacă creșterea prețului locuinței sau randamentul investițiilor diferă cu ±2 puncte procentuale. În centru sunt valorile tale.',
   sensitivityBuyWins: 'cumpărarea câștigă',
   sensitivityRentWins: 'închirierea câștigă',
   sensitivityBase: 'valorile tale',
+  sensitivityTie: 'la egalitate',
   sensitivityRows: 'Creștere preț locuință',
   sensitivityCols: 'Randament investiții',
   swingsHelp:
-    'Diferența de avere netă la final (cumpărător − chiriașul care investește) când o singură altă ipoteză e mai mică sau mai mare, restul rămânând la valorile tale.',
+    'Diferența de avere netă la final dintre cumpărător și chiriașul care investește, când o singură altă ipoteză e mai mică sau mai mare, restul rămânând la valorile tale.',
   swingsAssumption: 'Ipoteză',
   swingsDown: 'Mai mică',
   swingsBase: 'Valorile tale',
@@ -135,7 +180,7 @@ export const ro = {
     help: 'Același calcul dacă vinzi sau te oprești din închiriat mai devreme. Durata creditului nu spune cât locuiești acolo.',
     after: 'După',
     threshold: 'Prag de chirie',
-    gap: (real: boolean) => `Diferența de avere (cumpărător − chiriaș, ${real ? 'lei de azi' : 'valori nominale'})`,
+    gap: (real: boolean) => `Cine e în câștig și cu cât (${real ? 'lei de azi' : 'valori nominale'})`,
     yours: 'orizontul tău',
     alwaysBuy: 'cumpărarea câștigă la orice chirie',
     alwaysRent: 'închirierea câștigă la orice chirie',

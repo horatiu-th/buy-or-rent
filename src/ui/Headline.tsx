@@ -1,6 +1,6 @@
 import type { EquivalentRent, Inputs } from '../engine';
-import { ro } from '../i18n/ro';
-import { formatDuration, formatMoney, type Currency } from './format';
+import { t } from '../i18n';
+import { formatMoney, type Money } from './money';
 
 type SaleInputs = Pick<Inputs, 'includeSaleCosts' | 'saleTaxShortPct' | 'saleTaxLongPct' | 'saleTaxShortHoldYears'>;
 
@@ -11,29 +11,28 @@ interface Props {
   /** Whether the buyer is level or ahead in any month, which tells a lost lead apart from never leading. */
   buyerEverAhead: boolean;
   sale: SaleInputs;
-  currency: Currency;
-  eurRon: number;
+  money: Money;
 }
 
-export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sale, currency, eurRon }: Props) {
+export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sale, money }: Props) {
   if (eq.kind === 'invalid') {
     return (
       <header className="headline">
-        <h2 data-testid="headline" aria-live="polite">{ro.headlineInvalid}</h2>
+        <h2 data-testid="headline" aria-live="polite">{t.headlineInvalid}</h2>
       </header>
     );
   }
-  const after = formatDuration(horizonMonths);
+  const after = t.duration(horizonMonths);
   const main =
-    eq.kind === 'value' ? ro.headlineValue(after, formatMoney(eq.rent, currency, eurRon))
-    : eq.kind === 'alwaysBuy' ? ro.headlineAlwaysBuy(after)
-    : eq.kind === 'noThreshold' ? ro.headlineNoThreshold(after)
-    : ro.headlineAlwaysRent(after);
+    eq.kind === 'value' ? t.headlineValue(after, formatMoney(eq.rent, money))
+    : eq.kind === 'alwaysBuy' ? t.headlineAlwaysBuy(after)
+    : eq.kind === 'noThreshold' ? t.headlineNoThreshold(after)
+    : t.headlineAlwaysRent(after);
   const verdict =
-    breakEvenMonth === 0 ? ro.verdictBuyFromStart
-    : breakEvenMonth !== null ? ro.verdictBuy(formatDuration(breakEvenMonth))
-    : buyerEverAhead ? ro.verdictRentAtEnd
-    : ro.verdictRent;
+    breakEvenMonth === 0 ? t.verdictBuyFromStart
+    : breakEvenMonth !== null ? t.verdictBuy(t.duration(breakEvenMonth))
+    : buyerEverAhead ? t.verdictRentAtEnd
+    : t.verdictRent;
   // Each month's buyer net worth assumes a sale that month, so a drop in sale tax at the
   // short-hold threshold can be what pushes the buyer ahead. Only worth saying when that drop exists.
   const showSaleTaxNote =
@@ -46,7 +45,7 @@ export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sa
     <header className="headline">
       <h2 data-testid="headline">{main}</h2>
       <p aria-live="polite">{verdict}</p>
-      {showSaleTaxNote && <p className="note">{ro.saleTaxNote(formatDuration(sale.saleTaxShortHoldYears * 12))}</p>}
+      {showSaleTaxNote && <p className="note">{t.saleTaxNote(t.duration(sale.saleTaxShortHoldYears * 12))}</p>}
     </header>
   );
 }

@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cumpăr sau închiriez?</title>
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Sets the theme before first paint; useTheme keeps it in sync afterwards.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        // An unknown id is harmless here (no CSS matches it, so the light colours apply), and
+        // useTheme replaces it on load, so this script needs no copy of the theme list.
+        if (!t || t === 'system') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

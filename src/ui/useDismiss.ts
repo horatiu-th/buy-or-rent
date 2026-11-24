@@ -1,0 +1,39 @@
+import { useEffect, type RefObject } from 'react';
+
+/**
+ * Closes a popover when attention moves elsewhere: a press outside it, Escape, or keyboard focus
+ * landing outside it. Focus is watched with focusin on the document rather than blur on the
+ * popover, because Safari does not focus buttons, radios or links on click: a blur there reports
+ * no new target and would close the popover before the click that was meant for it.
+ */
+export function useDismiss(
+  open: boolean,
+  rootRef: RefObject<HTMLElement | null>,
+  close: () => void,
+  /** Gets focus back after Escape, so keyboard users stay where they were. */
+  returnFocusRef?: RefObject<HTMLElement | null>,
+) {
+  useEffect(() => {
+    if (!open) return;
+    const outside = (target: EventTarget | null) => !rootRef.current?.contains(target as Node);
+    const onPointer = (e: PointerEvent) => {
+      if (outside(e.target)) close();
+    };
+    const onFocus = (e: FocusEvent) => {
+      if (outside(e.target)) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      close();
+      returnFocusRef?.current?.focus();
+    };
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('focusin', onFocus);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('focusin', onFocus);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, rootRef, close, returnFocusRef]);
+}

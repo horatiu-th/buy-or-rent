@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { loadDefaults } from './data/defaults';
-import { ro } from './i18n/ro';
+import { t } from './i18n';
 
 // Recharts' ResponsiveContainer needs ResizeObserver, which jsdom lacks.
 beforeAll(() => {
@@ -91,7 +91,7 @@ it('moves between chart tabs with Home and End', async () => {
 
 it('lets the area be cleared and retyped', async () => {
   render(<App />);
-  const sqm = screen.getByLabelText(ro.sqm);
+  const sqm = screen.getByLabelText(t.sqm);
   await userEvent.clear(sqm);
   expect(sqm).toHaveValue('');
   await userEvent.type(sqm, '7');
@@ -102,7 +102,7 @@ it('lets the area be cleared and retyped', async () => {
 
 it('groups the currency radios', () => {
   render(<App />);
-  const [a, b] = within(screen.getByRole('group', { name: ro.currency })).getAllByRole('radio');
+  const [a, b] = within(screen.getByRole('group', { name: t.currency })).getAllByRole('radio');
   expect(a.getAttribute('name')).toBeTruthy();
   expect(a.getAttribute('name')).toBe(b.getAttribute('name'));
 });
@@ -161,7 +161,7 @@ it('counts edits hidden inside the folded buying costs', () => {
 
 it('shows only the buyer and investing renter in the end summary', () => {
   render(<App />);
-  expect(screen.getByText('Chiriaș care investește')).toBeInTheDocument();
+  expect(screen.getAllByRole('term').map((t) => t.textContent)).toEqual(['Cumpărător', 'Chiriaș care investește']);
   expect(screen.getAllByRole('definition')).toHaveLength(2);
 });
 
@@ -216,7 +216,7 @@ describe('typed values', () => {
 
   it('caps the area at its maximum', async () => {
     render(<App />);
-    const sqm = screen.getByLabelText(ro.sqm);
+    const sqm = screen.getByLabelText(t.sqm);
     await userEvent.clear(sqm);
     await userEvent.type(sqm, '5000');
     expect(new URLSearchParams(window.location.search).get('mp')).toBe('500');

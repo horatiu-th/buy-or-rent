@@ -2,22 +2,22 @@ import { useState } from 'react';
 import type { Inputs } from '../engine';
 import type { DataFile } from '../data/schema';
 import { sourceFor } from '../data/defaults';
-import { ro } from '../i18n/ro';
+import { t } from '../i18n';
 import { FIELDS, type FieldDef, type Topic } from './fields';
 import { InputField } from './InputField';
-import type { Currency } from './format';
+import type { Money } from './money';
 
 interface Props {
   data: DataFile;
   cityId: string;
   inputs: Inputs;
   overrides: Partial<Inputs>;
-  currency: Currency;
+  money: Money;
   setField: <K extends keyof Inputs>(key: K, value: Inputs[K]) => void;
   resetField: (key: keyof Inputs) => void;
 }
 
-type GroupId = keyof typeof ro.groups;
+type GroupId = keyof typeof t.groups;
 
 interface GroupLayout {
   id: GroupId;
@@ -33,18 +33,17 @@ const LAYOUT: GroupLayout[] = [
 ];
 
 const PRESETS = [
-  { years: 5, label: ro.presets.fixed5 },
-  { years: 0, label: ro.presets.variable },
+  { years: 5, label: t.presets.fixed5 },
+  { years: 0, label: t.presets.variable },
 ] as const;
 
 const fieldsOf = (topic: Topic) => FIELDS.filter((f) => f.topic === topic);
-const topicTitle = (topic: Topic) => (topic in ro.topics ? ro.topics[topic as keyof typeof ro.topics] : undefined);
+const topicTitle = (topic: Topic) => (topic in t.topics ? t.topics[topic as keyof typeof t.topics] : undefined);
 
-export function InputsPanel({ data, cityId, inputs, overrides, currency, setField, resetField }: Props) {
-  const eurRon = data.values.eurRon.value;
+export function InputsPanel({ data, cityId, inputs, overrides, money, setField, resetField }: Props) {
   // Presets only change the fixed period; the rate itself stays whatever the user or the defaults say.
   const presets = (
-    <div key="presets" className="presets" role="group" aria-label={ro.presets.label}>
+    <div key="presets" className="presets" role="group" aria-label={t.presets.label}>
       {PRESETS.map((p) => (
         <button key={p.years} type="button" aria-pressed={inputs.fixedYears === p.years} onClick={() => setField('fixedYears', p.years)}>
           {p.label}
@@ -62,8 +61,7 @@ export function InputsPanel({ data, cityId, inputs, overrides, currency, setFiel
         value={inputs[def.key]}
         isOverridden={def.key in overrides}
         source={sourceFor(data, cityId, def.key)}
-        currency={currency}
-        eurRon={eurRon}
+        money={money}
         onChange={(v) => setField(def.key, v as never)}
         onReset={() => resetField(def.key)}
         // With no fixed period the fixed rate never applies; disabled rather than hidden to avoid layout jumps.
@@ -104,8 +102,8 @@ export function InputsPanel({ data, cityId, inputs, overrides, currency, setFiel
                 aria-controls={bodyId}
                 onClick={() => toggle(group.id)}
               >
-                <span id={`group-${group.id}-title`} className="group-title">{ro.groups[group.id]}</span>
-                {!isOpen && groupEdits > 0 && <span className="edit-count">{ro.editedCount(groupEdits)}</span>}
+                <span id={`group-${group.id}-title`} className="group-title">{t.groups[group.id]}</span>
+                {!isOpen && groupEdits > 0 && <span className="edit-count">{t.editedCount(groupEdits)}</span>}
                 <span className="chevron" aria-hidden="true" />
               </button>
             </h3>
@@ -114,8 +112,8 @@ export function InputsPanel({ data, cityId, inputs, overrides, currency, setFiel
               {group.more && (
                 <details className="more">
                   <summary>
-                    <span>{ro.buyingMore}</span>
-                    {hiddenEdits > 0 && <span className="edit-count">{ro.editedCount(hiddenEdits)}</span>}
+                    <span>{t.buyingMore}</span>
+                    {hiddenEdits > 0 && <span className="edit-count">{t.editedCount(hiddenEdits)}</span>}
                     <span className="chevron" aria-hidden="true" />
                   </summary>
                   {group.more.map((t) => renderTopic(t, true))}

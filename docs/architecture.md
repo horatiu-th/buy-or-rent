@@ -9,9 +9,9 @@ data/overrides.json ─┐
                      ├─ npm run data:merge ─► src/data/defaults.json   (bundled at build)
 data/auto.json ──────┘                                │
                                                       ▼
-URL query string ◄──► Scenario (city, type, m², currency, view, edited values)
+URL query string ◄──► Scenario (city, m², currency, view, edited values)
                                                       │
-          resolveInputs(defaults, city, type, m², edited values)
+          resolveInputs(defaults, city, m², edited values)
                                                       ▼
                                                    Inputs
                                                       │  useDeferredValue
@@ -22,7 +22,7 @@ URL query string ◄──► Scenario (city, type, m², currency, view, edited 
 ```
 
 1. **Defaults** come from `src/data/defaults.json`, imported directly so there is no loading state.
-2. **The scenario** holds what the user chose: city, property type, size, currency, today's-money vs nominal, and any values they edited. It lives in the URL, so every scenario is a shareable link.
+2. **The scenario** holds what the user chose: city, size, currency, today's-money vs nominal, and any values they edited. It lives in the URL, so every scenario is a shareable link.
 3. **Inputs** are the city defaults with the user's edits on top. Property and rent growth, the investment return and the long-run IRCC default to inflation plus a real part, so an edited inflation moves them too unless they were edited themselves.
 4. **The engine** turns inputs into results. Typing stays smooth because results render from a deferred copy of the inputs and the results panel is memoized.
 
@@ -67,11 +67,11 @@ All money is in lei; all rates are decimals (`0.055` = 5.5%). Currency conversio
 | `oras` | City id (`bucuresti`, `cluj`, …, `ro` for the national average). Unknown ids are ignored. |
 | `tip` | No longer used; ignored in older links |
 | `mp` | Size in m², clamped to 10–500 |
-| `moneda` | `EUR` (lei is the default) |
+| `moneda` | A currency id from `CURRENCIES` in `src/ui/money.ts`, e.g. `EUR` (lei is the default). Unknown ids are ignored. |
 | `real` | `0` for nominal values (today's money is the default) |
 | any `Inputs` key | An edited value, e.g. `rent=2500`, `fixedYears=0`, `includeSaleCosts=0`. Numbers are clamped to the field's range; booleans accept only `0` and `1`. |
 
-Changing city, type or size drops edited price, rent and property tax, since they describe the home; other edits stay. "Resetează tot" (reset all) clears everything.
+Changing city or size drops edited price, rent and property tax, since they describe the home; other edits stay. "Resetează tot" (reset all) clears everything.
 
 ### `src/ui/`: components
 
@@ -79,30 +79,38 @@ Changing city, type or size drops edited price, rent and property tax, since the
 |---|---|
 | `fields.ts` | One definition per input: unit (`money`, `pct`, `years`, `months`, `bool`), topic, and min/max/step |
 | `InputsPanel.tsx` | Arranges fields into collapsible groups: Cumpărare and Închiriere. The general fields (horizon, inflation) sit in the scenario strip next to the city and size instead, rendered by `App.tsx`. Închiriere lists rent and investment fields together under a single heading. Buying costs and sale settings fold under a further toggle. Collapsed groups count the edits inside them. |
-| `InputField.tsx` | One input: a text draft while typing, conversion for % and €, a ↺ reset when edited, and an info popover with the explanation and the source |
-| `CityPicker.tsx` | The city, property type and size row |
+| `InputField.tsx` | One input: a text draft while typing, conversion for % and the display currency, a ↺ reset when edited, and an info popover with the explanation and the source |
+| `CityPicker.tsx` | The scenario panel: city and size, with the horizon and inflation fields passed in by `App.tsx` |
+| `TopBar.tsx` | Title and page-wide controls: currency switch, theme picker, reset |
+| `ThemePicker.tsx` | The palette button and its list of themes, each with a preview swatch |
+| `theme.ts` | `THEMES`, and `useTheme()`: remembers the choice and follows the system setting for "Ca sistemul" |
+| `useDismiss.ts` | Closes a popover on a press outside, Escape, or focus moving away; shared by the theme picker and the info popovers |
 | `Segmented.tsx` | Radio group drawn as a segmented control |
 | `Results.tsx` | Runs the engine and lays out the results: headline, rent scale, end-of-horizon figures, the horizon table, tabs |
 | `Headline.tsx` | The verdict sentence and the break-even line |
 | `RentScale.tsx` | The draggable bar comparing your rent with the break-even rent |
-| `charts.tsx` | Net worth, monthly costs and breakdown charts, with a shared tooltip |
+| `charts.tsx` | Net worth, monthly costs and breakdown charts, each with its own legend and a shared tooltip |
 | `SensitivityTable.tsx` | The ±2 percentage point grid, and `SwingsTable`: rent, rent growth, long-run IRCC and upkeep rate moved one at a time |
 | `HorizonTable.tsx` | The rent threshold and net-worth gap at 5, 10, 20 and 30 years and the chosen horizon |
-| `format.ts` | Money and duration formatting in Romanian |
+| `GapCell.tsx` | The table cell for "who wins, and by how much": an unsigned amount in the winner's colour, with a circle (buying) or diamond (renting) marker; amounts that round to zero show as a tie |
+| `money.ts` | `CURRENCIES` (symbol and rate per currency), `Money` (a currency ready to display) and `formatMoney()` |
+| `format.ts` | Reading typed numbers (`parseNumber`) and writing them back into inputs |
 
-### `src/i18n/ro.ts`: all text
+### `src/i18n/`: all text
 
-Every string shown in the interface is here, including each field's label and help text. The `fields` map is type-checked against `Inputs`, so adding an input without its text is a compile error.
+Components import `t` from `src/i18n/index.ts` and never a language file directly. `ro.ts` holds every string, including each field's label and help text, and also the language's grammar and formats: `numberLocale`, `count()` / `unitWord()` / `duration()` for "20 de ani", and the chart axis words. `Messages` (the type of `ro`) is the contract every language must meet; the `fields` map is checked against `Inputs`, so adding an input without its text is a compile error.
 
 ### `src/styles.css`: the look
 
-One stylesheet with design tokens at the top, in light and dark variants:
+One stylesheet. The top holds one block of colour tokens per theme, selected by `data-theme` on `<html>` (set before first paint by a small script in `index.html`, then by `useTheme`). Everything below uses only the tokens.
 
 | Token | Use |
 |---|---|
-| `--buyer` | Blue: the buyer, and the Cumpărare group |
-| `--renter` | Teal: the renter across all charts and the Închiriere group |
-| `--paper`, `--surface`, `--ink`, `--muted`, `--line`, `--field` | Background, text and line colours |
+| `--buyer` | The buyer: chart lines, the Cumpărare group, winning amounts |
+| `--renter`, `--renter-text` | The renter: chart lines and fills; `--renter-text` is the variant dark or light enough for text |
+| `--buyer-soft`, `--renter-soft` | Tinted backgrounds for each side |
+| `--paper`, `--surface`, `--field`, `--raised` | Page, cards, input boxes, the selected segmented option |
+| `--ink`, `--muted`, `--line`, `--control-line`, `--focus`, `--stale-text` | Text, rules, control borders, focus ring, stale-data warnings |
 
 The typeface is Schibsted Grotesk, bundled with the app (no external font requests). On desktop the results column stays in view while the inputs scroll; on narrow screens results come first.
 
@@ -141,6 +149,26 @@ Add an entry under `cities` in `data/overrides.json` with `name`, `priceSqmEur`,
 
 Edit `src/i18n/ro.ts`. Some UI tests find elements by their Romanian labels; update them if you rename one.
 
+### Add a theme
+
+1. Add its id to `THEMES` in `src/ui/theme.ts`.
+2. Copy the `[data-theme='light']` block at the top of `src/styles.css`, rename it, and set the colours.
+3. Add its name to `themes` in `src/i18n/ro.ts`. The compiler flags a missing one.
+
+`src/ui/theme.test.ts` fails if the block is missing a token, or if any text, chart line or control border falls below the WCAG contrast minimums (4.5:1 for text, 3:1 for lines and borders). The picker lists the theme and draws its swatch automatically.
+
+### Add a currency
+
+Add an entry to `CURRENCIES` in `src/ui/money.ts`: its symbol and how many lei one unit is worth, read from the data file (add the rate to `REQUIRED_VALUE_KEYS` and `data/overrides.json`, or a fetcher, the same way as `eurRon`). The currency switch, inputs, charts, tables and the `moneda` link parameter pick it up. The engine always works in lei.
+
+### Add a language
+
+1. Copy `src/i18n/ro.ts` to e.g. `en.ts` and translate it, including `numberLocale` and the grammar functions (`unitWord`, `count`, `duration`). It must satisfy `Messages`, so a missing key is a compile error.
+2. Register it in `LOCALES` in `src/i18n/index.ts` and set `DEFAULT_LOCALE`, or add a picker that chooses among `LOCALES`.
+3. Set `lang` on `<html>` in `index.html` to match.
+
+Tests that look for Romanian labels run against the default language.
+
 ## Testing
 
 ```bash
@@ -165,4 +193,6 @@ If Vitest reports a module it can't find right after you create it, clear its ca
 - For ticket work, name branches `<type>/<ticket>-<short-kebab-description>`.
 - For ticket work, use a single-line commit message in the form `<type> #<ticket>: <what changed>`.
 - Comments explain non-obvious reasons, not what the code does, and never mention ticket numbers.
-- Interface text is Romanian; code, comments and documentation are English.
+- Interface text lives only in `src/i18n/`; code, comments and documentation are English.
+- Colours live only in the theme blocks at the top of `src/styles.css`; components use the tokens.
+- Amounts are lei everywhere except at display time, where a `Money` converts them.

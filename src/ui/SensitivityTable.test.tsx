@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import { SensitivityTable, SwingsTable } from './SensitivityTable';
+import { LEI } from '../test/money';
 
 const grid = [
   [-30000, -10000, 5000],
@@ -8,7 +9,7 @@ const grid = [
 ];
 
 function renderTable() {
-  render(<SensitivityTable grid={grid} baseGrowth={0.03} baseReturn={0.07} currency="RON" eurRon={5} />);
+  render(<SensitivityTable grid={grid} baseGrowth={0.03} baseReturn={0.07} money={LEI} />);
   return screen.getByRole('table');
 }
 
@@ -28,9 +29,9 @@ describe('SensitivityTable', () => {
   it('says who wins in each cell without relying on colour', () => {
     renderTable();
     const cells = screen.getAllByRole('cell');
-    expect(cells[0]).toHaveTextContent('-30.000 lei');
+    expect(cells[0]).toHaveTextContent('30.000 lei');
     expect(cells[0]).toHaveTextContent('închirierea câștigă');
-    expect(cells[2]).toHaveTextContent('+5.000 lei');
+    expect(cells[2]).toHaveTextContent('5.000 lei');
     expect(cells[2]).toHaveTextContent('cumpărarea câștigă');
   });
 
@@ -58,16 +59,18 @@ describe('SwingsTable', () => {
   ];
 
   it('shows each assumption moved down and up next to the base case', () => {
-    render(<SwingsTable swings={swings} base={12_000} currency="RON" eurRon={5} />);
+    render(<SwingsTable swings={swings} base={12_000} money={LEI} />);
     const [rent, ircc] = screen.getAllByRole('row').slice(1);
     expect(within(rent).getByRole('rowheader')).toHaveTextContent('Chirie lunară (±10%)');
     const cells = within(rent).getAllByRole('cell');
-    expect(cells[0]).toHaveTextContent('2.250 lei: -8.000 lei');
+    expect(cells[0].querySelector('.swing-setting')).toHaveTextContent('2.250 lei');
+    expect(cells[0].querySelector('.gap-amount')).toHaveTextContent('8.000 lei');
     expect(cells[0]).toHaveTextContent('închirierea câștigă');
-    expect(cells[1]).toHaveTextContent('+12.000 lei');
+    expect(cells[1]).toHaveTextContent('12.000 lei');
     expect(cells[1]).toHaveClass('is-base');
-    expect(cells[2]).toHaveTextContent('2.750 lei: +30.000 lei');
-    expect(within(ircc).getAllByRole('cell')[0]).toHaveTextContent('3,5%: +20.000 lei');
+    expect(cells[2].querySelector('.swing-setting')).toHaveTextContent('2.750 lei');
+    expect(cells[2].querySelector('.gap-amount')).toHaveTextContent('30.000 lei');
+    expect(within(ircc).getAllByRole('cell')[0].querySelector('.swing-setting')).toHaveTextContent('3,5%');
   });
 });
 

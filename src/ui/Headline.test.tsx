@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { Headline } from './Headline';
+import { LEI } from '../test/money';
 
 const sale = { includeSaleCosts: true, saleTaxShortPct: 0.03, saleTaxLongPct: 0.01, saleTaxShortHoldYears: 3 };
 
@@ -11,8 +12,7 @@ function renderHeadline(props: Partial<Parameters<typeof Headline>[0]> = {}) {
       breakEvenMonth={27}
       buyerEverAhead
       sale={sale}
-      currency="RON"
-      eurRon={5}
+      money={LEI}
       {...props}
     />,
   );
