@@ -2,7 +2,7 @@ import { useCallback, useId, useRef, useState, type ReactNode } from 'react';
 import { todayIso } from '../data/dates';
 import type { SourcedValue } from '../data/schema';
 import type { Inputs } from '../engine';
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
 import { isWholeField, normalizeField, type FieldDef, type NumberFieldDef } from './fields';
 import { toUnits, fromUnits, type Money } from './money';
 import { NumberInput } from './NumberInput';
@@ -57,7 +57,7 @@ function displayStep(def: NumberFieldDef, money: Money) {
   return toDisplay(def, def.step, money);
 }
 
-function suffix(def: NumberFieldDef, money: Money, n: number) {
+function suffix(def: NumberFieldDef, money: Money, n: number, t: Messages) {
   switch (def.unit) {
     case 'pct': return '%';
     case 'money': return money.symbol;
@@ -72,6 +72,7 @@ export function InputField({ def, fields, disabled }: Props) {
   const sourceId = `${id}-source`;
   const unitId = `${id}-unit`;
   const popoverId = `${id}-popover`;
+  const t = useT();
   const text = t.fields[def.key];
   const { money } = fields;
   const isOverridden = fields.isOverridden(def.key);
@@ -154,7 +155,7 @@ export function InputField({ def, fields, disabled }: Props) {
           value={toDisplay(def, value, money)}
           onValue={(n) => fields.set(def.key, normalizeField(def, fromDisplay(def, n, money)))}
         />
-        <span id={unitId} className="suffix">{suffix(def, money, value)}</span>
+        <span id={unitId} className="suffix">{suffix(def, money, value, t)}</span>
       </div>
     </div>
   );

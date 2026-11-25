@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
 import { BuyIcon, RentIcon } from './icons';
 import { FIELDS, type FieldDef, type Topic } from './fields';
 import { InputField, type FieldBinding } from './InputField';
@@ -8,7 +8,7 @@ interface Props {
   fields: FieldBinding;
 }
 
-type GroupId = keyof typeof t.groups;
+type GroupId = keyof Messages['groups'];
 
 interface GroupLayout {
   id: GroupId;
@@ -24,15 +24,15 @@ const LAYOUT: GroupLayout[] = [
 ];
 
 const PRESETS = [
-  { years: 5, label: t.presets.fixed5 },
-  { years: 0, label: t.presets.variable },
-] as const;
+  { years: 5, label: 'fixed5' },
+  { years: 0, label: 'variable' },
+] as const satisfies readonly { years: number; label: keyof Messages['presets'] }[];
 
 const fieldsOf = (topic: Topic) => FIELDS.filter((f) => f.topic === topic);
-/** Only topics that share a group are titled; a group with one topic is named by the group itself. */
-const TOPIC_TITLES: Partial<Record<Topic, string>> = t.topics;
-
 export function InputsPanel({ fields }: Props) {
+  const t = useT();
+  /** Only topics that share a group are titled; a group with one topic is named by the group itself. */
+  const topicTitles: Partial<Record<Topic, string>> = t.topics;
   const [collapsed, setCollapsed] = useState<Partial<Record<GroupId, boolean>>>({});
   const toggle = (id: GroupId) => setCollapsed((c) => ({ ...c, [id]: !c[id] }));
   const editsIn = (topics: Topic[]) => topics.flatMap(fieldsOf).filter((f) => fields.isOverridden(f.key)).length;
@@ -43,7 +43,7 @@ export function InputsPanel({ fields }: Props) {
     <div key="presets" className="presets" role="group" aria-label={t.presets.label}>
       {PRESETS.map((p) => (
         <button key={p.years} type="button" aria-pressed={fields.value('fixedYears') === p.years} onClick={() => fields.set('fixedYears', p.years)}>
-          {p.label}
+          {t.presets[p.label]}
         </button>
       ))}
     </div>
@@ -61,7 +61,7 @@ export function InputsPanel({ fields }: Props) {
   ];
 
   const renderTopic = (topic: Topic) => {
-    const title = TOPIC_TITLES[topic];
+    const title = topicTitles[topic];
     return (
       <div key={topic} className="topic">
         {title && <h4>{title}</h4>}

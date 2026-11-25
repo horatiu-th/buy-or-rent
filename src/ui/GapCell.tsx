@@ -1,4 +1,4 @@
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
 import { BuyIcon, RentIcon } from './icons';
 import { formatMoney, roundsToZero, type Money } from './money';
 
@@ -17,11 +17,8 @@ type Outcome = 'buy-wins' | 'rent-wins' | 'tie';
 const outcomeOf = (gap: number, money: Money): Outcome =>
   roundsToZero(gap, money) ? 'tie' : gap > 0 ? 'buy-wins' : 'rent-wins';
 
-const OUTCOME_TEXT = {
-  'buy-wins': t.sensitivityBuyWins,
-  'rent-wins': t.sensitivityRentWins,
-  tie: t.sensitivityTie,
-} satisfies Record<Outcome, string>;
+const outcomeText = (t: Messages, outcome: Outcome) =>
+  ({ 'buy-wins': t.sensitivityBuyWins, 'rent-wins': t.sensitivityRentWins, tie: t.sensitivityTie })[outcome];
 
 const ICON_PROPS = { size: '1em', strokeWidth: 2.5, 'aria-hidden': true, className: 'outcome-icon' } as const;
 
@@ -38,6 +35,7 @@ function OutcomeIcon({ outcome }: { outcome: Outcome }) {
  * cell reads without colour. Screen readers hear the winner in words.
  */
 export function GapCell({ gap, money, setting, isBase = false }: Props) {
+  const t = useT();
   const outcome = outcomeOf(gap, money);
   return (
     <td className={`gap-cell ${outcome}${isBase ? ' is-base' : ''}`}>
@@ -47,7 +45,7 @@ export function GapCell({ gap, money, setting, isBase = false }: Props) {
         {formatMoney(Math.abs(gap), money)}
       </span>
       <span className="visually-hidden">
-        {' '}({OUTCOME_TEXT[outcome]}{isBase && `, ${t.sensitivityBase}`})
+        {' '}({outcomeText(t, outcome)}{isBase && `, ${t.sensitivityBase}`})
       </span>
     </td>
   );
@@ -55,6 +53,7 @@ export function GapCell({ gap, money, setting, isBase = false }: Props) {
 
 /** Explains the two icons, once per table under its caption. */
 export function GapKey() {
+  const t = useT();
   return (
     <span className="gap-key" aria-hidden="true">
       <span className="buy-wins"><OutcomeIcon outcome="buy-wins" />{t.sensitivityBuyWins}</span>

@@ -98,7 +98,7 @@ Changing city or size drops edited price, rent and property tax, since they desc
 
 ### `src/i18n/`: all text
 
-Components import `t` from `src/i18n/index.ts` and never a language file directly. `ro.ts` holds every string, including each field's label and help text, and also the language's grammar and formats: `numberLocale`, `count()` / `unitWord()` / `duration()` for "20 de ani", and the chart axis words. `Messages` (the type of `ro`) is the contract every language must meet; the `fields` map is checked against `Inputs`, so adding an input without its text is a compile error.
+Components read text with `useT()` from `src/i18n/index.ts` and never import a language file directly. Each language file (`ro.ts`, `en.ts`) holds every string, including each field's label and help text, and also the language's grammar and formats: `numberLocale`, `count()` / `unitWord()` / `duration()` for "20 de ani" or "20 years", and the chart axis words. `Messages` (the type of `ro`) is the contract every language must meet; the `fields` map is checked against `Inputs`, so adding an input without its text is a compile error. `useLocale()` picks the language (a stored choice, else the browser's preferred languages, else Romanian), keeps `<html lang>` and the tab title in step, and `App` provides the messages through `MessagesContext`. The language is remembered in `localStorage`, not the URL, so a shared link opens in the reader's language. Amounts are parsed and printed in the language's number format: `Money` carries `numberLocale`, and `NumberInput` reads it from `useT()`.
 
 ### `src/styles.css`: the look
 
@@ -135,7 +135,7 @@ Run with `tsx`. See [Data](data.md).
 2. If it can go out of range, clamp it in `sanitize.ts`.
 3. Add it to `fixtures.ts`.
 4. Add its definition to `FIELDS` in `src/ui/fields.ts` (unit, topic, limits).
-5. Add its label and help text to `ro.fields` in `src/i18n/ro.ts`.
+5. Add its label and help text to `fields` in every language file in `src/i18n/`.
 6. Add it to `REQUIRED_VALUE_KEYS` in `src/data/schema.ts` and to `buildInputs()` in `src/data/defaults.ts`.
 7. Add a sourced default to `data/overrides.json`, document it in `data/SOURCES.md`, and run `npm run data:merge`.
 
@@ -147,13 +147,13 @@ Add an entry under `cities` in `data/overrides.json` with `name`, `priceSqmEur`,
 
 ### Change interface text
 
-Edit `src/i18n/ro.ts`. Some UI tests find elements by their Romanian labels; update them if you rename one.
+Edit every language file in `src/i18n/`. Some UI tests find elements by their Romanian labels; update them if you rename one.
 
 ### Add a theme
 
 1. Add its id to `THEMES` in `src/ui/theme.ts`.
 2. Copy the `[data-theme='light']` block at the top of `src/styles.css`, rename it, and set the colours.
-3. Add its name to `themes` in `src/i18n/ro.ts`. The compiler flags a missing one.
+3. Add its name to `themes` in every language file in `src/i18n/`. The compiler flags a missing one.
 
 `src/ui/theme.test.ts` fails if the block is missing a token, or if any text, chart line or control border falls below the WCAG contrast minimums (4.5:1 for text, 3:1 for lines and borders). The picker lists the theme and draws its swatch automatically.
 
@@ -163,11 +163,10 @@ Add an entry to `CURRENCIES` in `src/ui/money.ts`: its symbol and how many lei o
 
 ### Add a language
 
-1. Copy `src/i18n/ro.ts` to e.g. `en.ts` and translate it, including `numberLocale` and the grammar functions (`unitWord`, `count`, `duration`). It must satisfy `Messages`, so a missing key is a compile error.
-2. Register it in `LOCALES` in `src/i18n/index.ts` and set `DEFAULT_LOCALE`, or add a picker that chooses among `LOCALES`.
-3. Set `lang` on `<html>` in `index.html` to match.
+1. Copy `src/i18n/en.ts` to e.g. `de.ts` and translate it, including `numberLocale`, `language` (its own name for itself and a short code) and the grammar functions (`unitWord`, `count`, `duration`). It must satisfy `Messages`, so a missing key is a compile error.
+2. Register it in `LOCALES` in `src/i18n/index.ts`, keyed by its BCP 47 tag. The picker in the top bar lists it automatically, and browsers that prefer it open in it.
 
-Tests that look for Romanian labels run against the default language.
+UI tests run as a Romanian browser (see `src/test/setup.ts`) and look for Romanian labels.
 
 ## Testing
 

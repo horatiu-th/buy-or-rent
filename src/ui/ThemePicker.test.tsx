@@ -85,3 +85,33 @@ describe('ThemePicker keyboard and focus', () => {
     expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 });
+
+describe('ThemePicker closing on selection', () => {
+  it('closes after a theme is clicked and returns focus to the button', async () => {
+    render(<Harness />);
+    const button = screen.getByRole('button', { name: /^Temă/ });
+    await userEvent.click(button);
+    await userEvent.click(screen.getByRole('radio', { name: 'Grafit' }));
+    expect(document.documentElement.dataset.theme).toBe('graphite');
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(button).toHaveFocus();
+  });
+
+  it('stays open while arrow keys preview themes', async () => {
+    render(<Harness />);
+    const button = screen.getByRole('button', { name: /^Temă/ });
+    await userEvent.click(button);
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('confirms with Space', async () => {
+    render(<Harness />);
+    const button = screen.getByRole('button', { name: /^Temă/ });
+    await userEvent.click(button);
+    await userEvent.keyboard('{ArrowDown} ');
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    expect(button).toHaveFocus();
+  });
+});

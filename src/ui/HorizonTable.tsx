@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import type { EquivalentRent, HorizonResult } from '../engine';
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
 import { formatMoney, inView, type Money } from './money';
 import { GapCell, GapKey } from './GapCell';
 
@@ -11,9 +11,7 @@ interface Props {
   money: Money;
 }
 
-const h = t.horizons;
-
-function thresholdText(eq: EquivalentRent, money: Money): string {
+function thresholdText(eq: EquivalentRent, money: Money, h: Messages['horizons']): string {
   switch (eq.kind) {
     case 'value': return formatMoney(eq.rent, money);
     case 'alwaysBuy': return h.alwaysBuy;
@@ -25,6 +23,8 @@ function thresholdText(eq: EquivalentRent, money: Money): string {
 
 /** The verdict at several holding periods, so the chosen horizon isn't the only answer on the page. */
 export function HorizonTable({ rows, chosenYears, real, money }: Props) {
+  const t = useT();
+  const h = t.horizons;
   const captionId = useId();
   return (
     <div className="table-scroll horizons" role="region" aria-labelledby={captionId} tabIndex={0}>
@@ -49,7 +49,7 @@ export function HorizonTable({ rows, chosenYears, real, money }: Props) {
                   {t.count(r.years, 'year')}
                   {isChosen && <span className="horizon-yours"> ({h.yours})</span>}
                 </th>
-                <td>{thresholdText(r.eq, money)}</td>
+                <td>{thresholdText(r.eq, money, h)}</td>
                 <GapCell gap={inView(r.gap, r.deflator, { real })} money={money} />
               </tr>
             );

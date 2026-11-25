@@ -5,6 +5,7 @@ import { baseInputs } from '../engine/fixtures';
 import {
   axisShort, BreakdownChart, breakEvenX, ChartTip, chartRows, MonthlyCostsChart, NetWorthChart, niceTicks, yearTicks,
 } from './charts';
+import { ro } from '../i18n/ro';
 import type { View } from './money';
 import { LEI, euro } from '../test/money';
 
@@ -72,24 +73,24 @@ describe('niceTicks', () => {
 
 describe('axisShort', () => {
   it('shows the full number when the axis stays below ten thousand', () => {
-    const fmt = axisShort([0, 1_500, 3_000, 4_500, 6_000], 'lei');
+    const fmt = axisShort([0, 1_500, 3_000, 4_500, 6_000], 'lei', ro);
     expect(fmt(1_500)).toBe('1.500 lei');
     expect(fmt(4_500)).toBe('4.500 lei');
   });
   it('keeps the decimals a tick needs', () => {
-    const mii = axisShort([0, 12_500, 25_000], 'lei');
+    const mii = axisShort([0, 12_500, 25_000], 'lei', ro);
     expect(mii(12_500)).toBe('12,5 mii lei');
-    const mil = axisShort([0, 500_000, 1_000_000, 1_500_000, 2_000_000], '€');
+    const mil = axisShort([0, 500_000, 1_000_000, 1_500_000, 2_000_000], '€', ro);
     expect(mil(1_650_000)).toBe('1,65 mil. €');
     expect(mil(500_000)).toBe('0,5 mil. €');
   });
   it('uses one unit for the whole axis, so a tick near a million never reads "1.000 mii"', () => {
-    const fmt = axisShort(niceTicks(0, 999_600), 'lei');
+    const fmt = axisShort(niceTicks(0, 999_600), 'lei', ro);
     expect(fmt(1_000_000)).toBe('1 mil. lei');
     expect(fmt(800_000)).toBe('0,8 mil. lei');
   });
   it('keeps the sign and never prints -0', () => {
-    const fmt = axisShort([-500_000, 0, 500_000, 1_000_000], 'lei');
+    const fmt = axisShort([-500_000, 0, 500_000, 1_000_000], 'lei', ro);
     expect(fmt(-500_000)).toBe('-0,5 mil. lei');
     expect(fmt(-0)).toBe('0 lei');
   });

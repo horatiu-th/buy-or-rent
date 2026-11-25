@@ -1,10 +1,11 @@
-import { memo, useState, type ReactNode } from 'react';
+import { memo, useMemo, useState, type ReactNode } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { Result } from '../engine';
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
+import { numberFormat } from '../i18n/numberFormat';
 import { formatMoney, fromUnits, inView, toUnits, type View } from './money';
 import { useMediaQuery } from './useMediaQuery';
 
@@ -64,15 +65,14 @@ export function niceTicks(lo: number, hi: number): number[] {
   return ticks;
 }
 
-const shortFmt = new Intl.NumberFormat(t.numberLocale, { maximumFractionDigits: 3 });
-
 /**
  * Tick labels for a money axis. The unit is chosen once from the largest tick, so one axis never
  * mixes "900 mii" with "1 mil.". Ticks are round numbers, so up to three decimals print them exactly.
  */
-export function axisShort(ticks: readonly number[], symbol: string) {
+export function axisShort(ticks: readonly number[], symbol: string, t: Pick<Messages, 'numberLocale' | 'axisUnits'>) {
   const top = Math.max(...ticks.map(Math.abs));
   const { thousand, million } = t.axisUnits;
+  const shortFmt = numberFormat(t.numberLocale, { maximumFractionDigits: 3 });
   const [div, unit] = top >= 1_000_000 ? [1_000_000, ` ${million}`] : top >= 10_000 ? [1_000, ` ${thousand}`] : [1, ''];
   return (v: number) => (v === 0 ? `0 ${symbol}` : `${shortFmt.format(v / div)}${unit} ${symbol}`);
 }
@@ -80,9 +80,9 @@ export function axisShort(ticks: readonly number[], symbol: string) {
 /** Formats a value already converted to the display currency. */
 const shownMoney = (view: View) => (v: number) => formatMoney(fromUnits(v, view.money), view.money);
 
-function moneyAxis(values: number[], view: View) {
+function moneyAxis(values: number[], view: View, t: Messages) {
   const ticks = niceTicks(Math.min(0, ...values), Math.max(0, ...values));
-  return { ticks, domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], tickFormatter: axisShort(ticks, view.money.symbol) };
+  return { ticks, domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], tickFormatter: axisShort(ticks, view.money.symbol, t) };
 }
 
 type ChartRow = ReturnType<typeof chartRows>[number];
@@ -120,11 +120,11 @@ export function ChartTip<Point>({ active, payload: all, label, fmt, title, descr
   );
 }
 
-const afterTitle = (_: unknown, point: ChartRow | undefined) => {
+const afterTitle = (t: Messages) => (_: unknown, point: ChartRow | undefined) => {
   const m = point?.month ?? 0;
   return m === 0 ? t.chartStart : t.afterTime(t.duration(m));
 };
-const monthTitle = (_: unknown, point: ChartRow | undefined) => t.monthN(point?.month ?? 0);
+const monthTitle = (t: Messages) => (_: unknown, point: ChartRow | undefined) => t.monthN(point?.month ?? 0);
 
 /**
  * Recharts makes the chart focusable for keyboard exploration but gives it no name, and the lines
@@ -188,6 +188,7 @@ export function useHiddenSeries<K extends string>(series: readonly Series<K>[], 
 function ChartLegend<K extends string>({ series, hidden, onToggle }: {
   series: readonly Series<K>[]; hidden: ReadonlySet<string>; onToggle: (key: K) => void;
 }) {
+  const t = useT();
   const lastShown = series.filter((s) => !hidden.has(s.key)).length === 1;
   return (
     <div className="chart-legend" role="group" aria-label={t.charts.legend}>
@@ -240,19 +241,19 @@ export interface HiddenProps {
 
 interface ChartProps extends HiddenProps { result: Result; view: View }
 
-const NET_WORTH_SERIES = [
+const netWorthSeries = (t: Messages) => [
   { key: 'buyer', label: t.buyerInvesting, color: BUYER, group: t.buyer, short: t.investing },
   { key: 'buyerNoInvest', label: t.buyerNoInvest, color: BUYER, dotted: true, group: t.buyer, short: t.notInvesting },
   { key: 'renter', label: t.renterInvesting, color: RENTER, group: t.renter, short: t.investing },
   { key: 'renterNoInvest', label: t.renterNoInvest, color: RENTER, dotted: true, group: t.renter, short: t.notInvesting },
 ] as const satisfies readonly Series<keyof ChartRow>[];
 
-const MONTHLY_SERIES = [
+const monthlySeries = (t: Messages) => [
   { key: 'buyerCost', label: t.buyer, color: BUYER },
   { key: 'renterCost', label: t.renter, color: RENTER },
 ] as const satisfies readonly Series<keyof ChartRow>[];
 
-const BREAKDOWN_SERIES = [
+const breakdownSeries = (t: Messages) => [
   { key: 'buyer', label: t.buyerInvesting, color: BUYER },
   { key: 'renter', label: t.renterInvesting, color: RENTER },
 ] as const satisfies readonly Series<'buyer' | 'renter'>[];
@@ -260,10 +261,12 @@ const BREAKDOWN_SERIES = [
 // Memoized: the results panel re-renders on every rent keystroke before the deferred inputs catch up.
 export const NetWorthChart = memo(function NetWorthChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
+  const t = useT();
+  const series = useMemo(() => netWorthSeries(t), [t]);
   const data = chartRows(result, view);
   const fmt = shownMoney(view);
-  const { hidden, toggle, shown } = useHiddenSeries(NET_WORTH_SERIES, held);
-  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view);
+  const { hidden, toggle, shown } = useHiddenSeries(series, held);
+  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view, t);
   // The break-even month compares the investing buyer with the renter, so it only means something while both are drawn.
   const marker = hidden.has('buyer') || hidden.has('renter') ? null : breakEvenX(result);
   const last = data[data.length - 1];
@@ -273,13 +276,13 @@ export const NetWorthChart = memo(function NetWorthChart({ result, view, ...held
   ].filter(Boolean).join(' ');
   return (
     <ChartFigure name={t.charts.netWorth} summary={summary}>
-      <ChartLegend series={NET_WORTH_SERIES} hidden={hidden} onToggle={toggle} />
+      <ChartLegend series={series} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={340}>
         <LineChart data={data} title={t.charts.netWorth} margin={{ top: 32, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} {...Y_AXIS} />
-          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={afterTitle} hidden={hidden} series={NET_WORTH_SERIES} />} cursor={LINE_CURSOR} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={afterTitle(t)} hidden={hidden} series={series} />} cursor={LINE_CURSOR} />
           {marker !== null && (
             <ReferenceLine
               x={marker}
@@ -302,10 +305,12 @@ export const NetWorthChart = memo(function NetWorthChart({ result, view, ...held
 export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
   // Month 0 is the purchase itself, not a monthly cost.
+  const t = useT();
+  const series = useMemo(() => monthlySeries(t), [t]);
   const data = chartRows(result, view).filter((d) => d.month > 0);
   const fmt = shownMoney(view);
-  const { hidden, toggle, shown } = useHiddenSeries(MONTHLY_SERIES, held);
-  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view);
+  const { hidden, toggle, shown } = useHiddenSeries(series, held);
+  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view, t);
   const first = data[0];
   const last = data[data.length - 1];
   const summary = first && last
@@ -315,13 +320,13 @@ export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view,
   // not smoothed curves that would invent a dip before the jump.
   return (
     <ChartFigure name={t.charts.monthly} summary={summary}>
-      <ChartLegend series={MONTHLY_SERIES} hidden={hidden} onToggle={toggle} />
+      <ChartLegend series={series} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={340}>
         <AreaChart data={data} title={t.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} {...Y_AXIS} />
-          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={monthTitle} hidden={hidden} series={MONTHLY_SERIES} />} cursor={LINE_CURSOR} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={monthTitle(t)} hidden={hidden} series={series} />} cursor={LINE_CURSOR} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={t.renter} hide={hidden.has('renterCost')} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
           <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={t.buyer} hide={hidden.has('buyerCost')} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
@@ -333,6 +338,8 @@ export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view,
 export const BreakdownChart = memo(function BreakdownChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
   // Totals are nominal sums; showing them in today's lei would need per-month deflation, so this chart stays nominal.
+  const t = useT();
+  const series = useMemo(() => breakdownSeries(t), [t]);
   const conv = (v: number) => toUnits(v, view.money);
   const b = result.buyer;
   const r = result.renter;
@@ -348,8 +355,8 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view, ...he
   ];
   const nominal = { ...view, real: false };
   const fmt = shownMoney(nominal);
-  const { hidden, toggle, shown } = useHiddenSeries(BREAKDOWN_SERIES, held);
-  const x = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), nominal);
+  const { hidden, toggle, shown } = useHiddenSeries(series, held);
+  const x = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), nominal, t);
   const summary = t.charts.breakdownSummary(
     data
       .map((d) => {
@@ -361,7 +368,7 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view, ...he
   );
   return (
     <ChartFigure name={t.charts.breakdown} summary={summary}>
-      <ChartLegend series={BREAKDOWN_SERIES} hidden={hidden} onToggle={toggle} />
+      <ChartLegend series={series} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={data} title={t.charts.breakdown} layout="vertical" barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} horizontal={false} />
@@ -369,7 +376,7 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view, ...he
           <YAxis type="category" dataKey="label" width={132} tick={TICK} axisLine={false} tickLine={false} />
           <Tooltip
             shared
-            content={(p) => <ChartTip {...p} fmt={fmt} hidden={hidden} series={BREAKDOWN_SERIES} title={String} description={data.find((row) => row.label === p.label)?.help} />}
+            content={(p) => <ChartTip {...p} fmt={fmt} hidden={hidden} series={series} title={String} description={data.find((row) => row.label === p.label)?.help} />}
             cursor={{ fill: 'var(--field)' }}
           />
           <Bar isAnimationActive={animate} dataKey="buyer" name={t.buyerInvesting} hide={hidden.has('buyer')} fill={BUYER} radius={[0, 3, 3, 0]} />

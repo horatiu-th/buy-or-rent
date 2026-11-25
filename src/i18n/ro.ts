@@ -43,6 +43,8 @@ export const ro = {
   city: 'Oraș',
   sqm: 'Suprafață utilă (m², fără balcon)',
   resetAll: 'Resetează tot',
+  /** `name` is the language's own name for itself, so a reader finds it whatever the page is showing. */
+  language: { label: 'Limbă', name: 'Română' },
   themes: {
     label: 'Temă',
     system: 'Ca sistemul',

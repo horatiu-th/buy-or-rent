@@ -4,7 +4,8 @@ import {
   assumptionSwings, horizonGaps, horizonThresholds, lastRow, sensitivity, SENSITIVITY_BASE, simulate,
   type HorizonResult, type Inputs, type MonthRow,
 } from '../engine';
-import { t } from '../i18n';
+import { useT, type Messages } from '../i18n';
+import { numberFormat } from '../i18n/numberFormat';
 import { formatMoney, inView, type View } from './money';
 import { Headline } from './Headline';
 import { RentScale } from './RentScale';
@@ -20,8 +21,8 @@ const NetWorthChart = lazy(() => loadCharts().then((m) => ({ default: m.NetWorth
 const MonthlyCostsChart = lazy(() => loadCharts().then((m) => ({ default: m.MonthlyCostsChart })));
 const BreakdownChart = lazy(() => loadCharts().then((m) => ({ default: m.BreakdownChart })));
 
-type Tab = keyof typeof t.tabs;
-const TABS = Object.keys(t.tabs) as Tab[];
+const TABS = ['netWorth', 'monthly', 'breakdown', 'sensitivity'] as const satisfies readonly (keyof Messages['tabs'])[];
+type Tab = (typeof TABS)[number];
 
 interface Props {
   inputs: Inputs;
@@ -32,13 +33,13 @@ interface Props {
   onRentChange: (lei: number) => void;
 }
 
-const pct = new Intl.NumberFormat(t.numberLocale, { style: 'percent', maximumFractionDigits: 1 });
-
 /**
  * The two rates that move the verdict most, with their current values, pointing to where their effect is
  * shown. The deposit rate is left out: it only moves the dotted lines, never the verdict.
  */
 function KeyAssumptions({ inputs, onShowSensitivity }: { inputs: Inputs; onShowSensitivity: () => void }) {
+  const t = useT();
+  const pct = numberFormat(t.numberLocale, { style: 'percent', maximumFractionDigits: 1 });
   const k = t.keyAssumptions;
   // Both are rounded to six decimals when derived from inflation, so a default is an exact match.
   const matchesInflation = Math.abs(inputs.propertyGrowth - inputs.inflation) < 1e-9;
@@ -53,6 +54,7 @@ function KeyAssumptions({ inputs, onShowSensitivity }: { inputs: Inputs; onShowS
 
 /** End-of-horizon figures for both sides, with the switch between today's money and nominal values. */
 function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; onToggleReal: (v: boolean) => void }) {
+  const t = useT();
   const fmt = (nominal: number) => formatMoney(inView(nominal, last.deflator, view), view.money);
   const hintId = useId();
   const items = [
@@ -94,6 +96,7 @@ function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; 
 
 // Memoized so keystrokes in the inputs panel don't re-render charts until the deferred inputs catch up.
 export const Results = memo(function Results({ inputs, liveRent, view, onToggleReal, onRentChange }: Props) {
+  const t = useT();
   const [tab, setTab] = useState<Tab>('netWorth');
   // Kept here, not in the charts: a chart unmounts when another tab opens, and the lines someone switched
   // off should stay off when they come back.

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { t } from '../i18n';
+import { useT } from '../i18n';
 import { CompareIcon } from './icons';
 
 const KEY = 'howWeCompareClosed';
@@ -17,6 +17,7 @@ function storedClosed(): boolean {
  * closes it, it stays closed on later visits, since returning users already know them.
  */
 export function HowWeCompare() {
+  const t = useT();
   const [open, setOpen] = useState(() => !storedClosed());
   return (
     <details

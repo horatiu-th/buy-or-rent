@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { t } from '../i18n';
+import { useT } from '../i18n';
+import { MenuPicker } from './MenuPicker';
 import { THEMES, type ThemeChoice } from './theme';
-import { useDismiss } from './useDismiss';
 import { ThemeIcon } from './icons';
 
 interface Props {
@@ -32,60 +31,19 @@ function Swatch({ choice }: { choice: ThemeChoice }) {
   );
 }
 
-/** A button that opens the list of themes. The list is a native radio group, so arrow keys move through it. */
+/** A palette button that opens the list of themes, each with a preview swatch. */
 export function ThemePicker({ choice, onChange }: Props) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLFieldSetElement>(null);
-  const panelId = useId();
-  const name = useId();
-
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(open, rootRef, close, buttonRef);
-
-  useEffect(() => {
-    // Focus starts on the current theme, so arrow keys preview the neighbours straight away.
-    if (open) panelRef.current?.querySelector<HTMLInputElement>('input:checked')?.focus();
-  }, [open]);
-
+  const t = useT();
   return (
-    <div className="theme-picker" ref={rootRef}>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="icon-button"
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-label={`${t.themes.label}: ${t.themes[choice]}`}
-        title={t.themes.label}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <ThemeIcon size={18} aria-hidden />
-      </button>
-      <fieldset
-        ref={panelRef}
-        id={panelId}
-        className="theme-menu"
-        hidden={!open}
-        // Enter confirms the theme the arrow keys landed on. Only inside the list: on the button,
-        // Enter already toggles the menu through its click.
-        onKeyDown={(e) => {
-          if (e.key !== 'Enter') return;
-          e.preventDefault();
-          close();
-          buttonRef.current?.focus();
-        }}
-      >
-        <legend className="visually-hidden">{t.themes.label}</legend>
-        {CHOICES.map((c) => (
-          <label key={c} className="theme-option">
-            <input type="radio" name={name} value={c} checked={choice === c} onChange={() => onChange(c)} />
-            <Swatch choice={c} />
-            <span>{t.themes[c]}</span>
-          </label>
-        ))}
-      </fieldset>
-    </div>
+    <MenuPicker
+      legend={t.themes.label}
+      value={choice}
+      options={CHOICES.map((c) => ({ value: c, label: t.themes[c], preview: <Swatch choice={c} /> }))}
+      onChange={onChange}
+      button={<ThemeIcon size={18} aria-hidden />}
+      buttonClassName="icon-button"
+      buttonLabel={`${t.themes.label}: ${t.themes[choice]}`}
+      buttonTitle={t.themes.label}
+    />
   );
 }

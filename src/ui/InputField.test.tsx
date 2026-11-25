@@ -5,7 +5,7 @@ import type { Inputs } from '../engine';
 import { fieldDef as def, type FieldDef } from './fields';
 import { InputField } from './InputField';
 import type { Money } from './money';
-import { t } from '../i18n';
+import { ro } from '../i18n/ro';
 import { LEI, euro } from '../test/money';
 
 const source = (over: Partial<SourcedValue>): SourcedValue => ({
@@ -144,12 +144,12 @@ describe('InputField', () => {
     const input = screen.getByLabelText('Chirie lunară');
     const toggle = screen.getByRole('button', { name: /Ajutor/ });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText(t.fields.rent.help)).not.toBeVisible();
+    expect(screen.getByText(ro.fields.rent.help)).not.toBeVisible();
     expect(input).toHaveAccessibleDescription(/Sursa X/);
 
     await userEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText(t.fields.rent.help)).toBeVisible();
+    expect(screen.getByText(ro.fields.rent.help)).toBeVisible();
     expect(input).toHaveAccessibleDescription(/Chiria pentru o locuință comparabilă\..*Sursa X/);
   });
 
@@ -159,7 +159,7 @@ describe('InputField', () => {
     await userEvent.click(toggle);
     const popover = screen.getByRole('note');
     expect(popover).toBeVisible();
-    expect(popover).toHaveTextContent(t.fields.rent.help);
+    expect(popover).toHaveTextContent(ro.fields.rent.help);
     expect(popover).toHaveTextContent('Sursa X');
     expect(toggle.parentElement).toContainElement(popover);
   });

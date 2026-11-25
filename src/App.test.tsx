@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { DEFAULTS } from './data/defaults';
-import { t } from './i18n';
+import { ro } from './i18n/ro';
 
 // Recharts' ResponsiveContainer needs ResizeObserver, which jsdom lacks.
 beforeAll(() => {
@@ -91,7 +91,7 @@ it('moves between chart tabs with Home and End', async () => {
 
 it('lets the area be cleared and retyped', async () => {
   render(<App />);
-  const sqm = screen.getByLabelText(t.sqm);
+  const sqm = screen.getByLabelText(ro.sqm);
   await userEvent.clear(sqm);
   expect(sqm).toHaveValue('');
   await userEvent.type(sqm, '7');
@@ -102,7 +102,7 @@ it('lets the area be cleared and retyped', async () => {
 
 it('groups the currency radios', () => {
   render(<App />);
-  const [a, b] = within(screen.getByRole('group', { name: t.currency })).getAllByRole('radio');
+  const [a, b] = within(screen.getByRole('group', { name: ro.currency })).getAllByRole('radio');
   expect(a.getAttribute('name')).toBeTruthy();
   expect(a.getAttribute('name')).toBe(b.getAttribute('name'));
 });
@@ -216,7 +216,7 @@ describe('typed values', () => {
 
   it('caps the area at its maximum', async () => {
     render(<App />);
-    const sqm = screen.getByLabelText(t.sqm);
+    const sqm = screen.getByLabelText(ro.sqm);
     await userEvent.clear(sqm);
     await userEvent.type(sqm, '5000');
     expect(new URLSearchParams(window.location.search).get('mp')).toBe('500');
@@ -309,13 +309,59 @@ describe('explanations', () => {
 
   it('explains flat lines only while values are in today\'s money', async () => {
     render(<App />);
-    expect(screen.getByText(t.realHint)).toBeInTheDocument();
+    expect(screen.getByText(ro.realHint)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('switch', { name: /Ajustat cu inflația/ }));
-    expect(screen.queryByText(t.realHint)).not.toBeInTheDocument();
+    expect(screen.queryByText(ro.realHint)).not.toBeInTheDocument();
   });
 });
 
 it('marks the switches with the native switch attribute', () => {
   render(<App />);
   for (const s of screen.getAllByRole('switch')) expect(s).toHaveAttribute('switch');
+});
+
+describe('language', () => {
+  afterEach(() => {
+    localStorage.clear();
+    Object.defineProperty(window.navigator, 'languages', { value: ['ro-RO', 'ro'], configurable: true });
+  });
+
+  it('switches the whole page and remembers the choice', async () => {
+    window.history.replaceState(null, '', '/?rent=1999');
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: 'Limbă: Română' }));
+    await userEvent.click(screen.getByRole('radio', { name: 'English' }));
+    expect(screen.getByRole('button', { name: 'Language: English' })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('Română', { selector: '.picker-option span' })).toHaveAttribute('lang', 'ro');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Buy or rent?');
+    expect(screen.getByLabelText('Monthly rent')).toHaveValue('1,999');
+    expect(document.documentElement.lang).toBe('en');
+    expect(document.title).toBe('Buy or rent?');
+    expect(localStorage.getItem('lang')).toBe('en');
+    // The language is a reader's preference, so it stays out of the shareable link.
+    expect(window.location.search).toBe('?rent=1999');
+  });
+
+  it("follows the browser's language on a first visit", () => {
+    Object.defineProperty(window.navigator, 'languages', { value: ['en-US', 'en'], configurable: true });
+    render(<App />);
+    expect(screen.getByRole('radio', { name: 'English', hidden: true })).toBeChecked();
+    expect(screen.getByLabelText('City')).toBeInTheDocument();
+  });
+
+  it('prefers a stored choice over the browser', () => {
+    Object.defineProperty(window.navigator, 'languages', { value: ['en-US'], configurable: true });
+    localStorage.setItem('lang', 'ro');
+    render(<App />);
+    expect(screen.getByRole('radio', { name: 'Română', hidden: true })).toBeChecked();
+  });
+
+  it('reads amounts typed in the English format', async () => {
+    localStorage.setItem('lang', 'en');
+    render(<App />);
+    const rent = screen.getByLabelText('Monthly rent');
+    await userEvent.clear(rent);
+    await userEvent.type(rent, '2,500');
+    expect(window.location.search).toContain('rent=2500');
+  });
 });

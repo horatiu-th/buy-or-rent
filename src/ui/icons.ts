@@ -10,4 +10,5 @@ export {
   ExternalLink as ExternalIcon,
   RotateCcw as ResetIcon,
   Palette as ThemeIcon,
+  Languages as LanguageIcon,
 } from 'lucide-react';

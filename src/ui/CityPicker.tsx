@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import type { DataFile } from '../data/schema';
-import { t } from '../i18n';
+import { useT } from '../i18n';
 import { clampSqm, SQM_MIN, type Scenario } from '../state/scenario';
 import { NumberInput } from './NumberInput';
 
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export function CityPicker({ data, cityId, sqm, onChange, children }: Props) {
+  const t = useT();
   const selectId = useId();
   const sqmId = useId();
 

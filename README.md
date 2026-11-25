@@ -2,7 +2,7 @@
 
 A buy-vs-rent calculator for Romania. It answers one question: **at what rent does buying a home pay off?**
 
-**Live:** https://horatiu-th.github.io/buy-or-rent/ · The interface is in Romanian.
+**Live:** https://horatiu-th.github.io/buy-or-rent/ · The interface is in Romanian and English.
 
 ## What it does
 
@@ -49,7 +49,7 @@ src/
   data/     Default values (generated) and the code that turns them into inputs
   state/    Scenario state, kept in the URL
   ui/       React components, charts, field definitions, currencies (money.ts) and themes (theme.ts)
-  i18n/     All interface text and language rules; Romanian today, one file per language
+  i18n/     All interface text and language rules, one file per language (Romanian, English)
 pipeline/   Scripts that fetch, validate and merge default data
 data/       Hand-maintained and fetched default values, plus their sources
 docs/       Documentation and the original design and plan

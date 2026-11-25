@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import type { EquivalentRent } from '../engine';
-import { t } from '../i18n';
+import { useT } from '../i18n';
 import { fieldDef } from './fields';
 import { formatMoney, type Money } from './money';
 
@@ -28,6 +28,7 @@ function niceCeil(x: number) {
  * never rescales the bar under the pointer.
  */
 export function RentScale({ eq, rent, price, money, onRentChange }: Props) {
+  const t = useT();
   const [heldMax, setHeldMax] = useState<number | null>(null);
   const baseMax = niceCeil(eq.kind === 'value' ? eq.rent * 2 : price * 0.01);
   const max = Math.max(heldMax ?? 0, rent > baseMax ? niceCeil(rent) : baseMax);

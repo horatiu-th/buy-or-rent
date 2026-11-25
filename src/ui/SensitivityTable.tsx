@@ -1,15 +1,19 @@
 import { useId } from 'react';
 import { SENSITIVITY_BASE, SENSITIVITY_STEPS, type Swing, type SwingKey } from '../engine';
-import { t } from '../i18n';
+import { useT } from '../i18n';
+import { numberFormat } from '../i18n/numberFormat';
 import { fieldDef } from './fields';
 import { formatMoney, type Money } from './money';
 import { GapCell, GapKey } from './GapCell';
 
 interface Props { grid: number[][]; baseGrowth: number; baseReturn: number; money: Money }
 
-const pct = (x: number) => `${(x * 100).toLocaleString(t.numberLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+const pctIn = (locale: string) => (x: number) =>
+  `${numberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(x * 100)}%`;
 
 export function SensitivityTable({ grid, baseGrowth, baseReturn, money }: Props) {
+  const t = useT();
+  const pct = pctIn(t.numberLocale);
   const captionId = useId();
   return (
     // Focusable so keyboard users can scroll it sideways when it is wider than a phone screen.
@@ -43,6 +47,8 @@ const isPctSwing = (key: SwingKey) => fieldDef(key).unit === 'pct';
 
 /** One assumption at a time moved down and up, for the inputs the grid above leaves fixed. */
 export function SwingsTable({ swings, base, money }: SwingsProps) {
+  const t = useT();
+  const pct = pctIn(t.numberLocale);
   const captionId = useId();
   const setting = (key: SwingKey, v: number) => (isPctSwing(key) ? pct(v) : formatMoney(v, money));
   const cell = (gap: number, label?: string, isBase = false) => (

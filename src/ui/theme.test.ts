@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { t } from '../i18n';
+import { ro } from '../i18n/ro';
 import { THEMES } from './theme';
 
 const css = readFileSync(resolve(__dirname, '../styles.css'), 'utf8');
@@ -30,7 +30,7 @@ describe.each(THEMES)('theme %s', (theme) => {
 
   it('sets every colour the light theme sets, and has a name', () => {
     expect(Object.keys(tk).sort()).toEqual([...REFERENCE].sort());
-    expect(t.themes[theme]).toBeTruthy();
+    expect(ro.themes[theme]).toBeTruthy();
   });
 
   it.each([

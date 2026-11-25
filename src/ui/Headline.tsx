@@ -1,5 +1,5 @@
 import type { EquivalentRent, Inputs } from '../engine';
-import { t } from '../i18n';
+import { useT } from '../i18n';
 import { formatMoney, type Money } from './money';
 
 type SaleInputs = Pick<Inputs, 'includeSaleCosts' | 'saleTaxShortPct' | 'saleTaxLongPct' | 'saleTaxShortHoldYears'>;
@@ -15,6 +15,7 @@ interface Props {
 }
 
 export function Headline({ eq, horizonMonths, breakEvenMonth, buyerEverAhead, sale, money }: Props) {
+  const t = useT();
   if (eq.kind === 'invalid') {
     return (
       <header className="headline">
