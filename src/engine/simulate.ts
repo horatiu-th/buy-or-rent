@@ -77,6 +77,10 @@ export function simulate(raw: Inputs): Result {
   const buyerPf: Portfolio = { value: 0, basis: 0 };
   const renterPf: Portfolio = { value: 0, basis: 0 };
   contribute(startGap > 0 ? renterPf : buyerPf, Math.abs(startGap));
+  // The households that don't invest have the same cash flows, but keep their spare cash in a bank
+  // deposit instead of a portfolio, so the two pairs differ only in where the savings go.
+  let buyerSavings = Math.max(0, -startGap);
+  let renterSavings = Math.max(0, startGap);
 
   const buyer: BuyerTotals = {
     downPayment, acquisitionCosts: acq, fitOut: i.fitOutCost, interest: 0, principal: 0, propertyTax: 0,
@@ -89,20 +93,28 @@ export function simulate(raw: Inputs): Result {
 
   const gProp = monthlyRate(i.propertyGrowth);
   const gInv = monthlyRate(i.investReturn);
+  // Interest tax is withheld as it is paid, so the deposit compounds at the rate after tax. A negative
+  // rate is a loss, and losses earn no tax back.
+  const gSav = monthlyRate(i.savingsRate > 0 ? i.savingsRate * (1 - i.savingsTaxRate) : i.savingsRate);
   const gInf = monthlyRate(i.inflation);
   let value = i.price;
   let balance = loan;
 
-  const snapshot = (month: number, buyerCost: number, renterCost: number): MonthRow => ({
-    month,
-    propertyValue: value,
-    loanBalance: balance,
-    buyerMonthlyCost: buyerCost,
-    renterMonthlyCost: renterCost,
-    buyerNetWorth: value - balance - saleCosts(value, month, i) + liquidate(buyerPf, i.investTaxRate).net,
-    renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
-    deflator: Math.pow(1 + gInf, month),
-  });
+  const snapshot = (month: number, buyerCost: number, renterCost: number): MonthRow => {
+    const equity = value - balance - saleCosts(value, month, i);
+    return {
+      month,
+      propertyValue: value,
+      loanBalance: balance,
+      buyerMonthlyCost: buyerCost,
+      renterMonthlyCost: renterCost,
+      buyerNetWorth: equity + liquidate(buyerPf, i.investTaxRate).net,
+      buyerNoInvestNetWorth: equity + buyerSavings,
+      renterNetWorth: liquidate(renterPf, i.investTaxRate).net + deposit,
+      renterNoInvestNetWorth: renterSavings + deposit,
+      deflator: Math.pow(1 + gInf, month),
+    };
+  };
 
   const rows: MonthRow[] = [snapshot(0, 0, 0)];
 
@@ -148,8 +160,12 @@ export function simulate(raw: Inputs): Result {
 
     buyerPf.value *= 1 + gInv;
     renterPf.value *= 1 + gInv;
+    buyerSavings *= 1 + gSav;
+    renterSavings *= 1 + gSav;
     const diff = buyerCost - renterCost;
     contribute(diff > 0 ? renterPf : buyerPf, Math.abs(diff));
+    if (diff > 0) renterSavings += diff;
+    else buyerSavings -= diff;
     buyer.cashOut += buyerCost + Math.max(0, -diff);
     renter.cashOut += renterCost + Math.max(0, diff);
 

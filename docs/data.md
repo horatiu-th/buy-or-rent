@@ -40,7 +40,7 @@ Every value is a `SourcedValue`:
 
 Values sit under `values` (global) or under `cities.<id>`: `name`, `priceSqmEur` (all apartments, old and new), `rentSqmEur`, `rentPriceSqmEur` (the sale €/m² from the same index as the rent), and optionally `propertyTaxSqm`, which replaces the global value (lei per m² per year) for that city.
 
-Most global keys are `Inputs` field names. The exceptions are values the inputs are computed from: `eurRon`, `negotiationPct`, `propertyTaxSqm`, and the real parts of the inflation-linked rates: `propertyRealGrowth`, `rentRealGrowth`, `investRealReturn` and `irccLongRunSpread`.
+Most global keys are `Inputs` field names. The exceptions are values the inputs are computed from: `eurRon`, `negotiationPct`, `propertyTaxSqm`, and the real parts of the inflation-linked rates: `propertyRealGrowth`, `rentRealGrowth`, `investRealReturn`, `savingsRealReturn` and `irccLongRunSpread`.
 
 The city `bucuresti` (`DEFAULT_CITY_ID` in `src/data/schema.ts`) must exist: an unknown city id, for example from an old shared link, falls back to it (`resolveCityId()` in `src/data/defaults.ts`).
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { t } from '../i18n';
+import { BuyIcon, RentIcon } from './icons';
 import { FIELDS, type FieldDef, type Topic } from './fields';
 import { InputField, type FieldBinding } from './InputField';
 
@@ -88,6 +89,7 @@ export function InputsPanel({ fields }: Props) {
                 aria-controls={bodyId}
                 onClick={() => toggle(group.id)}
               >
+                {group.id === 'buying' ? <BuyIcon className="group-icon" size="1em" aria-hidden /> : <RentIcon className="group-icon" size="1em" aria-hidden />}
                 <span id={`group-${group.id}-title`} className="group-title">{t.groups[group.id]}</span>
                 {!isOpen && groupEdits > 0 && <span className="edit-count">{t.editedCount(groupEdits)}</span>}
                 <span className="chevron" aria-hidden="true" />

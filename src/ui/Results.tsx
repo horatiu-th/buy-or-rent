@@ -1,4 +1,5 @@
 import { lazy, memo, Suspense, useId, useMemo, useState } from 'react';
+import type { HiddenProps } from './charts';
 import {
   assumptionSwings, horizonGaps, horizonThresholds, lastRow, sensitivity, SENSITIVITY_BASE, simulate,
   type HorizonResult, type Inputs, type MonthRow,
@@ -9,6 +10,8 @@ import { Headline } from './Headline';
 import { RentScale } from './RentScale';
 import { HorizonTable } from './HorizonTable';
 import { SensitivityTable, SwingsTable } from './SensitivityTable';
+import { HowWeCompare } from './HowWeCompare';
+import { NATIVE_SWITCH } from './switch';
 
 // The charting library is most of the page's JavaScript, so the charts load as a separate chunk and the
 // headline, rent scale and tables appear without waiting for it. All three share that one chunk.
@@ -29,11 +32,31 @@ interface Props {
   onRentChange: (lei: number) => void;
 }
 
+const pct = new Intl.NumberFormat(t.numberLocale, { style: 'percent', maximumFractionDigits: 1 });
+
+/**
+ * The two rates that move the verdict most, with their current values, pointing to where their effect is
+ * shown. The deposit rate is left out: it only moves the dotted lines, never the verdict.
+ */
+function KeyAssumptions({ inputs, onShowSensitivity }: { inputs: Inputs; onShowSensitivity: () => void }) {
+  const k = t.keyAssumptions;
+  // Both are rounded to six decimals when derived from inflation, so a default is an exact match.
+  const matchesInflation = Math.abs(inputs.propertyGrowth - inputs.inflation) < 1e-9;
+  return (
+    <p className="note">
+      {k.lead(pct.format(inputs.propertyGrowth), matchesInflation, pct.format(inputs.investReturn))}
+      <button type="button" className="link-button" onClick={onShowSensitivity}>{k.link}</button>
+      {k.tail}
+    </p>
+  );
+}
+
 /** End-of-horizon figures for both sides, with the switch between today's money and nominal values. */
 function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; onToggleReal: (v: boolean) => void }) {
   const fmt = (nominal: number) => formatMoney(inView(nominal, last.deflator, view), view.money);
+  const hintId = useId();
   const items = [
-    { cls: 'buyer', label: t.buyer, value: fmt(last.buyerNetWorth) },
+    { cls: 'buyer', label: t.buyerInvesting, value: fmt(last.buyerNetWorth) },
     { cls: 'renter', label: t.renterInvesting, value: fmt(last.renterNetWorth) },
   ];
   return (
@@ -41,10 +64,21 @@ function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; 
       {/* The switch sits with the figures it changes, not floating above them. */}
       <div className="end-summary-head">
         <p className="end-summary-title">{t.atHorizon(t.duration(last.month), view.real, view.money)}</p>
-        <label className="switch summary-switch">
-          <input type="checkbox" role="switch" checked={view.real} onChange={(e) => onToggleReal(e.target.checked)} />
-          <span>{t.realValues(view.money)}</span>
-        </label>
+        <div className="summary-switch-block">
+          <label className="switch summary-switch">
+            <input
+              type="checkbox"
+              {...NATIVE_SWITCH}
+              role="switch"
+              checked={view.real}
+              aria-describedby={view.real ? hintId : undefined}
+              onChange={(e) => onToggleReal(e.target.checked)}
+            />
+            <span>{t.realValues(view.money)}</span>
+          </label>
+          {/* Under the label, not beside it: it explains what the switch does to the chart. */}
+          {view.real && <p id={hintId} className="summary-hint">{t.realHint}</p>}
+        </div>
       </div>
       <dl>
         {items.map((it) => (
@@ -61,7 +95,18 @@ function EndSummary({ last, view, onToggleReal }: { last: MonthRow; view: View; 
 // Memoized so keystrokes in the inputs panel don't re-render charts until the deferred inputs catch up.
 export const Results = memo(function Results({ inputs, liveRent, view, onToggleReal, onRentChange }: Props) {
   const [tab, setTab] = useState<Tab>('netWorth');
+  // Kept here, not in the charts: a chart unmounts when another tab opens, and the lines someone switched
+  // off should stay off when they come back.
+  const [hiddenSeries, setHiddenSeries] = useState<Partial<Record<Tab, ReadonlySet<string>>>>({});
+  const held = useMemo(() => {
+    const forTab = (id: Tab): HiddenProps['onHiddenChange'] => (h) => setHiddenSeries((prev) => ({ ...prev, [id]: h }));
+    return { netWorth: forTab('netWorth'), monthly: forTab('monthly'), breakdown: forTab('breakdown') };
+  }, []);
   const panelId = useId();
+  const showSensitivity = () => {
+    setTab('sensitivity');
+    document.getElementById(`${panelId}-sensitivity`)?.focus();
+  };
   const result = useMemo(() => simulate(inputs), [inputs]);
   const last = lastRow(result.rows);
   const chosenYears = last.month / 12;
@@ -85,6 +130,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
 
   return (
     <div className="results">
+      <HowWeCompare />
       <Headline
         eq={eq}
         horizonMonths={last.month}
@@ -143,9 +189,9 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
         <div role="tabpanel" id={panelId} aria-labelledby={`${panelId}-${tab}`} className="chart-panel">
           {/* The panel keeps its height while the chart chunk loads, so nothing below it jumps. */}
           <Suspense fallback={null}>
-            {tab === 'netWorth' && <NetWorthChart result={result} view={view} />}
-            {tab === 'monthly' && <MonthlyCostsChart result={result} view={view} />}
-            {tab === 'breakdown' && <BreakdownChart result={result} view={view} />}
+            {tab === 'netWorth' && <NetWorthChart result={result} view={view} hidden={hiddenSeries.netWorth} onHiddenChange={held.netWorth} />}
+            {tab === 'monthly' && <MonthlyCostsChart result={result} view={view} hidden={hiddenSeries.monthly} onHiddenChange={held.monthly} />}
+            {tab === 'breakdown' && <BreakdownChart result={result} view={view} hidden={hiddenSeries.breakdown} onHiddenChange={held.breakdown} />}
           </Suspense>
           {sens && (
             <>
@@ -153,6 +199,7 @@ export const Results = memo(function Results({ inputs, liveRent, view, onToggleR
               <SwingsTable swings={sens.swings} base={sens.grid[SENSITIVITY_BASE][SENSITIVITY_BASE]} money={view.money} />
             </>
           )}
+          {tab === 'netWorth' && <KeyAssumptions inputs={inputs} onShowSensitivity={showSensitivity} />}
           {nominalOnly && <p className="note">{t.nominalNote}</p>}
         </div>
       </div>

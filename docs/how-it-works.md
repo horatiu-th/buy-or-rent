@@ -72,6 +72,14 @@ Net worth is what each household would have **if it liquidated everything that m
 |---|---|
 | Buyer | property value − loan balance − sale costs + investments after tax on gains |
 | Renter who invests | investments after tax on gains + rental deposit |
+| Buyer who doesn't invest | property value − loan balance − sale costs + bank deposit |
+| Renter who doesn't invest | bank deposit + rental deposit |
+
+The bank deposit earns `savingsRate` (by default equal to inflation), after the interest tax `savingsTaxRate`; a negative rate is a loss and gets no tax back.
+
+The households that don't invest have exactly the same cash flows as the ones that do: the same starting cash and monthly surplus go into a bank deposit instead of a portfolio. So all four spend the same, the two dotted lines compare buying and renting for a saver who only uses a bank deposit, and the gap between a solid line and the dotted line of the same colour is what investing earns over the deposit.
+
+The households that don't invest only appear on the net-worth chart. The verdict, the break-even rent and the other tables compare the two that invest.
 
 
 **Sale costs** are the agency fee plus the property transfer tax, both as a share of the sale value. The tax rate is higher if the home has been owned for up to `saleTaxShortHoldYears` inclusive (3% up to and including 3 years, 1% after, under current Romanian rules), so month 36 still uses the higher rate and month 37 the lower one. Because net worth assumes a sale each month, the buyer's line jumps up when the lower rate kicks in. The interface explains this when it affects the result.

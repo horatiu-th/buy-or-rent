@@ -18,7 +18,7 @@ It shows:
 - **Other horizons:** the threshold and the gap after 5, 10, 20 and 30 years, since how long you stay matters more than the loan term.
 - **Charts:** net worth over time, monthly costs, where the money goes, and how sensitive the result is to price growth, investment returns, rent, rent growth, long-run interest rates and upkeep.
 
-In the default theme, blue represents the buyer and teal represents the renter; other themes use their own pair. In tables, a circle marks a buying win and a diamond a renting win. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
+In the default theme, blue represents the buyer and teal represents the renter; other themes use their own pair. In tables, a house icon marks a buying win and a key icon a renting win. Under **Închiriere**, the investment return and investment tax fields follow the rental costs. Both households use these rates when they invest a surplus.
 
 Every input can be changed, values are shown in today's money by default (in lei or €), and any scenario can be shared as a link. Six colour themes, including a high-contrast one, are in the palette menu.
 

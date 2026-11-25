@@ -11,6 +11,7 @@ import { moneyFor } from './ui/money';
 import { useScenario } from './state/useScenario';
 import { useTheme } from './ui/theme';
 import { TopBar } from './ui/TopBar';
+import { ExternalIcon } from './ui/icons';
 
 const SOURCES_URL = 'https://github.com/horatiu-th/buy-or-rent/blob/main/data/SOURCES.md';
 
@@ -82,7 +83,12 @@ export default function App() {
           {data.values.eurRon.status === 'stale' && ` (${t.stale})`}
         </p>
         <p>
-          <a href={SOURCES_URL} target="_blank" rel="noreferrer">{t.footer.sources}</a>
+          <a href={SOURCES_URL} target="_blank" rel="noreferrer" className="external-link">
+            {t.footer.sources}
+            <ExternalIcon size="0.95em" aria-hidden />
+            {/* The icon shows sighted users the link opens elsewhere; this says it to everyone else. */}
+            <span className="visually-hidden">{t.footer.newTab}</span>
+          </a>
         </p>
       </footer>
     </div>

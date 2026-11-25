@@ -33,6 +33,7 @@ describe('buildInputs', () => {
     expect(i.propertyGrowth).toBeCloseTo(1.05 * (1 + real('propertyRealGrowth')) - 1, 6);
     expect(i.rentGrowth).toBeCloseTo(1.05 * (1 + real('rentRealGrowth')) - 1, 6);
     expect(i.investReturn).toBeCloseTo(1.05 * (1 + real('investRealReturn')) - 1, 6);
+    expect(i.savingsRate).toBeCloseTo(1.05 * (1 + real('savingsRealReturn')) - 1, 6);
     expect(i.irccLongRun).toBeCloseTo(0.05 + real('irccLongRunSpread'), 6);
     expect(buildInputs(data, 'cluj', 50).inflation).toBe(data.values.inflation.value);
   });
@@ -52,6 +53,7 @@ describe('resolveInputs', () => {
     const i = resolveInputs(data, 'cluj', 50, { inflation: 0.06, rentGrowth: 0.02 });
     expect(i.inflation).toBe(0.06);
     expect(i.investReturn).toEqual(buildInputs(data, 'cluj', 50, 0.06).investReturn);
+    expect(i.savingsRate).toEqual(buildInputs(data, 'cluj', 50, 0.06).savingsRate);
     expect(i.rentGrowth).toBe(0.02);
   });
 

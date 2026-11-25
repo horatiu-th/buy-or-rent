@@ -37,6 +37,10 @@ export interface Inputs {
   investReturn: number; // annual, gross
   investTaxRate: number; // on gains, applied at liquidation
 
+  // Bank deposit, for the households that don't invest
+  savingsRate: number; // annual, gross interest on a term deposit in lei
+  savingsTaxRate: number; // on interest, withheld by the bank
+
   // Sale at horizon
   includeSaleCosts: boolean;
   saleAgencyPct: number;
@@ -57,7 +61,11 @@ export interface MonthRow {
   /** Cash the renter spends on housing that month; in a move month this includes the move and the deposit top-up. */
   renterMonthlyCost: number;
   buyerNetWorth: number;
+  /** The same buyer if the spare cash goes into a bank deposit instead of being invested. */
+  buyerNoInvestNetWorth: number;
   renterNetWorth: number;
+  /** The same renter if the spare cash goes into a bank deposit instead of being invested. */
+  renterNoInvestNetWorth: number;
   /** Divide a nominal value by this to get today's lei. */
   deflator: number;
 }

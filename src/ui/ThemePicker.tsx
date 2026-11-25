@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { t } from '../i18n';
 import { THEMES, type ThemeChoice } from './theme';
 import { useDismiss } from './useDismiss';
+import { ThemeIcon } from './icons';
 
 interface Props {
   choice: ThemeChoice;
@@ -30,15 +31,6 @@ function Swatch({ choice }: { choice: ThemeChoice }) {
     </span>
   );
 }
-
-const PaletteIcon = () => (
-  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.7 1.8-1.7H16a5 5 0 0 0 5-5C21 6.6 17 3 12 3Z" />
-    <circle cx="7.5" cy="11.5" r="1" fill="currentColor" />
-    <circle cx="10.5" cy="7.5" r="1" fill="currentColor" />
-    <circle cx="15.5" cy="8" r="1" fill="currentColor" />
-  </svg>
-);
 
 /** A button that opens the list of themes. The list is a native radio group, so arrow keys move through it. */
 export function ThemePicker({ choice, onChange }: Props) {
@@ -69,7 +61,7 @@ export function ThemePicker({ choice, onChange }: Props) {
         title={t.themes.label}
         onClick={() => setOpen((o) => !o)}
       >
-        <PaletteIcon />
+        <ThemeIcon size={18} aria-hidden />
       </button>
       <fieldset
         ref={panelRef}

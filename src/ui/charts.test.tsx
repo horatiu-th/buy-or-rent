@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { simulate, type Result } from '../engine';
 import { baseInputs } from '../engine/fixtures';
 import {
-  axisShort, BreakdownChart, breakEvenX, chartRows, MonthlyCostsChart, NetWorthChart, niceTicks, yearTicks,
+  axisShort, BreakdownChart, breakEvenX, ChartTip, chartRows, MonthlyCostsChart, NetWorthChart, niceTicks, yearTicks,
 } from './charts';
 import type { View } from './money';
 import { LEI, euro } from '../test/money';
@@ -105,5 +106,47 @@ describe('chart text alternatives', () => {
     const figure = screen.getByRole('figure');
     expect(figure).toHaveAccessibleName(name);
     expect(figure.textContent).toMatch(/lei/);
+  });
+});
+
+describe('legend toggles', () => {
+  const result = simulate(baseInputs);
+  const toggle = (name: string) => screen.getByRole('button', { name });
+
+  it('hides a series and shows it again', async () => {
+    const user = userEvent.setup();
+    render(<NetWorthChart result={result} view={view} />);
+    expect(toggle('Cumpărător care nu investește')).toHaveAttribute('aria-pressed', 'true');
+    await user.click(toggle('Cumpărător care nu investește'));
+    expect(toggle('Cumpărător care nu investește')).toHaveAttribute('aria-pressed', 'false');
+    await user.click(toggle('Cumpărător care nu investește'));
+    expect(toggle('Cumpărător care nu investește')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps the last visible series on', async () => {
+    const user = userEvent.setup();
+    render(<MonthlyCostsChart result={result} view={view} />);
+    await user.click(toggle('Chiriaș'));
+    expect(toggle('Cumpărător')).toHaveAttribute('aria-disabled', 'true');
+    await user.click(toggle('Cumpărător'));
+    expect(toggle('Cumpărător')).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('ChartTip', () => {
+  it('lists rows in legend order and draws dotted lines with a dotted sample', () => {
+    const series = [
+      { key: 'buyer', label: 'B', color: 'blue' },
+      { key: 'buyerNoInvest', label: 'B0', color: 'blue', dotted: true },
+    ];
+    const payload = [
+      { name: 'B0', value: 1, dataKey: 'buyerNoInvest', color: 'blue' },
+      { name: 'B', value: 2, dataKey: 'buyer', color: 'blue' },
+    ];
+    const { container } = render(<ChartTip active payload={payload} fmt={String} series={series} />);
+    const rows = [...container.querySelectorAll('.chart-tip-row')];
+    expect(rows.map((r) => r.textContent)).toEqual(['B2', 'B01']);
+    expect(rows[1].querySelector('.swatch')).toHaveClass('dotted');
+    expect(rows[0].querySelector('.swatch')).not.toHaveClass('dotted');
   });
 });

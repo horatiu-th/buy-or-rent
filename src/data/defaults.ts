@@ -54,6 +54,7 @@ export function inflationLinked(data: DataFile, inflation: number) {
     propertyGrowth: nominal(inflation, v('propertyRealGrowth')),
     rentGrowth: nominal(inflation, v('rentRealGrowth')),
     investReturn: nominal(inflation, v('investRealReturn')),
+    savingsRate: nominal(inflation, v('savingsRealReturn')),
     irccLongRun: Math.max(0, +(inflation + v('irccLongRunSpread')).toFixed(6)),
   };
 }
@@ -91,6 +92,7 @@ export function buildInputs(
     moveEveryYears: v('moveEveryYears'),
     moveCost: v('moveCost'),
     investTaxRate: v('investTaxRate'),
+    savingsTaxRate: v('savingsTaxRate'),
     saleAgencyPct: v('saleAgencyPct'),
     saleTaxShortPct: v('saleTaxShortPct'),
     saleTaxLongPct: v('saleTaxLongPct'),
@@ -115,6 +117,7 @@ const REAL_PART: Partial<Record<keyof Inputs, ValueKey>> = {
   propertyGrowth: 'propertyRealGrowth',
   rentGrowth: 'rentRealGrowth',
   investReturn: 'investRealReturn',
+  savingsRate: 'savingsRealReturn',
   irccLongRun: 'irccLongRunSpread',
 };
 

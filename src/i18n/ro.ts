@@ -65,13 +65,14 @@ export const ro = {
     threshold: 'Prag',
   },
   atHorizon: (after: string, real: boolean, money: Money) => {
-    const basis = money.isBase ? 'lei de azi' : `lei de azi, convertiți în ${money.symbol}`;
-    return `Avere netă după ${after} (${real ? basis : 'valori nominale'})`;
+    const basis = money.isBase ? 'în lei de azi' : `în lei de azi, convertiți în ${money.symbol}`;
+    return `Avere netă după ${after}, ${real ? basis : 'în valori nominale'}`;
   },
   tabsLabel: 'Grafice',
   footer: {
     rate: (rate: string, date: string) => `Curs BNR: ${rate} lei/€, din ${date.split('-').reverse().join('.')}.`,
     sources: 'Surse și ipoteze pentru valorile implicite',
+    newTab: '(se deschide într-o filă nouă)',
   },
   resultsLabel: 'Rezultate',
   breakEvenMark: 'Cumpărarea trece în față',
@@ -79,16 +80,36 @@ export const ro = {
   // so "euro of today" would wrongly suggest euro-area inflation.
   realValues: (money: Money) =>
     money.isBase
-      ? 'Ajustat cu inflația din România (lei de azi)'
-      : `Ajustat cu inflația din România (lei de azi, convertiți în ${money.symbol} la cursul de azi)`,
+      ? 'Ajustat cu inflația din România'
+      : `Ajustat cu inflația din România, ${money.symbol} la cursul de azi`,
   nominalNote: 'Valori nominale: aici sumele nu sunt ajustate cu inflația.',
+  realHint: 'O valoare care crește cât inflația apare ca linie orizontală.',
+  howWeCompare: {
+    title: 'Cum comparăm',
+    paragraphs: [
+      'Două gospodării pornesc cu aceiași bani și plătesc lunar aceeași sumă: una cumpără cu credit, cealaltă stă în chirie. Cine are cheltuieli mai mici cu locuința investește diferența. La fel la început: cine cheltuiește mai puțin investește restul, de obicei chiriașul, care nu plătește avansul și costurile de cumpărare.',
+      'Averea netă e ce ar avea fiecare dacă ar vinde totul în luna respectivă: locuința minus creditul și costurile de vânzare, plus investițiile după impozit. De aceea cumpărătorul pornește de obicei în urmă: taxele de cumpărare sunt deja plătite.',
+      'Verdictul compară cele două gospodării care investesc, la orizontul ales. Liniile punctate din grafic arată aceleași gospodării cu economiile ținute în depozit bancar și nu schimbă verdictul.',
+    ],
+  },
+  keyAssumptions: {
+    lead: (property: string, matchesInflation: boolean, invest: string) =>
+      `Verdictul depinde mai ales de două ipoteze: locuința se scumpește cu ${property} pe an${matchesInflation ? ', cât inflația' : ''}, iar investițiile aduc ${invest} pe an. Vezi în tab-ul `,
+    link: 'Sensibilitate',
+    tail: ' cât schimbă rezultatul.',
+  },
   source: 'sursa',
   stale: 'date vechi',
   toCheck: 'de verificat',
   assumptions: 'Valorile implicite sunt ipoteze, nu prognoze. Verifică-le pentru situația ta.',
   buyer: 'Cumpărător',
   renter: 'Chiriaș',
+  buyerInvesting: 'Cumpărător care investește',
   renterInvesting: 'Chiriaș care investește',
+  buyerNoInvest: 'Cumpărător care nu investește',
+  renterNoInvest: 'Chiriaș care nu investește',
+  investing: 'investește',
+  notInvesting: 'nu investește',
   chartStart: 'La început',
   afterTime: (d: string) => `După ${d}`,
   monthN: (n: number) => `Luna ${n}`,
@@ -96,11 +117,14 @@ export const ro = {
     netWorth: 'Grafic: averea netă în timp',
     monthly: 'Grafic: costurile lunare în timp',
     breakdown: 'Grafic: unde se duc banii',
-    netWorthSummary: (span: string, buyer: string, renter: string) =>
-      `Averea netă lună de lună, pe ${span}. La final: cumpărător ${buyer}, chiriaș care investește ${renter}.`,
+    legend: 'Serii afișate în grafic',
+    netWorthSummary: (span: string, buyer: string, renter: string, buyerNoInvest: string, renterNoInvest: string) =>
+      `Averea netă lună de lună, pe ${span}. La final: cumpărător care investește ${buyer}, chiriaș care investește ${renter}, cumpărător care nu investește ${buyerNoInvest}, chiriaș care nu investește ${renterNoInvest}.`,
     breakEvenSummary: (after: string) => `Cumpărarea trece în față după ${after} și rămâne în față până la finalul orizontului ales.`,
     monthlySummary: (firstBuyer: string, firstRenter: string, lastBuyer: string, lastRenter: string) =>
       `Costul lunar în prima lună: cumpărător ${firstBuyer}, chiriaș ${firstRenter}. În ultima lună: cumpărător ${lastBuyer}, chiriaș ${lastRenter}.`,
+    noInvestNote: 'Liniile punctate: aceleași gospodării, cu aceiași bani economisiți, dar ținuți într-un depozit bancar în loc să fie investiți. Diferența față de linia plină de aceeași culoare e ce aduce investiția în plus față de depozit.',
+    lastSeries: 'Cel puțin o serie rămâne afișată.',
     breakdownSummary: (items: string) => `Totaluri pe tot orizontul, în valori nominale. ${items}.`,
   },
   headlineValue: (after: string, rent: string) =>
@@ -222,9 +246,11 @@ export const ro = {
     maintenancePct: { label: 'Întreținere și reparații', help: 'Procent anual din valoarea locuinței, inclusiv o renovare completă a apartamentului la circa 20 de ani. Implicit 1%, regula uzuală; o renovare standard la 20 de ani costă cam 1% pe an din prețul mediu național (2026).' },
     propertyGrowth: { label: 'Creștere preț locuință', help: 'Creștere anuală presupusă, nominală. Implicit egală cu inflația: în 2015–2025 prețurile locuințelor au crescut cam cât inflația, iar în termeni reali sunt încă cu peste o treime sub nivelul din 2009.' },
     rentGrowth: { label: 'Creștere chirie', help: 'Creștere anuală presupusă, nominală. Implicit egală cu inflația, cum au crescut chiriile în 2015–2025.' },
-    inflation: { label: 'Inflație', help: 'Inflația anuală din România, pe termen lung. Creșterea prețurilor și a chiriilor, randamentul investițiilor și IRCC pe termen lung pornesc implicit de la ea și se mișcă odată cu ea, dacă nu le-ai modificat. Indexează impozitul și costul mutărilor și e folosită pentru afișarea în lei de azi: sumele viitoare sunt readuse la puterea de cumpărare de azi, iar în € sunt apoi convertite la cursul de azi.' },
+    inflation: { label: 'Inflație', help: 'Inflația anuală din România, pe termen lung. Creșterea prețurilor și a chiriilor, randamentul investițiilor, dobânda la depozit și IRCC pe termen lung pornesc implicit de la ea și se mișcă odată cu ea, dacă nu le-ai modificat. Indexează impozitul și costul mutărilor și e folosită pentru afișarea în lei de azi: sumele viitoare sunt readuse la puterea de cumpărare de azi, iar în € sunt apoi convertite la cursul de azi.' },
     investReturn: { label: 'Randament investiții', help: 'Randament anual nominal, în lei, al banilor neinvestiți în locuință, după costurile fondului și înainte de impozit. Implicit: un ETF global de acțiuni, cu 3,5% peste inflație. Pentru un portofoliu mai prudent, folosește o valoare mai mică.' },
     investTaxRate: { label: 'Impozit pe câștig', help: 'Aplicat câștigului din investiții la final. În 2026: 3% prin broker românesc pentru dețineri de peste un an, 16% prin broker străin. CASS, datorat peste anumite praguri de venit, nu e inclus.' },
+    savingsRate: { label: 'Dobândă depozit bancar', help: 'Dobânda anuală brută la un depozit la termen în lei. Folosită pentru gospodăriile care nu investesc: banii economisiți, la început și lunar, stau într-un depozit în loc să fie investiți. Implicit egală cu inflația: pe termen lung, dobânzile la depozite au stat în jurul inflației sau sub ea. În septembrie 2026, dobânda medie la depozitele noi ale populației era 5,07% (BNR).' },
+    savingsTaxRate: { label: 'Impozit pe dobândă', help: 'Reținut de bancă la plata dobânzii. În 2026: 10%.' },
     renterInsuranceAnnual: { label: 'Asigurare chiriaș', help: 'Pe an.' },
     depositMonths: { label: 'Garanție chirie', help: 'Număr de chirii lunare date ca garanție, returnată la final.' },
     rentAgencyPct: { label: 'Comision agenție la închiriere', help: 'Procent dintr-o chirie lunară, plătit la început și la fiecare mutare. Adesea 50%; 0 dacă închiriezi direct de la proprietar.' },

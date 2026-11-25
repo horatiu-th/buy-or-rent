@@ -74,6 +74,8 @@ export const FIELDS: readonly FieldDef[] = [
 
   { key: 'investReturn', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },
   { key: 'investTaxRate', unit: 'pct', topic: 'renting', min: 0, max: 0.5, step: 0.01 },
+  { key: 'savingsRate', unit: 'pct', topic: 'renting', min: -0.2, max: 0.3, step: 0.005 },
+  { key: 'savingsTaxRate', unit: 'pct', topic: 'renting', min: 0, max: 0.5, step: 0.01 },
 
   { key: 'horizonYears', unit: 'years', topic: 'general', min: MIN_HORIZON_YEARS, max: MAX_HORIZON_YEARS, step: 1 },
   { key: 'inflation', unit: 'pct', topic: 'general', min: -0.1, max: 0.5, step: 0.005 },

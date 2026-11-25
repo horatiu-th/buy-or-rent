@@ -238,6 +238,22 @@
       "asOf": "2026-10-19",
       "status": "manual"
     },
+    "savingsRealReturn": {
+      "value": 0,
+      "unit": "%",
+      "source": "Ipoteză: dobânda la depozitele la termen în lei = inflația. Pe termen lung, dobânzile la depozite au stat în jurul inflației sau sub ea; BNR, dobânda medie la depozitele noi ale populației: 5,07% (sept. 2026), sub inflația curentă, după Financiarul",
+      "sourceUrl": "https://financiarul.ro/finante-si-banci/dobanzile-medii-la-creditele-noi-in-lei-au-scazut-la-7-70-iar-cele-la-depozitele-noi-in-lei-au-urcat-la-5-31-sub-inflatie/",
+      "asOf": "2026-11-25",
+      "status": "manual"
+    },
+    "savingsTaxRate": {
+      "value": 0.1,
+      "unit": "%",
+      "source": "Codul fiscal art. 97: 10% pe dobânzile la depozite, reținut la sursă de bancă",
+      "sourceUrl": "https://www.noulcodfiscal.ro/titlu-4/capitol-5/articol-97.html",
+      "asOf": "2026-11-25",
+      "status": "manual"
+    },
     "irccLongRunSpread": {
       "value": 0.01,
       "unit": "pp",

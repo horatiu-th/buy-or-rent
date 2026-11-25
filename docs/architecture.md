@@ -92,7 +92,7 @@ Changing city or size drops edited price, rent and property tax, since they desc
 | `charts.tsx` | Net worth, monthly costs and breakdown charts, each with its own legend and a shared tooltip |
 | `SensitivityTable.tsx` | The ±2 percentage point grid, and `SwingsTable`: rent, rent growth, long-run IRCC and upkeep rate moved one at a time |
 | `HorizonTable.tsx` | The rent threshold and net-worth gap at 5, 10, 20 and 30 years and the chosen horizon |
-| `GapCell.tsx` | The table cell for "who wins, and by how much": an unsigned amount in the winner's colour, with a circle (buying) or diamond (renting) marker; amounts that round to zero show as a tie |
+| `GapCell.tsx` | The table cell for "who wins, and by how much": an unsigned amount in the winner's colour, led by a house (buying) or key (renting) icon; amounts that round to zero show as a tie |
 | `money.ts` | `CURRENCIES` (symbol and rate per currency), `Money` (a currency ready to display) and `formatMoney()` |
 | `format.ts` | Reading typed numbers (`parseNumber`) and writing them back into inputs |
 

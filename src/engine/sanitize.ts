@@ -16,9 +16,9 @@ const NON_NEGATIVE = [
   'buyerAgencyPct', 'homeInsurancePct', 'rentAgencyPct', 'fitOutCost', 'moveEveryYears', 'moveCost',
 ] as const satisfies readonly (keyof Inputs)[];
 
-const TAX_RATES = ['investTaxRate', 'saleTaxShortPct', 'saleTaxLongPct'] as const satisfies readonly (keyof Inputs)[];
+const TAX_RATES = ['investTaxRate', 'savingsTaxRate', 'saleTaxShortPct', 'saleTaxLongPct'] as const satisfies readonly (keyof Inputs)[];
 
-const GROWTH_RATES = ['propertyGrowth', 'rentGrowth', 'investReturn', 'inflation'] as const satisfies readonly (keyof Inputs)[];
+const GROWTH_RATES = ['propertyGrowth', 'rentGrowth', 'investReturn', 'savingsRate', 'inflation'] as const satisfies readonly (keyof Inputs)[];
 
 // The simulation steps in whole months and the schedule in whole years of fixed and total term.
 const WHOLE_NUMBERS = ['horizonYears', 'loanTermYears', 'fixedYears', 'depositMonths', 'moveEveryYears'] as const satisfies readonly (keyof Inputs)[];

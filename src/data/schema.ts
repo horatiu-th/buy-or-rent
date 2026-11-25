@@ -41,7 +41,7 @@ export const REQUIRED_VALUE_KEYS = [
   'depositMonths', 'investRealReturn', 'investTaxRate', 'saleAgencyPct', 'saleTaxShortPct',
   'saleTaxLongPct', 'saleTaxShortHoldYears', 'horizonYears', 'inflation',
   'buyerAgencyPct', 'irccLongRunSpread', 'homeInsurancePct', 'rentAgencyPct', 'negotiationPct',
-  'fitOutCost', 'moveEveryYears', 'moveCost',
+  'fitOutCost', 'moveEveryYears', 'moveCost', 'savingsRealReturn', 'savingsTaxRate',
 ] as const;
 export type ValueKey = (typeof REQUIRED_VALUE_KEYS)[number];
 

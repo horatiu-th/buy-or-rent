@@ -7,6 +7,8 @@ import { isWholeField, normalizeField, type FieldDef, type NumberFieldDef } from
 import { toUnits, fromUnits, type Money } from './money';
 import { NumberInput } from './NumberInput';
 import { useDismiss } from './useDismiss';
+import { NATIVE_SWITCH } from './switch';
+import { HelpIcon } from './icons';
 
 /**
  * Everything a field needs from the scenario, looked up by its key. The generic accessors keep a
@@ -96,7 +98,7 @@ export function InputField({ def, fields, disabled }: Props) {
           aria-controls={popoverId}
           aria-label={`${t.help}: ${text.label}`}
           onClick={() => setShowHelp((v) => !v)}
-        >i</button>
+        ><HelpIcon size="1.15rem" strokeWidth={1.75} aria-hidden /></button>
         {/* Kept in the DOM while closed so the input's description can still point at the source. */}
         <span id={popoverId} role="note" className="help-popover" hidden={!showHelp}>
           <span id={helpId} className="help-text">{text.help}</span>
@@ -123,6 +125,7 @@ export function InputField({ def, fields, disabled }: Props) {
             <input
               id={id}
               type="checkbox"
+              {...NATIVE_SWITCH}
               role="switch"
               aria-describedby={describedBy}
               checked={fields.value(def.key)}

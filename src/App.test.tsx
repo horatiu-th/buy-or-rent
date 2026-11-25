@@ -59,10 +59,10 @@ it('keeps the summary adjustment independent of the nominal sensitivity table', 
   expect(screen.queryByText(/Valori nominale/)).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('tab', { name: 'Sensibilitate' }));
   expect(toggle).toBeChecked();
-  expect(screen.getByText(/Avere netă după.*lei de azi, convertiți în €/)).toBeVisible();
+  expect(screen.getByText(/Avere netă după .*, în lei de azi, convertiți în €/)).toBeVisible();
   expect(within(screen.getByRole('tabpanel')).getByText(/Valori nominale/)).toBeVisible();
   await userEvent.click(toggle);
-  expect(screen.getByText(/Avere netă după.*valori nominale/)).toBeVisible();
+  expect(screen.getByText(/Avere netă după .*, în valori nominale/)).toBeVisible();
   await userEvent.click(screen.getByRole('tab', { name: 'Avere netă' }));
   expect(toggle).toBeEnabled();
   expect(toggle).not.toBeChecked();
@@ -161,7 +161,7 @@ it('counts edits hidden inside the folded buying costs', () => {
 
 it('shows only the buyer and investing renter in the end summary', () => {
   render(<App />);
-  expect(screen.getAllByRole('term').map((t) => t.textContent)).toEqual(['Cumpărător', 'Chiriaș care investește']);
+  expect(screen.getAllByRole('term').map((t) => t.textContent)).toEqual(['Cumpărător care investește', 'Chiriaș care investește']);
   expect(screen.getAllByRole('definition')).toHaveLength(2);
 });
 
@@ -275,4 +275,47 @@ it('shows the horizon and inflation next to the city and size, not in the inputs
     expect(within(strip).getByLabelText(label)).toBeInTheDocument();
   }
   expect(screen.queryByRole('region', { name: 'General' })).not.toBeInTheDocument();
+});
+
+it('keeps chart lines switched off after visiting another tab', async () => {
+  render(<App />);
+  const toggle = await screen.findByRole('button', { name: 'Chiriaș care nu investește' });
+  await userEvent.click(toggle);
+  await userEvent.click(screen.getByRole('tab', { name: 'Costuri lunare' }));
+  await userEvent.click(screen.getByRole('tab', { name: 'Avere netă' }));
+  expect(await screen.findByRole('button', { name: 'Chiriaș care nu investește' })).toHaveAttribute('aria-pressed', 'false');
+});
+
+describe('explanations', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('explains how the comparison works on a first visit and remembers when it is closed', async () => {
+    const { unmount } = render(<App />);
+    const box = screen.getByText('Cum comparăm').closest('details')!;
+    expect(box).toHaveAttribute('open');
+    await userEvent.click(screen.getByText('Cum comparăm'));
+    expect(box).not.toHaveAttribute('open');
+    unmount();
+    render(<App />);
+    expect(screen.getByText('Cum comparăm').closest('details')).not.toHaveAttribute('open');
+  });
+
+  it('names the key assumptions with their values and opens the sensitivity tab', async () => {
+    render(<App />);
+    expect(screen.getByText(/locuința se scumpește cu .* pe an, cât inflația/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Sensibilitate' }));
+    expect(screen.getByRole('tab', { name: 'Sensibilitate' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('explains flat lines only while values are in today\'s money', async () => {
+    render(<App />);
+    expect(screen.getByText(t.realHint)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('switch', { name: /Ajustat cu inflația/ }));
+    expect(screen.queryByText(t.realHint)).not.toBeInTheDocument();
+  });
+});
+
+it('marks the switches with the native switch attribute', () => {
+  render(<App />);
+  for (const s of screen.getAllByRole('switch')) expect(s).toHaveAttribute('switch');
 });

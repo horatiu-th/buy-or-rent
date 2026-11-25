@@ -163,11 +163,47 @@ describe('simulate', () => {
   });
 });
 
+describe('households that do not invest', () => {
+  const sameAsInvesting = (r: ReturnType<typeof simulate>) =>
+    r.rows.forEach((row) => {
+      expect(row.buyerNoInvestNetWorth).toBeCloseTo(row.buyerNetWorth, 6);
+      expect(row.renterNoInvestNetWorth).toBeCloseTo(row.renterNetWorth, 6);
+    });
+
+  it('save the same cash as the investing households, so equal returns give equal lines', () => {
+    sameAsInvesting(simulate({ ...baseInputs, savingsRate: 0.06, investReturn: 0.06, savingsTaxRate: 0, investTaxRate: 0 }));
+  });
+
+  it('earn the deposit rate after the interest tax', () => {
+    sameAsInvesting(simulate({ ...baseInputs, savingsRate: 0.05, savingsTaxRate: 0.1, investReturn: 0.045, investTaxRate: 0 }));
+  });
+
+  it('get no tax back on a negative rate', () => {
+    sameAsInvesting(simulate({ ...baseInputs, savingsRate: -0.02, savingsTaxRate: 0.1, investReturn: -0.02, investTaxRate: 0 }));
+  });
+
+  it('put the buyer\'s starting cash in the deposit when the buyer is the one left with it', () => {
+    // No down payment and almost no fees, so the renter's deposit is the larger upfront outlay.
+    const i = { ...flatWorld, downPaymentPct: 0, depositMonths: 3, savingsRate: 0.05, savingsTaxRate: 0, horizonYears: 1 };
+    const r = simulate(i);
+    const cashIn = (row: MonthRow) => row.buyerNoInvestNetWorth - (row.propertyValue - row.loanBalance);
+    expect(cashIn(r.rows[0])).toBeGreaterThan(0);
+    expect(cashIn(last(r.rows))).toBeCloseTo(cashIn(r.rows[0]) * 1.05, 6);
+  });
+
+  it('fall behind the investing households when investing earns more than the deposit', () => {
+    const end = last(simulate(baseInputs).rows);
+    expect(end.buyerNoInvestNetWorth).toBeLessThan(end.buyerNetWorth);
+    expect(end.renterNoInvestNetWorth).toBeLessThan(end.renterNetWorth);
+  });
+});
+
 describe('breakEven', () => {
   const rows = (pairs: [number, number][]): MonthRow[] =>
     pairs.map(([buyerNetWorth, renterNetWorth], month) => ({
-      month, buyerNetWorth, renterNetWorth, propertyValue: 0, loanBalance: 0, buyerMonthlyCost: 0,
-      renterMonthlyCost: 0, deflator: 1,
+      month, buyerNetWorth, buyerNoInvestNetWorth: buyerNetWorth, renterNetWorth, renterNoInvestNetWorth: renterNetWorth,
+      propertyValue: 0, loanBalance: 0,
+      buyerMonthlyCost: 0, renterMonthlyCost: 0, deflator: 1,
     }));
 
   it('is 0 when the buyer is ahead from month 0 onward', () => {

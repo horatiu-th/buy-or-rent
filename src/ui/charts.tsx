@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart,
   ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -30,7 +30,9 @@ export function chartRows(result: Result, view: View) {
     month: r.month,
     year: r.month / 12,
     buyer: conv(r.buyerNetWorth, r.deflator),
+    buyerNoInvest: conv(r.buyerNoInvestNetWorth, r.deflator),
     renter: conv(r.renterNetWorth, r.deflator),
+    renterNoInvest: conv(r.renterNoInvestNetWorth, r.deflator),
     buyerCost: conv(r.buyerMonthlyCost, r.deflator),
     renterCost: conv(r.renterMonthlyCost, r.deflator),
   }));
@@ -87,6 +89,9 @@ type ChartRow = ReturnType<typeof chartRows>[number];
 
 interface TipProps<Point> {
   description?: string;
+  hidden?: ReadonlySet<string>;
+  /** The chart's series, so rows follow the legend's order and dotted lines get a dotted sample. */
+  series?: readonly Series<string>[];
   active?: boolean;
   payload?: ReadonlyArray<{ name?: string | number; value?: unknown; color?: string; dataKey?: unknown; payload?: Point }>;
   label?: unknown;
@@ -94,7 +99,11 @@ interface TipProps<Point> {
   title?: (label: unknown, point: Point | undefined) => string;
 }
 
-function ChartTip<Point>({ active, payload, label, fmt, title, description }: TipProps<Point>) {
+export function ChartTip<Point>({ active, payload: all, label, fmt, title, description, hidden, series }: TipProps<Point>) {
+  const find = (p: { dataKey?: unknown }) => series?.find((s) => s.key === String(p.dataKey));
+  const rank = (p: { dataKey?: unknown }) => (series ? series.findIndex((s) => s.key === String(p.dataKey)) : 0);
+  // Recharts lists rows in drawing order, which puts the buyer's main line last; the legend's order reads better.
+  const payload = all?.filter((p) => !hidden?.has(String(p.dataKey))).sort((a, b) => rank(a) - rank(b));
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tip">
@@ -102,7 +111,7 @@ function ChartTip<Point>({ active, payload, label, fmt, title, description }: Ti
       {description && <p className="chart-tip-description">{description}</p>}
       {payload.map((p) => (
         <p key={String(p.name)} className="chart-tip-row">
-          <span className="swatch" style={{ color: p.color }} aria-hidden="true" />
+          <span className={find(p)?.dotted ? 'swatch dotted' : 'swatch'} style={{ color: p.color }} aria-hidden="true" />
           <span>{p.name}</span>
           <strong>{typeof p.value === 'number' ? fmt(p.value) : String(p.value)}</strong>
         </p>
@@ -130,12 +139,81 @@ function ChartFigure({ name, summary, children }: { name: string; summary: strin
   );
 }
 
-/** Every chart names its two series right above the plot, so no chart depends on a legend elsewhere on the page. */
-function ChartLegend({ renter }: { renter: string }) {
+interface Series<K extends string> {
+  key: K;
+  /** The full name, for the tooltip and screen readers. */
+  label: string;
+  color: string;
+  dotted?: boolean;
+  /** Series sharing a group are listed under its name, each with its short label. */
+  group?: string;
+  short?: string;
+}
+
+/** Consecutive series with the same group, in order; a series without a group stands alone. */
+function groupSeries<K extends string>(series: readonly Series<K>[]) {
+  const groups: { name?: string; items: Series<K>[] }[] = [];
+  for (const s of series) {
+    const prev = groups.at(-1);
+    if (s.group && prev?.name === s.group) prev.items.push(s);
+    else groups.push({ name: s.group, items: [s] });
+  }
+  return groups;
+}
+
+const NONE: ReadonlySet<string> = new Set();
+
+/**
+ * Which series of a chart are switched off. The last visible one can't be hidden, so the plot is never empty.
+ * The parent can hold the state, so the choice survives the chart unmounting when another tab is opened.
+ */
+export function useHiddenSeries<K extends string>(series: readonly Series<K>[], held?: HiddenProps) {
+  const [own, setOwn] = useState<ReadonlySet<string>>(NONE);
+  const hidden = held?.hidden ?? own;
+  const setHidden = held?.onHiddenChange ?? setOwn;
+  const toggle = (key: K) => {
+    const next = new Set(hidden);
+    if (next.has(key)) next.delete(key);
+    else if (series.some((s) => s.key !== key && !next.has(s.key))) next.add(key);
+    setHidden(next);
+  };
+  const shown = series.filter((s) => !hidden.has(s.key)).map((s) => s.key);
+  return { hidden, toggle, shown };
+}
+
+/**
+ * Every chart names its series right above the plot, so no chart depends on a legend elsewhere on the page.
+ * Each entry is a toggle that shows or hides its series.
+ */
+function ChartLegend<K extends string>({ series, hidden, onToggle }: {
+  series: readonly Series<K>[]; hidden: ReadonlySet<string>; onToggle: (key: K) => void;
+}) {
+  const lastShown = series.filter((s) => !hidden.has(s.key)).length === 1;
   return (
-    <div className="chart-legend">
-      <span><i className="swatch" style={{ color: BUYER }} aria-hidden="true" />{t.buyer}</span>
-      <span><i className="swatch" style={{ color: RENTER }} aria-hidden="true" />{renter}</span>
+    <div className="chart-legend" role="group" aria-label={t.charts.legend}>
+      {groupSeries(series).map((g) => (
+        <span key={g.items[0].key} className="legend-group">
+          {g.name && <span className="legend-group-name" aria-hidden="true">{g.name}</span>}
+          {g.items.map((s) => {
+            const on = !hidden.has(s.key);
+            return (
+              <button
+                key={s.key}
+                type="button"
+                className="legend-toggle"
+                aria-label={s.short ? s.label : undefined}
+                aria-pressed={on}
+                aria-disabled={on && lastShown}
+                title={on && lastShown ? t.charts.lastSeries : undefined}
+                onClick={() => onToggle(s.key)}
+              >
+                <i className={s.dotted ? 'swatch dotted' : 'swatch'} style={{ color: s.color }} aria-hidden="true" />
+                {s.short ?? s.label}
+              </button>
+            );
+          })}
+        </span>
+      ))}
     </div>
   );
 }
@@ -155,29 +233,53 @@ function yearAxis(rows: readonly { year: number }[]) {
   );
 }
 
-interface ChartProps { result: Result; view: View }
+export interface HiddenProps {
+  hidden?: ReadonlySet<string>;
+  onHiddenChange?: (hidden: ReadonlySet<string>) => void;
+}
+
+interface ChartProps extends HiddenProps { result: Result; view: View }
+
+const NET_WORTH_SERIES = [
+  { key: 'buyer', label: t.buyerInvesting, color: BUYER, group: t.buyer, short: t.investing },
+  { key: 'buyerNoInvest', label: t.buyerNoInvest, color: BUYER, dotted: true, group: t.buyer, short: t.notInvesting },
+  { key: 'renter', label: t.renterInvesting, color: RENTER, group: t.renter, short: t.investing },
+  { key: 'renterNoInvest', label: t.renterNoInvest, color: RENTER, dotted: true, group: t.renter, short: t.notInvesting },
+] as const satisfies readonly Series<keyof ChartRow>[];
+
+const MONTHLY_SERIES = [
+  { key: 'buyerCost', label: t.buyer, color: BUYER },
+  { key: 'renterCost', label: t.renter, color: RENTER },
+] as const satisfies readonly Series<keyof ChartRow>[];
+
+const BREAKDOWN_SERIES = [
+  { key: 'buyer', label: t.buyerInvesting, color: BUYER },
+  { key: 'renter', label: t.renterInvesting, color: RENTER },
+] as const satisfies readonly Series<'buyer' | 'renter'>[];
 
 // Memoized: the results panel re-renders on every rent keystroke before the deferred inputs catch up.
-export const NetWorthChart = memo(function NetWorthChart({ result, view }: ChartProps) {
+export const NetWorthChart = memo(function NetWorthChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
   const data = chartRows(result, view);
   const fmt = shownMoney(view);
-  const y = moneyAxis(data.flatMap((d) => [d.buyer, d.renter]), view);
-  const marker = breakEvenX(result);
+  const { hidden, toggle, shown } = useHiddenSeries(NET_WORTH_SERIES, held);
+  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view);
+  // The break-even month compares the investing buyer with the renter, so it only means something while both are drawn.
+  const marker = hidden.has('buyer') || hidden.has('renter') ? null : breakEvenX(result);
   const last = data[data.length - 1];
   const summary = [
-    t.charts.netWorthSummary(t.duration(last.month), fmt(last.buyer), fmt(last.renter)),
+    t.charts.netWorthSummary(t.duration(last.month), fmt(last.buyer), fmt(last.renter), fmt(last.buyerNoInvest), fmt(last.renterNoInvest)),
     result.breakEvenMonth ? t.charts.breakEvenSummary(t.duration(result.breakEvenMonth)) : '',
   ].filter(Boolean).join(' ');
   return (
     <ChartFigure name={t.charts.netWorth} summary={summary}>
-      <ChartLegend renter={t.renterInvesting} />
+      <ChartLegend series={NET_WORTH_SERIES} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={340}>
         <LineChart data={data} title={t.charts.netWorth} margin={{ top: 32, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} {...Y_AXIS} />
-          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={afterTitle} />} cursor={LINE_CURSOR} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={afterTitle} hidden={hidden} series={NET_WORTH_SERIES} />} cursor={LINE_CURSOR} />
           {marker !== null && (
             <ReferenceLine
               x={marker}
@@ -186,20 +288,24 @@ export const NetWorthChart = memo(function NetWorthChart({ result, view }: Chart
               label={{ value: t.breakEvenMark, position: 'top', offset: 14, fill: 'var(--muted)', fontSize: 12 }}
             />
           )}
-          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={t.renterInvesting} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
-          <Line isAnimationActive={animate} type="linear" dataKey="buyer" name={t.buyer} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="renter" name={t.renterInvesting} hide={hidden.has('renter')} stroke={RENTER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="renterNoInvest" name={t.renterNoInvest} hide={hidden.has('renterNoInvest')} stroke={RENTER} strokeDasharray="2 4" strokeLinecap="round" dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="buyerNoInvest" name={t.buyerNoInvest} hide={hidden.has('buyerNoInvest')} stroke={BUYER} strokeDasharray="2 4" strokeLinecap="round" dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
+          <Line isAnimationActive={animate} type="linear" dataKey="buyer" name={t.buyerInvesting} hide={hidden.has('buyer')} stroke={BUYER} dot={false} strokeWidth={2.5} activeDot={{ r: 4 }} />
         </LineChart>
       </ResponsiveContainer>
+      {(!hidden.has('buyerNoInvest') || !hidden.has('renterNoInvest')) && <p className="note chart-note">{t.charts.noInvestNote}</p>}
     </ChartFigure>
   );
 });
 
-export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view }: ChartProps) {
+export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
   // Month 0 is the purchase itself, not a monthly cost.
   const data = chartRows(result, view).filter((d) => d.month > 0);
   const fmt = shownMoney(view);
-  const y = moneyAxis(data.flatMap((d) => [d.buyerCost, d.renterCost]), view);
+  const { hidden, toggle, shown } = useHiddenSeries(MONTHLY_SERIES, held);
+  const y = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), view);
   const first = data[0];
   const last = data[data.length - 1];
   const summary = first && last
@@ -209,22 +315,22 @@ export const MonthlyCostsChart = memo(function MonthlyCostsChart({ result, view 
   // not smoothed curves that would invent a dip before the jump.
   return (
     <ChartFigure name={t.charts.monthly} summary={summary}>
-      <ChartLegend renter={t.renter} />
+      <ChartLegend series={MONTHLY_SERIES} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={340}>
         <AreaChart data={data} title={t.charts.monthly} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           {yearAxis(data)}
           <YAxis {...y} {...Y_AXIS} />
-          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={monthTitle} />} cursor={LINE_CURSOR} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={t.renter} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
-          <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={t.buyer} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
+          <Tooltip content={(p) => <ChartTip<ChartRow> {...p} fmt={fmt} title={monthTitle} hidden={hidden} series={MONTHLY_SERIES} />} cursor={LINE_CURSOR} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="renterCost" name={t.renter} hide={hidden.has('renterCost')} stroke={RENTER} strokeWidth={2.5} fill={RENTER} fillOpacity={0.08} />
+          <Area isAnimationActive={animate} type="stepAfter" dataKey="buyerCost" name={t.buyer} hide={hidden.has('buyerCost')} stroke={BUYER} strokeWidth={2.5} fill={BUYER} fillOpacity={0.08} />
         </AreaChart>
       </ResponsiveContainer>
     </ChartFigure>
   );
 });
 
-export const BreakdownChart = memo(function BreakdownChart({ result, view }: ChartProps) {
+export const BreakdownChart = memo(function BreakdownChart({ result, view, ...held }: ChartProps) {
   const animate = useAnimate();
   // Totals are nominal sums; showing them in today's lei would need per-month deflation, so this chart stays nominal.
   const conv = (v: number) => toUnits(v, view.money);
@@ -242,11 +348,12 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view }: Cha
   ];
   const nominal = { ...view, real: false };
   const fmt = shownMoney(nominal);
-  const x = moneyAxis(data.flatMap((d) => [d.buyer, d.renter]), nominal);
+  const { hidden, toggle, shown } = useHiddenSeries(BREAKDOWN_SERIES, held);
+  const x = moneyAxis(data.flatMap((d) => shown.map((k) => d[k])), nominal);
   const summary = t.charts.breakdownSummary(
     data
       .map((d) => {
-        const parts = [d.buyer > 0 && `${t.buyer.toLowerCase()} ${fmt(d.buyer)}`, d.renter > 0 && `${t.renter.toLowerCase()} ${fmt(d.renter)}`].filter(Boolean);
+        const parts = [d.buyer > 0 && `${t.buyerInvesting.toLowerCase()} ${fmt(d.buyer)}`, d.renter > 0 && `${t.renterInvesting.toLowerCase()} ${fmt(d.renter)}`].filter(Boolean);
         return parts.length ? `${d.label}: ${parts.join(', ')}. ${d.help}` : '';
       })
       .filter(Boolean)
@@ -254,7 +361,7 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view }: Cha
   );
   return (
     <ChartFigure name={t.charts.breakdown} summary={summary}>
-      <ChartLegend renter={t.renterInvesting} />
+      <ChartLegend series={BREAKDOWN_SERIES} hidden={hidden} onToggle={toggle} />
       <ResponsiveContainer width="100%" height={360}>
         <BarChart data={data} title={t.charts.breakdown} layout="vertical" barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={GRID} horizontal={false} />
@@ -262,11 +369,11 @@ export const BreakdownChart = memo(function BreakdownChart({ result, view }: Cha
           <YAxis type="category" dataKey="label" width={132} tick={TICK} axisLine={false} tickLine={false} />
           <Tooltip
             shared
-            content={(p) => <ChartTip {...p} fmt={fmt} title={String} description={data.find((row) => row.label === p.label)?.help} />}
+            content={(p) => <ChartTip {...p} fmt={fmt} hidden={hidden} series={BREAKDOWN_SERIES} title={String} description={data.find((row) => row.label === p.label)?.help} />}
             cursor={{ fill: 'var(--field)' }}
           />
-          <Bar isAnimationActive={animate} dataKey="buyer" name={t.buyer} fill={BUYER} radius={[0, 3, 3, 0]} />
-          <Bar isAnimationActive={animate} dataKey="renter" name={t.renterInvesting} fill={RENTER} radius={[0, 3, 3, 0]} />
+          <Bar isAnimationActive={animate} dataKey="buyer" name={t.buyerInvesting} hide={hidden.has('buyer')} fill={BUYER} radius={[0, 3, 3, 0]} />
+          <Bar isAnimationActive={animate} dataKey="renter" name={t.renterInvesting} hide={hidden.has('renter')} fill={RENTER} radius={[0, 3, 3, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartFigure>
