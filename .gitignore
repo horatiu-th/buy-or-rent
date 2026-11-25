@@ -2,3 +2,5 @@
 node_modules/
 dist/
 pipeline-summary.md
+.DS_Store
+*.tsbuildinfo
